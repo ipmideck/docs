@@ -1,0 +1,80 @@
+---
+title: "IBM IMM"
+description: "Enable IPMI-over-LAN on the IBM Integrated Management Module II (IMM2) for System x servers. Low-confidence — verify on your hardware before use."
+---
+
+<Warning>
+  **Low-confidence guide — verify on your hardware before relying on these steps.**
+  IBM IMM2 hardware is legacy (IBM sold the System x line to Lenovo in 2014) and online
+  documentation is sparse. The exact web-interface path depends on the IMM2 firmware
+  version, and these steps have **not yet been validated on real hardware**. This is a
+  **high review priority** — confirm every path against your own server and report
+  corrections. Owner hardware validation is pending.
+</Warning>
+
+**Applies to:** IBM System x servers with IMM2 (Integrated Management Module II) — for
+example the IBM x3650 M4 and x3550 M4.
+
+<Note>
+  IBM IMM is a **Planned** vendor for ipmideck.
+</Note>
+
+## Steps
+
+<Steps>
+  <Step title="Open the IMM2 web interface">
+    In a browser, navigate to the IMM2 IP address and log in. The default credentials are
+    **USERID** / **PASSW0RD** (note the **zero** in "PASSW0RD"). Change them immediately
+    if they are still in use.
+
+    {/* Image slot — owner adds a screenshot after verifying on hardware */}
+    <Frame caption="Owner: replace with a photo of the IMM2 login screen.">
+      <img src="/images/enable-ipmi/ibm-step-1.png" alt="IBM IMM2 web interface login screen" />
+    </Frame>
+  </Step>
+  <Step title="Open Network Protocols">
+    Navigate to **Network Protocols** — typically under **IMM Management → Network** or
+    **Configuration → Network Protocols**.
+
+    {/* Image slot — owner adds a screenshot after verifying on hardware */}
+    <Frame caption="Owner: replace with a photo of the Network Protocols page.">
+      <img src="/images/enable-ipmi/ibm-step-2.png" alt="IBM IMM2 Network Protocols configuration page" />
+    </Frame>
+  </Step>
+  <Step title="Enable the IPMI LAN interface">
+    In the **Network Protocols** section, find **IPMI over LAN** (or the IPMI protocol
+    setting) and enable the IPMI LAN interface.
+
+    {/* Image slot — owner adds a screenshot after verifying on hardware */}
+    <Frame caption="Owner: replace with a photo of the IPMI over LAN protocol setting.">
+      <img src="/images/enable-ipmi/ibm-step-3.png" alt="IBM IMM2 IPMI over LAN protocol setting enabled" />
+    </Frame>
+  </Step>
+  <Step title="Apply / Save">
+    Apply or save the change.
+  </Step>
+  <Step title="Ensure an IPMI user ID exists">
+    IBM's documentation notes: *"If no IPMI User IDs have been configured by the CMM, the
+    network port associated with the IPMI protocol will be closed."* Make sure at least one
+    IPMI user ID is configured, or the LAN port stays closed.
+  </Step>
+  <Step title="Verify connectivity">
+    From the host that will run ipmideck:
+
+    ```bash
+    ipmitool -I lanplus -H <imm2-ip> -U USERID -P <password> chassis status
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  **Flag for review:** the IMM2 web-UI path varies by firmware version, and IBM's BMC
+  documentation is sparse online. The full reference is the
+  [IMM2 Configuration User's Guide (PDF)](https://public.dhe.ibm.com/systems/support/system_x_pdf/imm2_configurations_usersguide.pdf).
+  Validate every step against real hardware before relying on this guide.
+</Note>
+
+## Source
+
+[CITED: pubs.lenovo.com/imm2 — Managing the IMM2 with IPMI](https://pubs.lenovo.com/imm2/dw1lm_t_managingtheimmwithipmi.html) ·
+[IMM2 Configuration User's Guide (IBM)](https://public.dhe.ibm.com/systems/support/system_x_pdf/imm2_configurations_usersguide.pdf)

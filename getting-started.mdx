@@ -1,0 +1,60 @@
+---
+title: "Getting Started"
+description: "What ipmideck is, and how to get a dashboard running against your servers' BMCs in one command."
+---
+
+## What is ipmideck?
+
+ipmideck is a self-hosted, web-based IPMI management platform. It connects to your
+servers' BMC (Baseboard Management Controller) over IPMI 2.0 and gives you real-time
+sensor monitoring, intelligent fan-curve control (FanPilot), remote power management,
+and hardware event logs — all from your browser, no CLI required.
+
+ipmideck runs entirely on your own network. There is no cloud, no telemetry, and no
+external dependency: it talks directly to your BMCs and stores everything locally.
+
+<Note>
+  ipmideck needs to reach your BMCs over the network on UDP port 623 (the IPMI/RMCP+
+  port). When you run it in Docker, use `--network host` so the container can reach
+  BMCs on your LAN directly.
+</Note>
+
+## Quick start
+
+The fastest way to try ipmideck is Docker:
+
+```bash
+docker run --network host ipmideck/ipmideck:latest
+```
+
+Then open `http://<your-ip>:3000` in a browser and follow the setup wizard to add your
+first server.
+
+Prefer Python packaging? Install from PyPI instead:
+
+```bash
+pip install ipmideck
+```
+
+The pip package requires `ipmitool` to be installed on the host.
+
+<Note>
+  ipmideck is in pre-release: the published Docker image and PyPI package are coming
+  soon. The commands above are the exact commands you will run once they are live.
+</Note>
+
+## What you get
+
+- **Sensor Monitoring** — live temperature, fan RPM, voltage, and power, with up to a
+  year of history.
+- **FanPilot** — a drag-and-drop fan-curve editor with a safe autonomous control loop.
+- **Power Control** — On, Soft Off, Hard Off, Reset, and Power Cycle with a full audit log.
+- **System Event Log (SEL)** — browse and export your BMC's hardware event log.
+- **Hardware Inventory (FRU)** — serial numbers, part numbers, and manufacturer data.
+- **Multi-Server Dashboard** — manage many BMCs from a single instance.
+
+## Next steps
+
+- [Installation](/installation) — Docker and pip in detail.
+- [Configuration](/configuration) — the `config.yaml` file and `IPMILINK_` environment overrides.
+- [Supported Hardware](/supported-hardware) — which BMCs are tested, experimental, or planned.

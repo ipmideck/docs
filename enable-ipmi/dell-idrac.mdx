@@ -1,0 +1,74 @@
+---
+title: "Dell iDRAC"
+description: "Enable IPMI-over-LAN on Dell iDRAC (iDRAC7 / iDRAC8 / iDRAC9) so ipmideck can connect to your PowerEdge server."
+---
+
+**Applies to:** Dell iDRAC7, iDRAC8, iDRAC9 (PowerEdge servers). The web-interface path is
+consistent across versions; iDRAC9 is documented here.
+
+<Note>
+  Dell iDRAC is **Supported / tested** with ipmideck. These steps are from official Dell
+  documentation, but confirm the navigation path matches your iDRAC firmware before
+  relying on it.
+</Note>
+
+## Steps
+
+<Steps>
+  <Step title="Open the iDRAC web interface">
+    In a browser, navigate to the iDRAC IP address (factory default `192.168.0.120`) and
+    log in. The default PowerEdge credentials are **root** / **calvin** — change these
+    immediately if they are still in use.
+
+    {/* Image slot — owner adds a screenshot after verifying on hardware */}
+    <Frame caption="Owner: replace with a photo of the iDRAC login screen.">
+      <img src="/images/enable-ipmi/dell-step-1.png" alt="iDRAC web interface login screen" />
+    </Frame>
+  </Step>
+  <Step title="Open Network settings">
+    Navigate to **iDRAC Settings → Connectivity → Network**.
+
+    {/* Image slot — owner adds a screenshot after verifying on hardware */}
+    <Frame caption="Owner: replace with a photo of iDRAC Settings → Connectivity → Network.">
+      <img src="/images/enable-ipmi/dell-step-2.png" alt="iDRAC Settings Connectivity Network page" />
+    </Frame>
+  </Step>
+  <Step title="Enable IPMI Over LAN">
+    Under **IPMI Settings**, find **Enable IPMI Over LAN** and set it to **Enabled**
+    (a dropdown or checkbox, depending on iDRAC version).
+
+    {/* Image slot — owner adds a screenshot after verifying on hardware */}
+    <Frame caption="Owner: replace with a photo of the IPMI Settings panel with Enable IPMI Over LAN.">
+      <img src="/images/enable-ipmi/dell-step-3.png" alt="iDRAC IPMI Settings panel showing Enable IPMI Over LAN" />
+    </Frame>
+  </Step>
+  <Step title="Set an encryption key (optional)">
+    If your security policy requires it, set an **Encryption Key** (a 40-character hex
+    string). This is optional and can be left blank for a basic LAN session.
+  </Step>
+  <Step title="Apply">
+    Click **Apply** to save the change.
+
+    {/* Image slot — owner adds a screenshot after verifying on hardware */}
+    <Frame caption="Owner: replace with a photo of the Apply confirmation.">
+      <img src="/images/enable-ipmi/dell-step-5.png" alt="iDRAC Apply button confirming IPMI settings" />
+    </Frame>
+  </Step>
+  <Step title="Verify connectivity">
+    From the host that will run ipmideck, confirm the LAN channel responds:
+
+    ```bash
+    ipmitool -I lanplus -H <idrac-ip> -U root -P calvin chassis status
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  **Flag for review:** the UI path changed between generations — iDRAC7/8 used
+  *Network/Security → Network → IPMI Settings*, while iDRAC9 uses
+  *iDRAC Settings → Connectivity → Network*. Verify the exact path against your hardware.
+</Note>
+
+## Source
+
+[CITED: dell.com/support/manuals — iDRAC9 User Guide, section "Configuring IPMI over LAN using web interface"](https://www.dell.com/support/manuals/en-us/idrac9-lifecycle-controller-v3.1-series/idrac_3.15.15.15_ug/configuring-ipmi-over-lan-using-web-interface)

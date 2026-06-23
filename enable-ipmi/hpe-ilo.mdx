@@ -1,0 +1,73 @@
+---
+title: "HPE iLO"
+description: "Enable IPMI/DCMI-over-LAN on HPE iLO 4 / iLO 5 so ipmideck can connect to your ProLiant server."
+---
+
+**Applies to:** HPE iLO 4 and iLO 5 (ProLiant servers). The navigation path is consistent
+across both.
+
+<Note>
+  HPE iLO is a **Planned** vendor for ipmideck — these steps are from official HPE
+  documentation but should be confirmed against your specific iLO version before use.
+  IPMI/DCMI over LAN is **disabled by default** on iLO 5 for security reasons.
+</Note>
+
+## Steps
+
+<Steps>
+  <Step title="Open the iLO web interface">
+    In a browser, navigate to the iLO IP address and log in with iLO administrator
+    credentials.
+
+    {/* Image slot — owner adds a screenshot after verifying on hardware */}
+    <Frame caption="Owner: replace with a photo of the iLO login screen.">
+      <img src="/images/enable-ipmi/hpe-step-1.png" alt="HPE iLO web interface login screen" />
+    </Frame>
+  </Step>
+  <Step title="Open Security settings">
+    In the left navigation pane, click **Security**.
+
+    {/* Image slot — owner adds a screenshot after verifying on hardware */}
+    <Frame caption="Owner: replace with a photo of the iLO Security navigation item.">
+      <img src="/images/enable-ipmi/hpe-step-2.png" alt="HPE iLO Security navigation pane" />
+    </Frame>
+  </Step>
+  <Step title="Open Access Settings → Network">
+    Click the **Access Settings** tab, then click the **pencil / edit** icon for the
+    **Network** section.
+
+    {/* Image slot — owner adds a screenshot after verifying on hardware */}
+    <Frame caption="Owner: replace with a photo of Access Settings → Network edit.">
+      <img src="/images/enable-ipmi/hpe-step-3.png" alt="HPE iLO Access Settings Network edit panel" />
+    </Frame>
+  </Step>
+  <Step title="Enable IPMI/DCMI over LAN">
+    Check the box for **IPMI/DCMI over LAN** to enable IPMI access.
+
+    {/* Image slot — owner adds a screenshot after verifying on hardware */}
+    <Frame caption="Owner: replace with a photo of the IPMI/DCMI over LAN checkbox.">
+      <img src="/images/enable-ipmi/hpe-step-4.png" alt="HPE iLO IPMI/DCMI over LAN checkbox enabled" />
+    </Frame>
+  </Step>
+  <Step title="Apply">
+    Click **Apply**. IPMI-over-LAN uses the default port **623**.
+  </Step>
+  <Step title="Verify connectivity">
+    From the host that will run ipmideck:
+
+    ```bash
+    ipmitool -I lanplus -H <ilo-ip> -U <user> -P <password> chassis status
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  **Flag for review:** iLO 4 may use a slightly different path (a **Network** tab rather
+  than the **Security** tab). Verify against your specific iLO version before relying on
+  these steps.
+</Note>
+
+## Source
+
+[CITED: support.hpe.com — HPE iLO 5 IPMI User Guide](https://support.hpe.com/hpesc/public/docDisplay?docId=a00018321en_us) ·
+[Guidelines for using iLO with IPMI or DCMI over LAN](https://support.hpe.com/hpesc/public/docDisplay?docId=a00026171en_us)

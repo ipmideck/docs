@@ -1,0 +1,74 @@
+---
+title: "Configuration"
+description: "ipmideck reads data/config.yaml and accepts IPMILINK_-prefixed environment overrides."
+---
+
+## config.yaml
+
+ipmideck reads its settings from `data/config.yaml`, written with sensible defaults on the
+first run. You can edit the file directly, or override any value at runtime with an
+environment variable (handy for Docker — see below).
+
+```yaml
+# data/config.yaml — auto-generated on first run
+server:
+  host: "0.0.0.0"
+  port: 3000
+  https: false
+auth:
+  enabled: true
+  session_expiry: "24h"
+  max_login_attempts: 5
+ipmi:
+  poll_interval: 30
+  power_poll_interval: 30
+  command_timeout: 30
+data:
+  retention_days: 365
+  cleanup_interval: "24h"
+logging:
+  level: "info"
+modules:
+  sensors:
+    enabled: true
+  fanpilot:
+    enabled: true
+  power:
+    enabled: true
+  sel:
+    enabled: true
+  fru:
+    enabled: true
+```
+
+The keys above are the real, unprefixed nested keys ipmideck writes to `config.yaml`.
+Environment-variable overrides use a separate `IPMILINK_` prefix and never appear inside
+the YAML file itself.
+
+## Environment overrides
+
+Every setting can be overridden at runtime with an `IPMILINK_`-prefixed environment
+variable. This is the easiest way to configure ipmideck in Docker, where you do not want
+to edit a file inside the container.
+
+| Environment variable | Description |
+|----------------------|-------------|
+| `IPMILINK_SERVER_PORT` | HTTP port the dashboard binds to (default 3000). |
+| `IPMILINK_AUTH_ENABLED` | Enable or disable the built-in login (default true). |
+| `IPMILINK_IPMI_POLL_INTERVAL` | Seconds between BMC sensor polls (default 30). |
+| `IPMILINK_DATA_RETENTION_DAYS` | Days of sensor history to keep before cleanup (default 365). |
+
+<Note>
+  Environment variables take precedence over values in `config.yaml`. Set them in your
+  `docker run` command (`-e IPMILINK_SERVER_PORT=8080`) or your `docker-compose.yml`.
+</Note>
+
+## Where config lives
+
+- **Docker:** `/data/config.yaml` (persist `/data` with a volume).
+- **pip:** `~/.ipmideck/config.yaml`.
+
+## Next steps
+
+- [Security](/security) — how credentials and sessions are protected.
+- [Features](/features) — what each module does.

@@ -1,0 +1,43 @@
+---
+title: "Supported Hardware"
+description: "ipmideck speaks standard IPMI 2.0; support is tiered by how thoroughly each vendor is tested."
+---
+
+## IPMI 2.0 everywhere
+
+ipmideck speaks standard IPMI 2.0, so most server BMCs respond. Support is tiered by how
+thoroughly each vendor has been tested. Fan-curve control (FanPilot) currently relies on
+Dell iDRAC raw commands; other vendors' fan control is on the roadmap.
+
+| Vendor | Status | Enable IPMI | Notes |
+|--------|--------|-------------|-------|
+| Dell PowerEdge / iDRAC | Supported / tested | [Dell iDRAC guide](/enable-ipmi/dell-idrac) | IPMI 2.0 — fully supported and tested. |
+| Supermicro | Experimental | [Supermicro guide](/enable-ipmi/supermicro) | IPMI 2.0 — works, not yet exhaustively tested. |
+| HPE iLO | Planned | [HPE iLO guide](/enable-ipmi/hpe-ilo) | IPMI 2.0 — on the roadmap. |
+| Lenovo XCC | Planned | [Lenovo XCC guide](/enable-ipmi/lenovo-xcc) | IPMI 2.0 — on the roadmap. |
+| IBM IMM | Planned | [IBM IMM guide](/enable-ipmi/ibm-imm) | IPMI 2.0 — on the roadmap. |
+
+<Note>
+  Any BMC that implements IPMI 2.0 should connect for sensor monitoring, power control,
+  SEL, and FRU. The tiers above describe how much FanPilot fan control and vendor-specific
+  behavior has been validated on real hardware.
+</Note>
+
+## Enabling IPMI on your BMC
+
+Most servers ship with IPMI-over-LAN disabled or with default credentials. Before
+ipmideck can connect, you need to enable IPMI 2.0 over LAN and set a user account on the
+BMC. The **[Enabling IPMI on your BMC →](/enable-ipmi/index)** guide has a per-vendor
+walkthrough for each controller:
+
+- [Dell iDRAC](/enable-ipmi/dell-idrac)
+- [Supermicro](/enable-ipmi/supermicro) — *low-confidence; verify on hardware*
+- [HPE iLO](/enable-ipmi/hpe-ilo)
+- [Lenovo XCC](/enable-ipmi/lenovo-xcc)
+- [IBM IMM](/enable-ipmi/ibm-imm) — *low-confidence; verify on hardware*
+
+<Note>
+  The Supermicro and IBM IMM2 walkthroughs are flagged **low-confidence** — their BMC
+  navigation paths come from sparse documentation and need validation on real hardware
+  before you rely on them. Each page carries a prominent warning.
+</Note>

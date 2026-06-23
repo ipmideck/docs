@@ -1,0 +1,74 @@
+---
+title: "Supermicro"
+description: "Enable IPMI-over-LAN on a Supermicro IPMI 2.0 BMC (X8–X12 boards). Low-confidence — verify on your hardware before use."
+---
+
+<Warning>
+  **Low-confidence guide — verify on your hardware before relying on these steps.**
+  Supermicro BMC firmware differs significantly between board generations (X8 through
+  X12), and these steps come from sparse documentation that has **not yet been validated
+  on real hardware**. Treat the navigation paths below as a starting point, confirm them
+  against your own board, and report corrections. Owner hardware validation is pending.
+</Warning>
+
+**Applies to:** Supermicro servers with an IPMI 2.0 BMC (X8 / X9 / X10 / X11 / X12 boards).
+
+<Note>
+  Supermicro is **Experimental** with ipmideck — IPMI 2.0 works but is not yet
+  exhaustively tested.
+</Note>
+
+## Steps
+
+<Steps>
+  <Step title="Open the Supermicro BMC web interface">
+    In a browser, navigate to the BMC IP address. The default credentials are
+    **ADMIN** / **ADMIN** — change them immediately after first access.
+
+    {/* Image slot — owner adds a screenshot after verifying on hardware */}
+    <Frame caption="Owner: replace with a photo of the Supermicro BMC login screen.">
+      <img src="/images/enable-ipmi/supermicro-step-1.png" alt="Supermicro BMC web interface login screen" />
+    </Frame>
+  </Step>
+  <Step title="Open IPMI / LAN settings">
+    Navigate to **Configuration → IPMI Settings**. The exact label varies by firmware —
+    it may also appear as **IPMI → LAN** or **Network → IPMI LAN**.
+
+    {/* Image slot — owner adds a screenshot after verifying on hardware */}
+    <Frame caption="Owner: replace with a photo of Configuration → IPMI Settings.">
+      <img src="/images/enable-ipmi/supermicro-step-2.png" alt="Supermicro Configuration IPMI Settings page" />
+    </Frame>
+  </Step>
+  <Step title="Confirm IPMI LAN access is enabled">
+    Ensure **IPMI LAN Access** is enabled and the LAN channel is active. On Supermicro
+    boards the BMC web interface typically has IPMI enabled by default — verify rather than
+    assume.
+
+    {/* Image slot — owner adds a screenshot after verifying on hardware */}
+    <Frame caption="Owner: replace with a photo of the IPMI LAN Access toggle.">
+      <img src="/images/enable-ipmi/supermicro-step-3.png" alt="Supermicro IPMI LAN Access setting" />
+    </Frame>
+  </Step>
+  <Step title="Set authentication (optional)">
+    Optionally configure the **Authentication Type** — MD5 + SHA is recommended for
+    IPMI 2.0.
+  </Step>
+  <Step title="Save">
+    Click **Save** or **Apply** to commit the change.
+  </Step>
+  <Step title="Alternative: configure via BIOS">
+    You can also configure the BMC from BIOS: press **DEL** during POST →
+    **IPMI → BMC Network Configuration** → set a static IP.
+  </Step>
+</Steps>
+
+<Note>
+  **Flag for review:** Supermicro BMC firmware varies a lot across X8–X12 generations and
+  the *Configuration → IPMI Settings* path is **[ASSUMED]** for current firmware. Test
+  against your specific board before relying on this guide.
+</Note>
+
+## Source
+
+[CITED: supermicro.com/manuals/other/IPMI_Users_Guide.pdf](https://www.supermicro.com/manuals/other/IPMI_Users_Guide.pdf) ·
+[Thomas-Krenn Wiki — Supermicro IPMI Configuration](https://www.thomas-krenn.com/en/wiki/Supermicro_IPMI_Configuration_through_BIOS_or_Web_Interface)
