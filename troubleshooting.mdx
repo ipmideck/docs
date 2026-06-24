@@ -40,7 +40,7 @@ likely to be slow.
 
 - Confirm the BMC actually exposes those sensors (`sdr elist` support varies by vendor).
 - Some sensors only populate while the server is powered on.
-- Check the polling interval (`ipmi.poll_interval`, default 30s / `IPMILINK_IPMI_POLL_INTERVAL`);
+- Check the polling interval (`ipmi.poll_interval`, default 30s / `IPMIDECK_IPMI_POLL_INTERVAL`);
   very long intervals delay the first reading.
 
 ## Fans return to BMC control unexpectedly
@@ -56,6 +56,6 @@ This is intended fail-safe behavior, not a bug. See [Security](/security).
 ## The dashboard will not load
 
 - Confirm the container or process is running and listening on the configured port
-  (`server.port` / `IPMILINK_SERVER_PORT`, default 3000).
+  (`server.port` / `IPMIDECK_SERVER_PORT`, default 3000).
 - Open `http://<your-ip>:3000` — not `https`, unless you set `server.https: true`.
 - Check the application logs; raise `logging.level` to `debug` for more detail.

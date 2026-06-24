@@ -36,11 +36,15 @@ first (for example `apt install ipmitool` or `dnf install ipmitool`).
 
 ipmideck writes its configuration and database under a data directory:
 
-- **Docker:** `/data` inside the container (persist it with a volume).
-- **pip:** `~/.ipmideck/`.
+- **Docker:** `/data` inside the container (the image sets `IPMIDECK_DATA_DIR=/data`;
+  persist it with a volume).
+- **pip on Linux:** `/data` by default — set `IPMIDECK_DATA_DIR` to relocate it.
+- **pip on Windows:** `./data`, relative to the directory you run `ipmideck` from.
 
-This directory holds `config.yaml`, the SQLite database, and the encryption key file used
-to protect your stored BMC credentials. See [Configuration](/configuration) for details.
+You can override the location on any platform with the `IPMIDECK_DATA_DIR` environment
+variable. This directory holds `config.yaml`, the SQLite database, and the encryption key
+file used to protect your stored BMC credentials. See [Configuration](/configuration) and
+[Running ipmideck](/running) for details.
 
 ## Next steps
 

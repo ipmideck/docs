@@ -29,17 +29,17 @@ container talk to that port directly instead of sitting behind Docker's NAT. See
 ## What port does the dashboard run on?
 
 3000 by default. Change it in `config.yaml` (`server.port`) or with the
-`IPMILINK_SERVER_PORT` environment variable.
+`IPMIDECK_SERVER_PORT` environment variable.
 
 ## How long is sensor history kept?
 
 One year by default (`data.retention_days: 365`). Override it with
-`IPMILINK_DATA_RETENTION_DAYS`. Older data is cleaned up on the schedule set by
+`IPMIDECK_DATA_RETENTION_DAYS`. Older data is cleaned up on the schedule set by
 `data.cleanup_interval`.
 
 ## Can I disable the login?
 
-Yes — set `auth.enabled: false` in `config.yaml`, or `IPMILINK_AUTH_ENABLED=false`. Only
+Yes — set `auth.enabled: false` in `config.yaml`, or `IPMIDECK_AUTH_ENABLED=false`. Only
 do this on a trusted, isolated network: with auth off, anyone who can reach the dashboard
 can control your hardware.
 

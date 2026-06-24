@@ -24,8 +24,16 @@
             "pages": ["installation"]
           },
           {
+            "group": "Running",
+            "pages": ["running"]
+          },
+          {
             "group": "Configuration",
             "pages": ["configuration"]
+          },
+          {
+            "group": "CLI & Console",
+            "pages": ["cli", "console"]
           },
           {
             "group": "Features",
