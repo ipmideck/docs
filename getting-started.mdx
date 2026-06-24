@@ -55,6 +55,17 @@ The pip package requires `ipmitool` to be installed on the host.
 
 ## Next steps
 
-- [Installation](/installation): Docker and pip in detail.
-- [Configuration](/configuration): the `config.yaml` file and `IPMIDECK_` environment overrides.
-- [Supported Hardware](/supported-hardware): which BMCs are tested, experimental, or planned.
+<CardGroup cols={2}>
+  <Card title="Install ipmideck" icon="download" href="/installation">
+    Docker and pip, with the `--network host` requirement explained.
+  </Card>
+  <Card title="First-run setup" icon="wand-magic-sparkles" href="/setup">
+    The setup wizard: pick a login mode and add your first BMC.
+  </Card>
+  <Card title="Enable IPMI" icon="server" href="/enable-ipmi/index">
+    Per-vendor steps to turn on IPMI-over-LAN in your BMC.
+  </Card>
+  <Card title="Configuration" icon="sliders" href="/configuration">
+    Ports, polling intervals, retention, and environment overrides.
+  </Card>
+</CardGroup>

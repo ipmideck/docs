@@ -1,0 +1,72 @@
+---
+title: "Backup & restore"
+description: "Back up ipmideck's data directory (config, database, and encryption key) and restore it after a move or a rebuild."
+---
+
+Everything ipmideck remembers lives in one data directory: your `config.yaml`, the SQLite
+database (`ipmideck.db`) with your servers and sensor history, and the `encryption.key`
+file that decrypts your stored BMC credentials. Back up those and you can rebuild ipmideck
+anywhere.
+
+<Warning>
+  `encryption.key` is part of the backup for a reason: without it, the restored BMC
+  usernames and passwords cannot be decrypted. A backup of the database alone leaves your
+  saved credentials unreadable, so keep the key file as safe as the database.
+</Warning>
+
+## What is in a backup
+
+| File | What it holds |
+| --- | --- |
+| `ipmideck.db` | Servers, users, sensor history, command log, and settings. |
+| `config.yaml` | Server bind, auth, IPMI, logging, and module settings. |
+| `encryption.key` | The 32-byte key that decrypts your stored BMC credentials. |
+
+These all sit in the [data directory](/configuration#where-config-lives): `/data` on Docker
+and Linux, `./data` on Windows, or wherever `IPMIDECK_DATA_DIR` points.
+
+## Option A: in-app backup
+
+ipmideck can hand you a ready-made backup. From the web UI, open **Settings** and use the
+backup action: it downloads `ipmideck-backup-<timestamp>.zip` containing the three files
+above. The database is checkpointed first, so the snapshot includes your most recent
+readings.
+
+To restore, upload that zip from the same **Settings** screen. ipmideck validates it,
+stages the files, and applies them on the next start, so **restart ipmideck to finish the
+restore**.
+
+## Option B: copy the data directory
+
+Because the whole state is just files, you can also back up by copying the data directory
+while ipmideck is stopped:
+
+<CodeGroup>
+
+```bash bash
+# stop ipmideck first, then:
+cp -r /data /data-backup-$(date +%Y%m%d)
+```
+
+```powershell PowerShell
+# stop ipmideck first, then:
+Copy-Item -Recurse .\data ".\data-backup-$(Get-Date -Format yyyyMMdd)"
+```
+
+</CodeGroup>
+
+In Docker the data lives in the volume you mounted on `/data`, so back up that volume.
+Restoring is the reverse: stop ipmideck, put the files back in the data directory, and
+start it again.
+
+<Note>
+  Stop ipmideck before a file-level copy. The database runs in WAL mode, so copying it
+  while the app is writing can capture an inconsistent snapshot. The in-app backup avoids
+  this by checkpointing first.
+</Note>
+
+## Next steps
+
+- [Configuration](/configuration): where the data directory lives and what `config.yaml` holds.
+- [Updating ipmideck](/updating): your data survives an upgrade.
+- [Security](/security): how credentials are encrypted at rest.

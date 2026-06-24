@@ -5,12 +5,9 @@
   "colors": {
     "primary": "#1E3A8A"
   },
-  "comment": {
-    "_comment_logo": "Questo blocco definisce i loghi per i temi chiaro e scuro quando inserirò il logo mio si dovrà togliere il commento",
-    "logo": {
-      "light": "/logo/light.svg",
-      "dark": "/logo/dark.svg"
-    }
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
   },
   "favicon": "/favicon.svg",
   "navigation": {
@@ -20,7 +17,7 @@
         "groups": [
           {
             "group": "Getting Started",
-            "pages": ["getting-started"]
+            "pages": ["getting-started", "setup"]
           },
           {
             "group": "Installation",
@@ -28,11 +25,11 @@
           },
           {
             "group": "Running",
-            "pages": ["running"]
+            "pages": ["running", "updating"]
           },
           {
             "group": "Configuration",
-            "pages": ["configuration"]
+            "pages": ["configuration", "backup-restore"]
           },
           {
             "group": "CLI & Console",
