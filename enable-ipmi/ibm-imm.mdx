@@ -7,9 +7,8 @@ description: "Enable IPMI-over-LAN on the IBM Integrated Management Module II (I
   **Low-confidence guide — verify on your hardware before relying on these steps.**
   IBM IMM2 hardware is legacy (IBM sold the System x line to Lenovo in 2014) and online
   documentation is sparse. The exact web-interface path depends on the IMM2 firmware
-  version, and these steps have **not yet been validated on real hardware**. This is a
-  **high review priority** — confirm every path against your own server and report
-  corrections. Owner hardware validation is pending.
+  version. This is a **high review priority** — confirm every path against your own server
+  and report corrections. Owner hardware validation is pending.
 </Warning>
 
 **Applies to:** IBM System x servers with IMM2 (Integrated Management Module II) — for
@@ -26,32 +25,22 @@ example the IBM x3650 M4 and x3550 M4.
     In a browser, navigate to the IMM2 IP address and log in. The default credentials are
     **USERID** / **PASSW0RD** (note the **zero** in "PASSW0RD"). Change them immediately
     if they are still in use.
-
-    {/* Image slot — owner adds a screenshot after verifying on hardware */}
-    <Frame caption="Owner: replace with a photo of the IMM2 login screen.">
-      <img src="/images/enable-ipmi/ibm-step-1.png" alt="IBM IMM2 web interface login screen" />
-    </Frame>
   </Step>
-  <Step title="Open Network Protocols">
-    Navigate to **Network Protocols** — typically under **IMM Management → Network** or
-    **Configuration → Network Protocols**.
-
-    {/* Image slot — owner adds a screenshot after verifying on hardware */}
-    <Frame caption="Owner: replace with a photo of the Network Protocols page.">
-      <img src="/images/enable-ipmi/ibm-step-2.png" alt="IBM IMM2 Network Protocols configuration page" />
-    </Frame>
+  <Step title="Open IMM Management → Network Protocol Properties">
+    From the top menu, go to **IMM Management → Network Protocol Properties** — the page
+    with tabs for Ethernet, SNMP, DNS, …, **IPMI**.
   </Step>
-  <Step title="Enable the IPMI LAN interface">
-    In the **Network Protocols** section, find **IPMI over LAN** (or the IPMI protocol
-    setting) and enable the IPMI LAN interface.
+  <Step title="Enable IPMI access">
+    Open the **IPMI** tab and tick **Allow IPMI access**, then click **Apply**.
 
-    {/* Image slot — owner adds a screenshot after verifying on hardware */}
-    <Frame caption="Owner: replace with a photo of the IPMI over LAN protocol setting.">
-      <img src="/images/enable-ipmi/ibm-step-3.png" alt="IBM IMM2 IPMI over LAN protocol setting enabled" />
+    <Frame caption="IMM Management → Network Protocol Properties → IPMI tab: tick Allow IPMI access.">
+      <img src="/tutorials/IBM/IPMI_tab.jpg" alt="IBM IMM2 Network Protocol Properties IPMI tab with Allow IPMI access enabled" />
     </Frame>
-  </Step>
-  <Step title="Apply / Save">
-    Apply or save the change.
+
+    <Note>
+      Changing the IPMI port configuration **requires an IMM reboot** to take effect — the
+      IMM shows this reminder on the IPMI tab.
+    </Note>
   </Step>
   <Step title="Ensure an IPMI user ID exists">
     IBM's documentation notes: *"If no IPMI User IDs have been configured by the CMM, the

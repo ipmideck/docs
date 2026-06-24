@@ -3,68 +3,53 @@ title: "HPE iLO"
 description: "Enable IPMI/DCMI-over-LAN on HPE iLO 4 / iLO 5 so ipmideck can connect to your ProLiant server."
 ---
 
-**Applies to:** HPE iLO 4 and iLO 5 (ProLiant servers). The navigation path is consistent
-across both.
+**Applies to:** HPE iLO 4 and iLO 5 (ProLiant servers).
 
 <Note>
   HPE iLO is a **Planned** vendor for ipmideck — these steps are from official HPE
-  documentation but should be confirmed against your specific iLO version before use.
-  IPMI/DCMI over LAN is **disabled by default** on iLO 5 for security reasons.
+  documentation and a real iLO 4. On **iLO 4** IPMI-over-LAN is typically **enabled by
+  default**; on **iLO 5** it is **disabled by default** for security and must be turned on
+  (steps below).
 </Note>
 
-## Steps
+## iLO 5 — enable IPMI/DCMI over LAN
 
 <Steps>
   <Step title="Open the iLO web interface">
     In a browser, navigate to the iLO IP address and log in with iLO administrator
     credentials.
-
-    {/* Image slot — owner adds a screenshot after verifying on hardware */}
-    <Frame caption="Owner: replace with a photo of the iLO login screen.">
-      <img src="/images/enable-ipmi/hpe-step-1.png" alt="HPE iLO web interface login screen" />
-    </Frame>
   </Step>
-  <Step title="Open Security settings">
-    In the left navigation pane, click **Security**.
-
-    {/* Image slot — owner adds a screenshot after verifying on hardware */}
-    <Frame caption="Owner: replace with a photo of the iLO Security navigation item.">
-      <img src="/images/enable-ipmi/hpe-step-2.png" alt="HPE iLO Security navigation pane" />
-    </Frame>
-  </Step>
-  <Step title="Open Access Settings → Network">
-    Click the **Access Settings** tab, then click the **pencil / edit** icon for the
-    **Network** section.
-
-    {/* Image slot — owner adds a screenshot after verifying on hardware */}
-    <Frame caption="Owner: replace with a photo of Access Settings → Network edit.">
-      <img src="/images/enable-ipmi/hpe-step-3.png" alt="HPE iLO Access Settings Network edit panel" />
-    </Frame>
+  <Step title="Security → Access Settings → Network">
+    In the left navigation pane click **Security**, open the **Access Settings** tab, then
+    click the **pencil / edit** icon for the **Network** section.
   </Step>
   <Step title="Enable IPMI/DCMI over LAN">
-    Check the box for **IPMI/DCMI over LAN** to enable IPMI access.
-
-    {/* Image slot — owner adds a screenshot after verifying on hardware */}
-    <Frame caption="Owner: replace with a photo of the IPMI/DCMI over LAN checkbox.">
-      <img src="/images/enable-ipmi/hpe-step-4.png" alt="HPE iLO IPMI/DCMI over LAN checkbox enabled" />
-    </Frame>
-  </Step>
-  <Step title="Apply">
-    Click **Apply**. IPMI-over-LAN uses the default port **623**.
-  </Step>
-  <Step title="Verify connectivity">
-    From the host that will run ipmideck:
-
-    ```bash
-    ipmitool -I lanplus -H <ilo-ip> -U <user> -P <password> chassis status
-    ```
+    Tick **IPMI/DCMI over LAN** and click **Apply**. IPMI-over-LAN uses the default port
+    **623**.
   </Step>
 </Steps>
 
+## iLO 4 — confirm the network address
+
+On iLO 4, IPMI-over-LAN is generally enabled already; you mainly need the iLO's IP address.
+Open **Network → iLO Dedicated Network Port** and read the **Network Summary**.
+
+<Frame caption="iLO 4 → Network → iLO Dedicated Network Port → Network Summary. The IPv4 Summary block holds the iLO address, subnet, and gateway you need (the red highlight on the SNTP tab is incidental to this capture).">
+  <img src="/tutorials/HPE/HP-Proliant-BL460C-Gen9-Network-info-screenshot-IPMI_web-interface.png" alt="HPE iLO 4 Network Summary page on a ProLiant BL460c Gen9" />
+</Frame>
+
+## Verify
+
+From the host that will run ipmideck:
+
+```bash
+ipmitool -I lanplus -H <ilo-ip> -U <user> -P <password> chassis status
+```
+
 <Note>
-  **Flag for review:** iLO 4 may use a slightly different path (a **Network** tab rather
-  than the **Security** tab). Verify against your specific iLO version before relying on
-  these steps.
+  **Flag for review:** the path differs between iLO 4 (a **Network** tab; IPMI usually
+  enabled) and iLO 5 (**Security → Access Settings**; IPMI disabled by default). Verify
+  against your specific iLO version before relying on these steps.
 </Note>
 
 ## Source
