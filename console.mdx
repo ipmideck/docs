@@ -19,22 +19,9 @@ entirely and just writes plain scrolling logs. See [Where the console shows up](
 The console is one full-screen view: a pinned header you can always see, over a live log
 that scrolls underneath it.
 
-```text
-┌─ Console ──────────────────────────────────────────────┐
-│                                                        │
-│     IPMIDeck   (large banner, pinned at the top)       │
-│                                                        │
-│  [v] verbosity  [c] sessions  [s] servers  [u] url     │
-│  [g] update  [b] change bind  [r] restart  [q] quit    │
-│  Verbosity: INFO  |  Clients: 0  |  last: -            │
-│  Luigi Tanzillo · v2.0.0a1 · ISC                       │
-├─ Logs ─────────────────────────────────────────────────┤
-│  10:42:01 INFO   ipmideck: IPMIDeck started on         │
-│                  0.0.0.0:3000                           │
-│  10:42:06 INFO   ipmideck: client connected 127.0.0.1  │
-│  …                                                     │
-└────────────────────────────────────────────────────────┘
-```
+<Frame caption="The console right after start: the banner and help bar stay pinned at the top while the log tail scrolls below.">
+  <img src="/console/home.png" alt="ipmideck interactive console showing the banner, help bar, status line, and the scrolling log panel" />
+</Frame>
 
 The header never scrolls. New log lines appear in the panel below it, and the newest line
 is always kept on screen. You press a single key to act; everything happens in-process
@@ -106,6 +93,10 @@ currently attached, with columns:
 
 Press `q` or `ESC` to return to the log view.
 
+<Frame caption="The Connected sessions sub-view (key c), one row per attached dashboard client.">
+  <img src="/console/connections.png" alt="Connected sessions table showing IP, Connected since, and User-Agent columns" />
+</Frame>
+
 ### s: servers
 
 `s` opens the **Configured servers** sub-view, a read-only table of the BMCs ipmideck is
@@ -117,12 +108,20 @@ configured to talk to, with columns:
 
 Press `q` or `ESC` to return to the log view.
 
+<Frame caption="The Configured servers sub-view (key s), listing each BMC and whether it is online.">
+  <img src="/console/servers.png" alt="Configured servers table showing Name, Host, and Status columns with online and offline servers" />
+</Frame>
+
 ### u: url
 
 `u` surfaces the dashboard URL (`scheme://host:port`) in the log body. If the server is
 bound to a wildcard address (`0.0.0.0`, `::`, or empty), the URL is rewritten to
 `127.0.0.1` so it is actually openable in a browser, `http://0.0.0.0:3000` is a listen
 address, not a navigable one.
+
+<Frame caption="Key u prints the dashboard URL at the bottom of the log, rewritten to a reachable address.">
+  <img src="/console/url.png" alt="The console log with the dashboard URL printed at the bottom after pressing u" />
+</Frame>
 
 ### g: update
 
@@ -146,6 +145,10 @@ the new address.
 while you type. The header shows the current bind as a read-only `current: host:port` label
 and an empty `new:` field, so the value you type appears immediately and is never confused
 with the existing one.
+
+<Frame caption="The change-bind editor (key b): the help bar is replaced by the current bind and an empty new host:port prompt.">
+  <img src="/console/bind.png" alt="The change-bind editor showing the current bind address and an empty new field with apply, cancel, and delete key hints" />
+</Frame>
 
 Keys inside the editor:
 
