@@ -26,19 +26,19 @@ including default credentials, the enable toggle, and a verification command.
 
 <CardGroup cols={2}>
   <Card title="Dell iDRAC" href="/enable-ipmi/dell-idrac">
-    iDRAC7 / iDRAC8 / iDRAC9 — PowerEdge servers.
+    iDRAC7 / iDRAC8 / iDRAC9, PowerEdge servers.
   </Card>
   <Card title="Supermicro" href="/enable-ipmi/supermicro">
-    Supermicro IPMI 2.0 BMC (X8–X12 boards). <b>Low-confidence — verify on hardware.</b>
+    Supermicro IPMI 2.0 BMC (X8–X12 boards). <b>Low-confidence, verify on hardware.</b>
   </Card>
   <Card title="HPE iLO" href="/enable-ipmi/hpe-ilo">
-    HPE iLO 4 / iLO 5 — ProLiant servers.
+    HPE iLO 4 / iLO 5, ProLiant servers.
   </Card>
   <Card title="Lenovo XCC" href="/enable-ipmi/lenovo-xcc">
-    Lenovo XClarity Controller (XCC / XCC2) — ThinkSystem servers.
+    Lenovo XClarity Controller (XCC / XCC2), ThinkSystem servers.
   </Card>
   <Card title="IBM IMM" href="/enable-ipmi/ibm-imm">
-    IBM IMM2 — System x servers. <b>Low-confidence — verify on hardware.</b>
+    IBM IMM2, System x servers. <b>Low-confidence, verify on hardware.</b>
   </Card>
 </CardGroup>
 
@@ -52,7 +52,7 @@ ipmitool -I lanplus -H <bmc-ip> -U <user> -P <password> chassis status
 ```
 
 A successful response confirms the LAN channel is live. Then add the server in ipmideck's
-setup wizard — see [Getting Started](/getting-started) and
+setup wizard, see [Getting Started](/getting-started) and
 [Supported Hardware](/supported-hardware).
 
 <Note>

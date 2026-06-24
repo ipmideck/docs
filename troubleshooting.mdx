@@ -26,7 +26,7 @@ If commands fail with an authentication or privilege error:
 - Double-check the BMC username and password you entered for the server.
 - The BMC account needs at least Operator privilege for power and fan control;
   Administrator is required for configuration changes.
-- Some BMCs lock an account after repeated failed logins — wait, or reset the account from
+- Some BMCs lock an account after repeated failed logins, wait, or reset the account from
   the BMC's own web UI.
 
 ## Commands time out
@@ -47,8 +47,8 @@ likely to be slow.
 
 FanPilot deliberately hands fans back to the BMC's own thermal management in two cases:
 
-- **Safety override** — at or above the critical temperature, fans go to 100%.
-- **Recovery** — after an unclean shutdown, server-offline, or stale-sensor detection,
+- **Safety override**: at or above the critical temperature, fans go to 100%.
+- **Recovery**: after an unclean shutdown, server-offline, or stale-sensor detection,
   ipmideck restores the BMC's auto mode so hardware is never left unmanaged.
 
 This is intended fail-safe behavior, not a bug. See [Security](/security).
@@ -57,5 +57,5 @@ This is intended fail-safe behavior, not a bug. See [Security](/security).
 
 - Confirm the container or process is running and listening on the configured port
   (`server.port` / `IPMIDECK_SERVER_PORT`, default 3000).
-- Open `http://<your-ip>:3000` — not `https`, unless you set `server.https: true`.
+- Open `http://<your-ip>:3000`, not `https`, unless you set `server.https: true`.
 - Check the application logs; raise `logging.level` to `debug` for more detail.

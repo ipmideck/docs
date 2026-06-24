@@ -1,6 +1,6 @@
 ---
 title: "Security"
-description: "Every security claim here is grounded in ipmideck's own backend code — not marketing."
+description: "Every security claim here is grounded in ipmideck's own backend code, not marketing."
 ---
 
 ipmideck is built for people who read the source instead of trusting a vendor. The claims
@@ -8,14 +8,14 @@ below are grounded in the product's backend code.
 
 ## Data & account security
 
-Credentials are encrypted at rest, logins are hashed, and sessions are signed — the
+Credentials are encrypted at rest, logins are hashed, and sessions are signed, the
 database alone is never enough to get in.
 
 ### AES-256-CBC credential encryption
 
 BMC credentials are encrypted at rest with AES-256-CBC and a random IV per secret. The
 encryption key lives in a separate key file (`data/encryption.key`, 32 random bytes,
-owner-only permissions) — never in the database — so a stolen database alone cannot
+owner-only permissions), never in the database, so a stolen database alone cannot
 decrypt anything.
 
 ### bcrypt logins + HMAC-SHA256 signed sessions
@@ -31,7 +31,7 @@ plus timing-leak-safe generic errors so an attacker learns nothing from how a lo
 
 ### No-shell ipmitool, fully offline
 
-ipmitool is invoked through an argument list (`create_subprocess_exec`), never a shell —
+ipmitool is invoked through an argument list (`create_subprocess_exec`), never a shell,
 so there is no command-injection surface. The whole system runs fully offline: no
 telemetry, no cloud, no external calls.
 
@@ -43,7 +43,7 @@ keeps running even when you are not watching.
 ### Safety override at the critical temperature
 
 Fans are forced to 100% at or above the critical temperature (default 85°C, configurable).
-No fan curve can override the override — the thermal limit always wins.
+No fan curve can override the override, the thermal limit always wins.
 
 ### Hysteresis to stop oscillation
 
@@ -53,7 +53,7 @@ and down around a temperature limit, keeping speed changes smooth and predictabl
 ### Autonomous background loop
 
 Fan control runs in a background task (~30s poll) that keeps working with the dashboard
-closed — protection does not depend on a browser tab being open.
+closed, protection does not depend on a browser tab being open.
 
 ### Unclean-shutdown recovery + graceful shutdown
 

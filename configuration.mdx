@@ -7,10 +7,10 @@ description: "ipmideck reads data/config.yaml and accepts IPMIDECK_-prefixed env
 
 ipmideck reads its settings from `data/config.yaml`, written with sensible defaults on the
 first run. You can edit the file directly, or override any value at runtime with an
-environment variable (handy for Docker — see below).
+environment variable (handy for Docker, see below).
 
 ```yaml
-# data/config.yaml — auto-generated on first run
+# data/config.yaml (auto-generated on first run)
 server:
   host: "0.0.0.0"
   port: 3000
@@ -65,7 +65,7 @@ to edit a file inside the container.
 | `IPMIDECK_DEMO` | Run against simulated hardware instead of real BMCs (default `false`). |
 
 Two more variables control file *locations* rather than a `config.yaml` value:
-`IPMIDECK_DATA_DIR` (the data directory — see below) and `IPMIDECK_CONFIG_PATH` (an
+`IPMIDECK_DATA_DIR` (the data directory, see below) and `IPMIDECK_CONFIG_PATH` (an
 explicit path to a `config.yaml` to load).
 
 <Note>
@@ -78,12 +78,12 @@ explicit path to a `config.yaml` to load).
 ipmideck resolves its data directory from `IPMIDECK_DATA_DIR` if set, otherwise it falls
 back to a platform default. `config.yaml` always lives at `<data-dir>/config.yaml`:
 
-- **Docker:** `/data/config.yaml` — the image sets `IPMIDECK_DATA_DIR=/data`; persist
+- **Docker:** `/data/config.yaml`: the image sets `IPMIDECK_DATA_DIR=/data`; persist
   `/data` with a volume.
-- **pip on Linux:** `/data/config.yaml` by default — set `IPMIDECK_DATA_DIR` to relocate it.
+- **pip on Linux:** `/data/config.yaml` by default: set `IPMIDECK_DATA_DIR` to relocate it.
 - **pip on Windows:** `./data/config.yaml`, relative to the directory you run `ipmideck` from.
 
 ## Next steps
 
-- [Security](/security) — how credentials and sessions are protected.
-- [Features](/features) — what each module does.
+- [Security](/security): how credentials and sessions are protected.
+- [Features](/features): what each module does.

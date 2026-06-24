@@ -12,7 +12,7 @@ description: "Sensor monitoring, FanPilot fan control, power management, SEL, FR
 ipmideck polls each BMC on an interval set by `ipmi.poll_interval` (default 30 seconds,
 overridable with `IPMIDECK_IPMI_POLL_INTERVAL`).
 
-## FanPilot — Intelligent Fan Control
+## FanPilot: Intelligent Fan Control
 
 - Visual drag-and-drop fan-curve editor.
 - Built-in profiles: Silent, Balanced, Performance, Full Speed, and Custom.
@@ -22,7 +22,7 @@ overridable with `IPMIDECK_IPMI_POLL_INTERVAL`).
 
 <Warning>
   FanPilot's safety override always wins. No fan curve can hold fans below 100% once the
-  critical temperature is reached — the thermal limit takes precedence over any profile.
+  critical temperature is reached, the thermal limit takes precedence over any profile.
 </Warning>
 
 ## Power Control
@@ -50,6 +50,6 @@ overridable with `IPMIDECK_IPMI_POLL_INTERVAL`).
 ## How it talks to your hardware
 
 ipmideck drives every IPMI operation through `ipmitool`, invoked over `lanplus`
-(IPMI 2.0) for encrypted sessions. Arguments are always passed as a list — never through
-a shell — so there is no command-injection surface. See [Security](/security) for the
+(IPMI 2.0) for encrypted sessions. Arguments are always passed as a list, never through
+a shell, so there is no command-injection surface. See [Security](/security) for the
 full picture.

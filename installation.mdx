@@ -18,7 +18,7 @@ Once the container is up, open `http://<your-ip>:3000` and follow the setup wiza
 <Note>
   The published image lives on Docker Hub at
   [hub.docker.com/r/ipmideck/ipmideck](https://hub.docker.com/r/ipmideck/ipmideck).
-  The image is coming soon — the command above is the exact command you will run once
+  The image is coming soon, the command above is the exact command you will run once
   it is published.
 </Note>
 
@@ -28,7 +28,7 @@ Once the container is up, open `http://<your-ip>:3000` and follow the setup wiza
 pip install ipmideck
 ```
 
-The pip package requires `ipmitool` to be installed on the host — ipmideck shells out to
+The pip package requires `ipmitool` to be installed on the host, ipmideck shells out to
 `ipmitool` for every IPMI operation. Install it from your distribution's package manager
 first (for example `apt install ipmitool` or `dnf install ipmitool`).
 
@@ -38,7 +38,7 @@ ipmideck writes its configuration and database under a data directory:
 
 - **Docker:** `/data` inside the container (the image sets `IPMIDECK_DATA_DIR=/data`;
   persist it with a volume).
-- **pip on Linux:** `/data` by default — set `IPMIDECK_DATA_DIR` to relocate it.
+- **pip on Linux:** `/data` by default: set `IPMIDECK_DATA_DIR` to relocate it.
 - **pip on Windows:** `./data`, relative to the directory you run `ipmideck` from.
 
 You can override the location on any platform with the `IPMIDECK_DATA_DIR` environment
@@ -48,6 +48,6 @@ file used to protect your stored BMC credentials. See [Configuration](/configura
 
 ## Next steps
 
-- [Configuration](/configuration) — tune ports, polling intervals, and retention.
-- [Supported Hardware](/supported-hardware) — confirm your BMC is covered.
-- [Troubleshooting](/troubleshooting) — connection and IPMI errors.
+- [Configuration](/configuration): tune ports, polling intervals, and retention.
+- [Supported Hardware](/supported-hardware): confirm your BMC is covered.
+- [Troubleshooting](/troubleshooting): connection and IPMI errors.

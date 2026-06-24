@@ -6,13 +6,13 @@ description: "Enable IPMI/DCMI-over-LAN on HPE iLO 4 / iLO 5 so ipmideck can con
 **Applies to:** HPE iLO 4 and iLO 5 (ProLiant servers).
 
 <Note>
-  HPE iLO is a **Planned** vendor for ipmideck — these steps are from official HPE
+  HPE iLO is a **Planned** vendor for ipmideck, these steps are from official HPE
   documentation and a real iLO 4. On **iLO 4** IPMI-over-LAN is typically **enabled by
   default**; on **iLO 5** it is **disabled by default** for security and must be turned on
   (steps below).
 </Note>
 
-## iLO 5 — enable IPMI/DCMI over LAN
+## iLO 5: enable IPMI/DCMI over LAN
 
 <Steps>
   <Step title="Open the iLO web interface">
@@ -29,7 +29,7 @@ description: "Enable IPMI/DCMI-over-LAN on HPE iLO 4 / iLO 5 so ipmideck can con
   </Step>
 </Steps>
 
-## iLO 4 — confirm the network address
+## iLO 4: confirm the network address
 
 On iLO 4, IPMI-over-LAN is generally enabled already; you mainly need the iLO's IP address.
 Open **Network → iLO Dedicated Network Port** and read the **Network Summary**.
@@ -54,5 +54,5 @@ ipmitool -I lanplus -H <ilo-ip> -U <user> -P <password> chassis status
 
 ## Source
 
-[CITED: support.hpe.com — HPE iLO 5 IPMI User Guide](https://support.hpe.com/hpesc/public/docDisplay?docId=a00018321en_us) ·
+[CITED: support.hpe.com, HPE iLO 5 IPMI User Guide](https://support.hpe.com/hpesc/public/docDisplay?docId=a00018321en_us) ·
 [Guidelines for using iLO with IPMI or DCMI over LAN](https://support.hpe.com/hpesc/public/docDisplay?docId=a00026171en_us)

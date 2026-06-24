@@ -1,18 +1,17 @@
 ---
 title: "CLI Reference"
-description: "Run ipmideck from the command line — subcommands, bind flags, the 0.0.0.0:3000 default, self-signed HTTPS, demo mode, and exit codes."
+description: "Run ipmideck from the command line: subcommands, bind flags, the 0.0.0.0:3000 default, self-signed HTTPS, demo mode, and exit codes."
 ---
 
 ipmideck ships a single console command, `ipmideck`, that starts the server, resets the
 admin password, or generates a self-signed certificate. `ipmilink` is a backward-compatible
-alias for the same command — every subcommand and flag below works identically under either
+alias for the same command, every subcommand and flag below works identically under either
 name.
 
 <Note>
   The CLI only applies when you run ipmideck directly (pip install or a source checkout). The
   Docker image launches `uvicorn backend.main:app` directly and never invokes the CLI, so none
-  of these flags, the bind precedence, or the single-instance guard apply to the container —
-  the container's bind is set by its own startup command. See [Installation](/installation).
+  of these flags, the bind precedence, or the single-instance guard apply to the container. The container's bind is set by its own startup command. See [Installation](/installation).
 </Note>
 
 ## Starting the server
@@ -42,7 +41,7 @@ ipmideck
 
 </CodeGroup>
 
-With no flags, ipmideck binds **`0.0.0.0:3000`** by default — reachable on every interface,
+With no flags, ipmideck binds **`0.0.0.0:3000`** by default, reachable on every interface,
 on port `3000`. Open `http://<your-ip>:3000` once it is up.
 
 Override the bind with `--host` and `--port`:
@@ -72,7 +71,7 @@ ipmideck start --host 127.0.0.1 --port 8080
 | `reset-password` | Interactively create or update the admin login, then exit without serving. |
 
 <Note>
-  `serve` is a deprecated alias of `start` — prefer `start` (or a bare `ipmideck`) in new
+  `serve` is a deprecated alias of `start`, prefer `start` (or a bare `ipmideck`) in new
   scripts.
 </Note>
 
@@ -95,12 +94,12 @@ subcommand branch, so they also affect `reset-password` and `--gen-cert`.
 The host and port ipmideck actually binds are resolved in this order, highest priority first:
 
 1. An explicit `--host` / `--port` flag on the command line.
-2. Configuration — which itself resolves env var (`IPMIDECK_SERVER_HOST` / `IPMIDECK_SERVER_PORT`)
+2. Configuration, which itself resolves env var (`IPMIDECK_SERVER_HOST` / `IPMIDECK_SERVER_PORT`)
    over `config.yaml` over the built-in default.
 3. The hardcoded fallback **`0.0.0.0:3000`**, used if the early config load fails.
 
 In other words: a value you persist to `config.yaml` is **overridden by an `IPMIDECK_`
-environment variable or a `--host` / `--port` flag** on the next boot — env and CLI always win.
+environment variable or a `--host` / `--port` flag** on the next boot, env and CLI always win.
 If `config.yaml` is malformed, ipmideck prints a warning to stderr and falls back to
 `0.0.0.0:3000`.
 
@@ -139,12 +138,11 @@ Generated: <path-to-key>
 Wrote cert_file/key_file to config.yaml. Set server.https=true and restart to serve over HTTPS.
 ```
 
-To actually serve over HTTPS, set `server.https: true` in `config.yaml` and restart ipmideck —
-HTTPS is never enabled automatically.
+To actually serve over HTTPS, set `server.https: true` in `config.yaml` and restart ipmideck. HTTPS is never enabled automatically.
 
 ## Demo mode
 
-`--demo` runs ipmideck against simulated hardware instead of real BMCs — useful for evaluating
+`--demo` runs ipmideck against simulated hardware instead of real BMCs, useful for evaluating
 the dashboard without any servers wired up:
 
 <CodeGroup>
@@ -163,8 +161,7 @@ ipmideck start --demo
 
 </CodeGroup>
 
-Demo mode is set very early, before any subcommand branch, so the whole app — config and the
-running server — sees it.
+Demo mode is set very early, before any subcommand branch, so the whole app (config and the running server) sees it.
 
 ## Resetting the admin password
 
@@ -222,7 +219,7 @@ ipmideck start --reload
 
 | Exit code | When |
 | --- | --- |
-| `0` | Clean shutdown on `Ctrl+C` / SIGTERM — the server stops gracefully, no traceback. |
+| `0` | Clean shutdown on `Ctrl+C` / SIGTERM, the server stops gracefully, no traceback. |
 | `1` | The port is already in use on the target host (another instance may be running), **or** the bind fails because the address is unavailable or not permitted (for example a privileged port or an interface that does not exist). |
 
 On the serve path (not `--reload`), ipmideck runs a single-instance guard before binding. If the
@@ -231,6 +228,6 @@ address is unavailable or not permitted, it prints a distinct error and also exi
 
 ## Next steps
 
-- [Configuration](/configuration) — `config.yaml` keys and the `IPMIDECK_` environment overrides.
-- [Installation](/installation) — install ipmideck with Docker or pip.
-- [Troubleshooting](/troubleshooting) — connection, port, and IPMI errors.
+- [Configuration](/configuration): `config.yaml` keys and the `IPMIDECK_` environment overrides.
+- [Installation](/installation): install ipmideck with Docker or pip.
+- [Troubleshooting](/troubleshooting): connection, port, and IPMI errors.

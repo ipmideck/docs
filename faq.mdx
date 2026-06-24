@@ -6,7 +6,7 @@ description: "Common questions about running ipmideck in a homelab."
 ## Is ipmideck cloud-based?
 
 No. ipmideck is fully self-hosted and runs entirely on your own network. It makes no
-external calls — no telemetry, no cloud, no account. It talks directly to your BMCs and
+external calls, no telemetry, no cloud, no account. It talks directly to your BMCs and
 stores everything locally.
 
 ## Which BMCs does it work with?
@@ -17,7 +17,7 @@ Lenovo XCC, and IBM IMM are planned. See [Supported Hardware](/supported-hardwar
 
 ## Do I need ipmitool installed?
 
-Only for the pip install — the pip package shells out to your system `ipmitool`. The
+Only for the pip install, the pip package shells out to your system `ipmitool`. The
 Docker image bundles everything it needs, so you only need Docker with `--network host`.
 
 ## Why does Docker need `--network host`?
@@ -39,7 +39,7 @@ One year by default (`data.retention_days: 365`). Override it with
 
 ## Can I disable the login?
 
-Yes — set `auth.enabled: false` in `config.yaml`, or `IPMIDECK_AUTH_ENABLED=false`. Only
+Yes, set `auth.enabled: false` in `config.yaml`, or `IPMIDECK_AUTH_ENABLED=false`. Only
 do this on a trusted, isolated network: with auth off, anyone who can reach the dashboard
 can control your hardware.
 

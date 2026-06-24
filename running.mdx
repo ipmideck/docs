@@ -5,7 +5,7 @@ description: "Start ipmideck on Windows, Linux, or Docker, find your data direct
 
 Once ipmideck is [installed](/installation), there are two very different ways it runs:
 a **host install** that you launch with the `ipmideck` command, and the **Docker
-container**, which runs the web server directly. They behave differently — the host
+container**, which runs the web server directly. They behave differently, the host
 command gives you an interactive operator console, while the container just streams plain
 logs. This page covers both.
 
@@ -52,13 +52,13 @@ By default the server binds to `0.0.0.0:3000`, so open `http://<your-ip>:3000` i
 browser once it is up.
 
 <Note>
-  `ipmilink` is a backward-compatible alias for the same command — `ipmilink start`
+  `ipmilink` is a backward-compatible alias for the same command, `ipmilink start`
   behaves exactly like `ipmideck start`. Use `ipmideck` for everything new.
 </Note>
 
 On a real terminal (a TTY), `ipmideck start` opens an interactive operator console. When
-the same command runs without a terminal — for example piped to a file or under a
-process supervisor — it skips the console and serves with plain logs instead. See
+the same command runs without a terminal, for example piped to a file or under a
+process supervisor, it skips the console and serves with plain logs instead. See
 [the headless / non-TTY mode](#headless--non-tty-mode) below.
 
 ## Docker: the container runs the server directly
@@ -71,14 +71,14 @@ docker run --network host ipmideck/ipmideck:latest
 ```
 
 Because the container never invokes the `ipmideck` CLI, none of the subcommands, flags, or
-the interactive console apply inside Docker — the container only ever streams **plain
+the interactive console apply inside Docker, the container only ever streams **plain
 logs** to stdout, exactly like the headless host mode. The container binds to
 `0.0.0.0:3000` and `--network host` is required so it can reach your BMCs over UDP port
 `623`. See [Installation](/installation) for the networking details.
 
 <Note>
   Configure the container with `IPMIDECK_`-prefixed environment variables and a volume on
-  `/data` rather than CLI flags — see [Configuration](/configuration). The published image
+  `/data` rather than CLI flags, see [Configuration](/configuration). The published image
   is coming soon; the command above is the exact command you will run once it is live.
 </Note>
 
@@ -117,7 +117,7 @@ volume to keep your config and history across container restarts.
 ## Environment overrides
 
 Every `IPMIDECK_`-prefixed environment variable that overrides a `config.yaml` setting
-works the same way whether you run on the host or in Docker — see
+works the same way whether you run on the host or in Docker, see
 [Configuration](/configuration) for the full list. The two that change *how* ipmideck
 binds are:
 
@@ -146,7 +146,7 @@ claimed the port. Stop the other process, or change the port with `IPMIDECK_SERV
 
 ## Address unavailable
 
-A different failure is when the *host* you asked to bind cannot be used — for example an
+A different failure is when the *host* you asked to bind cannot be used, for example an
 address that does not exist on this machine, an IPv6-only interface, or a privileged port
 you are not permitted to bind. ipmideck reports this separately and also exits with status
 `1`:
@@ -155,19 +155,19 @@ you are not permitted to bind. ipmideck reports this separately and also exits w
 ERROR: IPMIDeck cannot bind 0.0.0.0:3000 — address unavailable or not permitted.
 ```
 
-Check the value of `IPMIDECK_SERVER_HOST` (or `server.host`) — it must be an address that
-actually exists on the machine — and make sure the port is one you are allowed to bind.
+Check the value of `IPMIDECK_SERVER_HOST` (or `server.host`), it must be an address that
+actually exists on the machine, and make sure the port is one you are allowed to bind.
 
 ## Graceful shutdown with Ctrl+C
 
 Press **Ctrl+C** (which sends `SIGINT`; `SIGTERM` is handled the same way) to stop
 ipmideck. The shutdown is graceful: the web server exits its loop, the application
-lifespan shutdown runs — **fan control is handed back to your BMCs** — and the process
+lifespan shutdown runs, **fan control is handed back to your BMCs**, and the process
 exits cleanly with no traceback.
 
 <Warning>
   Because shutdown restores fan control to the BMC, FanPilot stops driving your fans the
-  moment ipmideck exits. Your BMC's own fan policy takes over — this is the intended
+  moment ipmideck exits. Your BMC's own fan policy takes over, this is the intended
   fail-safe. See [Features](/features) for how the fan loop behaves.
 </Warning>
 
@@ -178,7 +178,7 @@ graceful shutdown runs when you stop the container.
 
 How a restart works depends on your operating system:
 
-- **Linux (and other POSIX systems):** ipmideck restarts **in place** — it re-launches a
+- **Linux (and other POSIX systems):** ipmideck restarts **in place**: it re-launches a
   fresh process that re-reads `config.yaml`, keeping the same controlling terminal.
 - **Windows:** there is no in-place re-exec. ipmideck shuts down cleanly and prints a hint
   asking you to run the command again yourself:
@@ -188,13 +188,13 @@ IPMIDeck: restart required to apply the new bind.
   Run  ipmideck start  again to restart.
 ```
 
-On Windows, just rerun `ipmideck start` in the same shell — the fresh process re-reads
+On Windows, just rerun `ipmideck start` in the same shell, the fresh process re-reads
 `config.yaml` and picks up the new settings.
 
 ## Headless / non-TTY mode
 
-When ipmideck runs without an attached terminal — piped to a file, redirected, or under a
-process manager — it detects there is no TTY and **skips the interactive console**. It
+When ipmideck runs without an attached terminal, piped to a file, redirected, or under a
+process manager, it detects there is no TTY and **skips the interactive console**. It
 serves the dashboard normally and streams **plain logs** to stdout instead. This is the
 same output you get from the Docker container, which always runs without a console.
 
@@ -203,6 +203,6 @@ invokes it, and read the logs from stdout.
 
 ## Next steps
 
-- [Installation](/installation) — Docker and pip in detail.
-- [Configuration](/configuration) — `config.yaml`, environment overrides, and where data lives.
-- [Troubleshooting](/troubleshooting) — connection and IPMI errors.
+- [Installation](/installation): Docker and pip in detail.
+- [Configuration](/configuration): `config.yaml`, environment overrides, and where data lives.
+- [Troubleshooting](/troubleshooting): connection and IPMI errors.
