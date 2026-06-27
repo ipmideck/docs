@@ -1,0 +1,43 @@
+---
+title: "Unterstützte Hardware"
+description: "ipmideck spricht Standard-IPMI 2.0; die Unterstützung ist abgestuft danach, wie gründlich jeder Hersteller getestet ist."
+---
+
+## IPMI 2.0 überall
+
+ipmideck spricht Standard-IPMI 2.0, sodass die meisten Server-BMCs antworten. Die Unterstützung ist abgestuft danach, wie
+gründlich jeder Hersteller getestet wurde. Die Lüfterkurvensteuerung (FanPilot) stützt sich derzeit auf
+Dell-iDRAC-Raw-Befehle; die Lüftersteuerung anderer Hersteller ist auf der Roadmap.
+
+| Hersteller | Status | IPMI aktivieren | Hinweise |
+|--------|--------|-------------|-------|
+| Dell PowerEdge / iDRAC | <Icon icon="circle-check" color="#16a34a" /> Unterstützt / getestet | [Dell-iDRAC-Anleitung](/de/enable-ipmi/dell-idrac) | IPMI 2.0, vollständig unterstützt und getestet. |
+| Supermicro | <Icon icon="flask" color="#d97706" /> Experimentell | [Supermicro-Anleitung](/de/enable-ipmi/supermicro) | IPMI 2.0, funktioniert, noch nicht erschöpfend getestet. |
+| HPE iLO | <Icon icon="flask" color="#d97706" /> Experimentell | [HPE-iLO-Anleitung](/de/enable-ipmi/hpe-ilo) | IPMI 2.0, experimentell, noch nicht erschöpfend getestet. |
+| Lenovo XCC | <Icon icon="flask" color="#d97706" /> Experimentell | [Lenovo-XCC-Anleitung](/de/enable-ipmi/lenovo-xcc) | IPMI 2.0, experimentell, noch nicht erschöpfend getestet. |
+| IBM IMM | <Icon icon="flask" color="#d97706" /> Experimentell | [IBM-IMM-Anleitung](/de/enable-ipmi/ibm-imm) | IPMI 2.0, experimentell, noch nicht erschöpfend getestet. |
+
+<Note>
+  Jeder BMC, der IPMI 2.0 implementiert, sollte sich für Sensorüberwachung, Stromsteuerung,
+  SEL und FRU verbinden. Die obigen Stufen beschreiben, wie viel FanPilot-Lüftersteuerung und
+  herstellerspezifisches Verhalten auf echter Hardware validiert wurde.
+</Note>
+
+## IPMI auf Ihrem BMC aktivieren
+
+Die meisten Server werden mit deaktiviertem IPMI-over-LAN oder mit Standard-Zugangsdaten ausgeliefert. Bevor
+ipmideck sich verbinden kann, müssen Sie IPMI 2.0 über LAN aktivieren und ein Benutzerkonto auf dem
+BMC anlegen. Die Anleitung **[IPMI auf Ihrem BMC aktivieren →](/de/enable-ipmi)** hat eine herstellerspezifische
+Durchführung für jeden Controller:
+
+- [Dell iDRAC](/de/enable-ipmi/dell-idrac)
+- [Supermicro](/de/enable-ipmi/supermicro): *geringe Sicherheit; auf Hardware überprüfen*
+- [HPE iLO](/de/enable-ipmi/hpe-ilo)
+- [Lenovo XCC](/de/enable-ipmi/lenovo-xcc)
+- [IBM IMM](/de/enable-ipmi/ibm-imm): *geringe Sicherheit; auf Hardware überprüfen*
+
+<Note>
+  Die Durchführungen für Supermicro und IBM IMM2 sind als **geringe Sicherheit** gekennzeichnet, ihre BMC-
+  Navigationspfade stammen aus spärlicher Dokumentation und müssen auf echter Hardware validiert werden,
+  bevor Sie sich darauf verlassen. Jede Seite trägt eine deutliche Warnung.
+</Note>

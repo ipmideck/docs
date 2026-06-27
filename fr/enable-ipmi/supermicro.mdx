@@ -1,0 +1,114 @@
+---
+title: "Supermicro"
+description: "Configurez IPMI sur LAN sur un BMC Supermicro IPMI 2.0 (cartes X8–X12) via l'interface web ou le BIOS. Faible confiance, vérifiez sur votre matériel avant utilisation."
+---
+
+<Warning>
+  **Guide à faible confiance, vérifiez ces étapes sur votre matériel avant de vous y fier.**
+  Le firmware du BMC Supermicro diffère significativement entre les générations de cartes (X8 à X12).
+  Les captures d'écran ci-dessous proviennent d'un BMC et d'un BIOS Supermicro plus anciens ; traitez les chemins
+  de navigation comme un point de départ, confirmez-les contre votre propre carte et signalez les corrections.
+  La validation matérielle par le propriétaire est en attente.
+</Warning>
+
+**S'applique à :** serveurs Supermicro avec un BMC IPMI 2.0 (cartes X8 / X9 / X10 / X11 / X12).
+
+<Note>
+  Supermicro est **Expérimental** avec ipmideck, IPMI 2.0 fonctionne mais n'est pas encore testé de façon
+  exhaustive. Sur la plupart des cartes Supermicro, **IPMI sur LAN est activé par défaut** ; la tâche principale
+  est de donner au BMC une adresse LAN joignable, soit depuis l'interface web, soit depuis le BIOS.
+</Note>
+
+## Option A : depuis l'interface web du BMC
+
+<Steps>
+  <Step title="Se connecter à l'interface web du BMC">
+    Dans un navigateur, accédez à l'adresse IP du BMC. Les identifiants par défaut sont
+    **ADMIN** / **ADMIN**, changez-les immédiatement après le premier accès.
+
+    <Frame caption="L'écran de connexion du BMC Supermicro (par défaut ADMIN / ADMIN).">
+      <img src="/tutorials/supermicro/IPMI-login.png" alt="Supermicro BMC web interface login screen" />
+    </Frame>
+  </Step>
+  <Step title="Ouvrir Configuration → Network">
+    Ouvrez l'onglet **Configuration** et choisissez **Network** dans la liste d'options. (Ce firmware
+    plus ancien regroupe tout sous *Configuration* ; les cartes plus récentes peuvent l'étiqueter
+    *Network → Network Settings*.)
+
+    <Frame caption="Le menu Configuration : ouvrez Network pour définir l'adresse LAN du BMC.">
+      <img src="/tutorials/supermicro/IPMI-web-configuration.png" alt="Supermicro Configuration options menu" />
+    </Frame>
+  </Step>
+  <Step title="Définir l'adresse réseau du BMC">
+    Choisissez **Obtain an IP address automatically (DHCP)** ou **Use the following IP address**
+    et saisissez une IP statique, un masque de sous-réseau et une passerelle, puis cliquez sur **Save**. IPMI sur LAN est
+    déjà actif sur le canal par défaut, ceci rend simplement le BMC joignable.
+
+    <Frame caption="Network Settings : DHCP ou une IP statique, un masque de sous-réseau et une passerelle.">
+      <img src="/tutorials/supermicro/IPMI-network-configuration.png" alt="Supermicro Network Settings page with static IP configuration" />
+    </Frame>
+  </Step>
+</Steps>
+
+## Option B : depuis le BIOS
+
+Si le BMC n'a pas encore d'adresse, définissez-la depuis le BIOS. Appuyez sur **DEL** pendant le POST pour entrer dans
+l'utilitaire de configuration du BIOS.
+
+<Steps>
+  <Step title="Advanced → IPMI Configuration">
+    Dans l'onglet **Advanced**, ouvrez **IPMI Configuration**.
+
+    <Frame caption="Onglet Advanced du BIOS : sélectionnez IPMI Configuration.">
+      <img src="/tutorials/supermicro/BIOS-advanced.png" alt="Supermicro BIOS Advanced settings menu" />
+    </Frame>
+  </Step>
+  <Step title="Set LAN Configuration">
+    Confirmez **Status Of BMC: Working**, puis ouvrez **Set LAN Configuration**.
+
+    <Frame caption="IPMI Configuration : état du BMC et Set LAN Configuration.">
+      <img src="/tutorials/supermicro/IPMI-configuration.png" alt="Supermicro BIOS IPMI Configuration screen" />
+    </Frame>
+  </Step>
+  <Step title="Ouvrir le canal LAN">
+    Sous **LAN Configuration** (Channel 01), vous pouvez définir l'**IP Address**, le **Subnet Mask**
+    et la **Gateway Address**.
+
+    <Frame caption="LAN Configuration : sous-menus IP Address, Subnet Mask et Gateway Address.">
+      <img src="/tutorials/supermicro/LAN-configuration.png" alt="Supermicro BIOS LAN Configuration menu" />
+    </Frame>
+  </Step>
+  <Step title="Définir une IP statique, un sous-réseau et une passerelle">
+    Réglez **IP Address Source** sur **Static**, puis saisissez l'IP, le masque de sous-réseau et la passerelle.
+    Appuyez sur **F10** pour enregistrer et quitter.
+
+    <Frame caption="IP Address Configuration : réglez la source sur Static et saisissez l'adresse.">
+      <img src="/tutorials/supermicro/IP-configuration.png" alt="Supermicro BIOS IP Address configuration" />
+    </Frame>
+    <Frame caption="Configuration du Subnet Mask.">
+      <img src="/tutorials/supermicro/Subnetmask-configuration.png" alt="Supermicro BIOS Subnet Mask configuration" />
+    </Frame>
+    <Frame caption="Configuration de la Default Gateway.">
+      <img src="/tutorials/supermicro/Gateway-configuration.png" alt="Supermicro BIOS Default Gateway configuration" />
+    </Frame>
+  </Step>
+</Steps>
+
+## Vérifier
+
+Depuis l'hôte qui exécutera ipmideck :
+
+```bash
+ipmitool -I lanplus -H <bmc-ip> -U ADMIN -P ADMIN chassis status
+```
+
+<Note>
+  **Signalé pour révision :** le firmware du BMC Supermicro varie beaucoup entre les générations X8–X12 et
+  ces captures d'écran proviennent d'une carte plus ancienne. Les cartes plus récentes (X11 / X12) ont une interface web
+  repensée. Testez contre votre carte spécifique avant de vous fier à ce guide.
+</Note>
+
+## Source
+
+[CITED: supermicro.com/manuals/other/IPMI_Users_Guide.pdf](https://www.supermicro.com/manuals/other/IPMI_Users_Guide.pdf) ·
+[Thomas-Krenn Wiki, Supermicro IPMI Configuration](https://www.thomas-krenn.com/en/wiki/Supermicro_IPMI_Configuration_through_BIOS_or_Web_Interface)

@@ -1,0 +1,56 @@
+---
+title: "HPE iLO"
+description: "HPE iLO 4 / iLO 5 で IPMI/DCMI over LAN を有効にし、ipmideck が ProLiant サーバーに接続できるようにします。"
+---
+
+**対象:** HPE iLO 4 と iLO 5 (ProLiant サーバー)。
+
+<Note>
+  HPE iLO は ipmideck の **実験的** ベンダーです。これらの手順は公式の HPE ドキュメントと実際の
+  iLO 4 から来ています。**iLO 4** では IPMI over LAN は通常 **デフォルトで有効** です。**iLO 5** では
+  セキュリティのために **デフォルトで無効** で、有効にする必要があります (下記の手順)。
+</Note>
+
+## iLO 5: IPMI/DCMI over LAN を有効化
+
+<Steps>
+  <Step title="iLO Web インターフェイスを開く">
+    ブラウザーで iLO IP アドレスに移動し、iLO 管理者資格情報でログインします。
+  </Step>
+  <Step title="Security → Access Settings → Network">
+    左のナビゲーションペインで **Security** をクリックし、**Access Settings** タブを開き、
+    **Network** セクションの **鉛筆 / 編集** アイコンをクリックします。
+  </Step>
+  <Step title="IPMI/DCMI over LAN を有効化">
+    **IPMI/DCMI over LAN** にチェックを入れ、**Apply** をクリックします。IPMI over LAN は
+    デフォルトポート **623** を使用します。
+  </Step>
+</Steps>
+
+## iLO 4: ネットワークアドレスを確認
+
+iLO 4 では、IPMI over LAN は一般にすでに有効です。主に iLO の IP アドレスが必要です。
+**Network → iLO Dedicated Network Port** を開き、**Network Summary** を読みます。
+
+<Frame caption="iLO 4 → Network → iLO Dedicated Network Port → Network Summary。IPv4 Summary ブロックには、必要な iLO アドレス、サブネット、ゲートウェイが含まれます (SNTP タブの赤いハイライトはこのキャプチャに付随するものです)。">
+  <img src="/tutorials/HPE/HP-Proliant-BL460C-Gen9-Network-info-screenshot-IPMI_web-interface.png" alt="HPE iLO 4 Network Summary page on a ProLiant BL460c Gen9" />
+</Frame>
+
+## 検証
+
+ipmideck を実行するホストから:
+
+```bash
+ipmitool -I lanplus -H <ilo-ip> -U <user> -P <password> chassis status
+```
+
+<Note>
+  **レビュー用にフラグ:** パスは iLO 4 (**Network** タブ。IPMI は通常有効) と iLO 5
+  (**Security → Access Settings**。IPMI はデフォルトで無効) の間で異なります。これらの手順に頼る前に、
+  特定の iLO バージョンに対して検証してください。
+</Note>
+
+## ソース
+
+[CITED: support.hpe.com, HPE iLO 5 IPMI User Guide](https://support.hpe.com/hpesc/public/docDisplay?docId=a00018321en_us) ·
+[Guidelines for using iLO with IPMI or DCMI over LAN](https://support.hpe.com/hpesc/public/docDisplay?docId=a00026171en_us)

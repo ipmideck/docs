@@ -1,0 +1,71 @@
+---
+title: "Backup e ripristino"
+description: "Fai il backup della directory dati di ipmideck (configurazione, database e chiave di cifratura) e ripristinala dopo uno spostamento o una ricostruzione."
+---
+
+Tutto ciò che ipmideck ricorda vive in una sola directory dati: il tuo `config.yaml`, il database
+SQLite (`ipmideck.db`) con i tuoi server e lo storico dei sensori, e il file `encryption.key`
+che decifra le credenziali BMC archiviate. Fai il backup di questi e potrai ricostruire ipmideck
+ovunque.
+
+<Warning>
+  `encryption.key` fa parte del backup per un motivo: senza di essa, i nomi utente e le password
+  BMC ripristinati non possono essere decifrati. Un backup del solo database lascia le tue
+  credenziali salvate illeggibili, quindi tieni il file della chiave al sicuro quanto il database.
+</Warning>
+
+## Cosa contiene un backup
+
+| File | Cosa contiene |
+| --- | --- |
+| `ipmideck.db` | Server, utenti, storico dei sensori, log dei comandi e impostazioni. |
+| `config.yaml` | Bind del server, auth, IPMI, logging e impostazioni dei moduli. |
+| `encryption.key` | La chiave da 32 byte che decifra le credenziali BMC archiviate. |
+
+Tutti questi stanno nella [directory dati](/it/configuration#dove-vive-la-configurazione): `/data` su Docker
+e Linux, `./data` su Windows, o ovunque punti `IPMIDECK_DATA_DIR`.
+
+## Opzione A: backup dall'app
+
+ipmideck può fornirti un backup già pronto. Dalla UI web, apri **Impostazioni** e usa l'azione
+di backup: scarica `ipmideck-backup-<timestamp>.zip` contenente i tre file
+qui sopra. Il database viene prima sottoposto a checkpoint, così lo snapshot include le tue letture più recenti.
+
+Per ripristinare, carica quello zip dalla stessa schermata **Impostazioni**. ipmideck lo valida,
+mette in stage i file e li applica al successivo avvio, quindi **riavvia ipmideck per terminare il
+ripristino**.
+
+## Opzione B: copia la directory dati
+
+Poiché l'intero stato è solo file, puoi anche fare il backup copiando la directory dati
+mentre ipmideck è fermo:
+
+<CodeGroup>
+
+```bash bash
+# stop ipmideck first, then:
+cp -r /data /data-backup-$(date +%Y%m%d)
+```
+
+```powershell PowerShell
+# stop ipmideck first, then:
+Copy-Item -Recurse .\data ".\data-backup-$(Get-Date -Format yyyyMMdd)"
+```
+
+</CodeGroup>
+
+In Docker i dati vivono nel volume che hai montato su `/data`, quindi fai il backup di quel volume.
+Ripristinare è l'operazione inversa: ferma ipmideck, rimetti i file nella directory dati, e
+avvialo di nuovo.
+
+<Note>
+  Ferma ipmideck prima di una copia a livello di file. Il database gira in modalità WAL, quindi copiarlo
+  mentre l'app sta scrivendo può catturare uno snapshot inconsistente. Il backup dall'app evita
+  questo facendo prima un checkpoint.
+</Note>
+
+## Prossimi passi
+
+- [Configurazione](/it/configuration): dove vive la directory dati e cosa contiene `config.yaml`.
+- [Aggiornamento di ipmideck](/it/updating): i tuoi dati sopravvivono a un aggiornamento.
+- [Sicurezza](/it/security): come le credenziali sono cifrate a riposo.

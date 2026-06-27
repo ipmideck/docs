@@ -1,0 +1,53 @@
+---
+title: "Instalacja"
+description: "Zainstaluj ipmideck za pomocą Dockera lub pip i zrozum wymóg --network host."
+---
+
+## Docker (zalecane)
+
+```bash
+docker run --network host ipmideck/ipmideck:latest
+```
+
+`--network host` jest wymagane, aby kontener mógł docierać do twoich BMC bezpośrednio w twojej lokalnej
+sieci przez port UDP 623 (port IPMI/RMCP+). Bez sieci hosta kontener
+siedzi za NAT-em Dockera i nie może ukończyć sesji IPMI z twoim sprzętem.
+
+Gdy kontener już działa, otwórz `http://<your-ip>:3000` i postępuj zgodnie z kreatorem konfiguracji.
+
+<Note>
+  Opublikowany obraz znajduje się na Docker Hub pod adresem
+  [hub.docker.com/r/ipmideck/ipmideck](https://hub.docker.com/r/ipmideck/ipmideck).
+  Obraz pojawi się wkrótce, polecenie powyżej to dokładnie to polecenie, które uruchomisz, gdy
+  zostanie opublikowany.
+</Note>
+
+## pip
+
+```bash
+pip install ipmideck
+```
+
+Pakiet pip wymaga, aby `ipmitool` był zainstalowany na hoście, ipmideck wywołuje
+`ipmitool` przy każdej operacji IPMI. Zainstaluj go najpierw z menedżera pakietów twojej dystrybucji
+(na przykład `apt install ipmitool` lub `dnf install ipmitool`).
+
+## Gdzie ipmideck przechowuje dane
+
+ipmideck zapisuje swoją konfigurację i bazę danych w katalogu danych:
+
+- **Docker:** `/data` wewnątrz kontenera (obraz ustawia `IPMIDECK_DATA_DIR=/data`;
+  utrwal go za pomocą wolumenu).
+- **pip na Linuksie:** domyślnie `/data`: ustaw `IPMIDECK_DATA_DIR`, aby go przenieść.
+- **pip na Windowsie:** `./data`, względem katalogu, z którego uruchamiasz `ipmideck`.
+
+Lokalizację możesz nadpisać na dowolnej platformie zmienną środowiskową `IPMIDECK_DATA_DIR`.
+Ten katalog zawiera `config.yaml`, bazę danych SQLite oraz plik klucza szyfrującego
+używany do ochrony przechowywanych poświadczeń BMC. Zobacz [Konfiguracja](/pl/configuration) i
+[Uruchamianie ipmideck](/pl/running) po szczegóły.
+
+## Następne kroki
+
+- [Konfiguracja](/pl/configuration): dostrój porty, interwały odpytywania i retencję.
+- [Obsługiwany sprzęt](/pl/supported-hardware): potwierdź, że twój BMC jest objęty.
+- [Rozwiązywanie problemów](/pl/troubleshooting): błędy połączenia i IPMI.

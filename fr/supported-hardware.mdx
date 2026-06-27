@@ -1,0 +1,43 @@
+---
+title: "Matériel pris en charge"
+description: "ipmideck parle l'IPMI 2.0 standard ; la prise en charge est échelonnée selon le degré de test de chaque fabricant."
+---
+
+## IPMI 2.0 partout
+
+ipmideck parle l'IPMI 2.0 standard, donc la plupart des BMC de serveur répondent. La prise en charge est échelonnée selon le
+degré de test de chaque fabricant. Le contrôle des courbes de ventilateurs (FanPilot) repose actuellement sur des
+commandes raw Dell iDRAC ; le contrôle des ventilateurs des autres fabricants est sur la feuille de route.
+
+| Fabricant | Statut | Activer IPMI | Notes |
+|--------|--------|-------------|-------|
+| Dell PowerEdge / iDRAC | <Icon icon="circle-check" color="#16a34a" /> Pris en charge / testé | [Guide Dell iDRAC](/fr/enable-ipmi/dell-idrac) | IPMI 2.0, entièrement pris en charge et testé. |
+| Supermicro | <Icon icon="flask" color="#d97706" /> Expérimental | [Guide Supermicro](/fr/enable-ipmi/supermicro) | IPMI 2.0, fonctionne, pas encore testé de façon exhaustive. |
+| HPE iLO | <Icon icon="flask" color="#d97706" /> Expérimental | [Guide HPE iLO](/fr/enable-ipmi/hpe-ilo) | IPMI 2.0, expérimental, pas encore testé de façon exhaustive. |
+| Lenovo XCC | <Icon icon="flask" color="#d97706" /> Expérimental | [Guide Lenovo XCC](/fr/enable-ipmi/lenovo-xcc) | IPMI 2.0, expérimental, pas encore testé de façon exhaustive. |
+| IBM IMM | <Icon icon="flask" color="#d97706" /> Expérimental | [Guide IBM IMM](/fr/enable-ipmi/ibm-imm) | IPMI 2.0, expérimental, pas encore testé de façon exhaustive. |
+
+<Note>
+  Tout BMC qui implémente l'IPMI 2.0 devrait se connecter pour la surveillance des capteurs, le contrôle de l'alimentation,
+  le SEL et le FRU. Les niveaux ci-dessus décrivent à quel point le contrôle des ventilateurs FanPilot et le comportement
+  spécifique au fabricant ont été validés sur du matériel réel.
+</Note>
+
+## Activer IPMI sur votre BMC
+
+La plupart des serveurs sont livrés avec IPMI sur LAN désactivé ou avec des identifiants par défaut. Avant qu'
+ipmideck puisse se connecter, vous devez activer l'IPMI 2.0 sur LAN et configurer un compte utilisateur sur le
+BMC. Le guide **[Activer IPMI sur votre BMC →](/fr/enable-ipmi)** propose un parcours par fabricant
+pour chaque contrôleur :
+
+- [Dell iDRAC](/fr/enable-ipmi/dell-idrac)
+- [Supermicro](/fr/enable-ipmi/supermicro) : *faible confiance ; vérifiez sur le matériel*
+- [HPE iLO](/fr/enable-ipmi/hpe-ilo)
+- [Lenovo XCC](/fr/enable-ipmi/lenovo-xcc)
+- [IBM IMM](/fr/enable-ipmi/ibm-imm) : *faible confiance ; vérifiez sur le matériel*
+
+<Note>
+  Les parcours Supermicro et IBM IMM2 sont signalés comme **faible confiance**, leurs chemins de
+  navigation du BMC proviennent d'une documentation clairsemée et nécessitent une validation sur du matériel réel
+  avant que vous vous y fiiez. Chaque page comporte un avertissement bien visible.
+</Note>

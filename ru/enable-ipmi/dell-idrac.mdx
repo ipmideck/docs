@@ -1,0 +1,76 @@
+---
+title: "Dell iDRAC"
+description: "Включите IPMI-over-LAN на Dell iDRAC (iDRAC6 / iDRAC7 / iDRAC8 / iDRAC9), чтобы ipmideck мог подключиться к вашему серверу PowerEdge."
+---
+
+**Применимо к:** Dell iDRAC6, iDRAC7, iDRAC8, iDRAC9 (серверы PowerEdge). Скриншоты
+ниже сделаны на iDRAC6; iDRAC7 и iDRAC8 почти идентичны, а iDRAC9 реорганизует
+те же настройки в *iDRAC Settings → Connectivity → Network* (см. примечание в конце).
+
+<Note>
+  Dell iDRAC **Поддерживается / протестирован** с ipmideck. Эти шаги взяты из официальной документации
+  Dell и реального iDRAC6, подтвердите, что путь навигации соответствует прошивке вашего iDRAC,
+  прежде чем полагаться на него.
+</Note>
+
+## Шаги
+
+<Steps>
+  <Step title="Откройте веб-интерфейс iDRAC">
+    В браузере перейдите по IP-адресу iDRAC (заводское значение по умолчанию `192.168.0.120`) и
+    войдите. Учётные данные PowerEdge по умолчанию, **root** / **calvin**, измените их
+    немедленно, если они всё ещё используются.
+
+    <Frame caption="The Dell iDRAC login screen (iDRAC6: Integrated Dell Remote Access Controller 6 Enterprise).">
+      <img src="/tutorials/dell/idrac-login.png" alt="Dell iDRAC6 web interface login screen" />
+    </Frame>
+  </Step>
+  <Step title="Откройте Network/Security → Network">
+    В левой панели выберите **iDRAC Settings**, затем откройте вкладку **Network/Security** и
+    её подвкладку **Network**. Эта страница содержит настройки IPv4 и, ниже, **IPMI Settings**.
+
+    <Note>
+      На **iDRAC9** эквивалентный путь, **iDRAC Settings → Connectivity → Network**.
+    </Note>
+  </Step>
+  <Step title="Включите IPMI Over LAN">
+    Прокрутите до раздела **IPMI Settings** и отметьте **Enable IPMI Over LAN**. Установите
+    **Channel Privilege Level Limit** на **Administrator** (или как минимум Operator), чтобы
+    ipmideck мог читать датчики и управлять питанием.
+
+    <Frame caption="Network/Security → Network: the IPMI Settings panel with Enable IPMI Over LAN ticked and the channel privilege set to Administrator.">
+      <img src="/tutorials/dell/ipmi-activation.png" alt="iDRAC IPMI Settings panel showing Enable IPMI Over LAN enabled" />
+    </Frame>
+  </Step>
+  <Step title="Установите ключ шифрования (необязательно)">
+    **Encryption Key** может оставаться полностью из нулей (по умолчанию) для стандартной сессии `lanplus`.
+    Установите 40-символьный hex-ключ только если этого требует ваша политика безопасности.
+  </Step>
+  <Step title="Применить">
+    Нажмите **Apply**, чтобы сохранить изменение.
+  </Step>
+  <Step title="Проверьте, что IPMI включён">
+    Вернувшись на **Properties → iDRAC Settings → iDRAC Information**, подтвердите **LAN Enabled: Yes**
+    и **IPMI Version: 2.0**.
+
+    <Frame caption="iDRAC Information confirms LAN Enabled: Yes and IPMI Version: 2.0.">
+      <img src="/tutorials/dell/ipmi-info.png" alt="iDRAC Information page showing LAN Enabled Yes and IPMI Version 2.0" />
+    </Frame>
+
+    Затем с хоста, который будет запускать ipmideck, подтвердите, что канал LAN отвечает:
+
+    ```bash
+    ipmitool -I lanplus -H <idrac-ip> -U root -P calvin chassis status
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  **Путь различается по поколениям:** iDRAC6 / iDRAC7 / iDRAC8 используют *Network/Security → Network →
+  IPMI Settings* (показано выше), тогда как iDRAC9 использует *iDRAC Settings → Connectivity → Network*.
+  Проверьте точный путь на вашем оборудовании.
+</Note>
+
+## Источник
+
+[CITED: dell.com/support/manuals, iDRAC9 User Guide, section "Configuring IPMI over LAN using web interface"](https://www.dell.com/support/manuals/en-us/idrac9-lifecycle-controller-v3.1-series/idrac_3.15.15.15_ug/configuring-ipmi-over-lan-using-web-interface)

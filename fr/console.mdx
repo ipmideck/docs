@@ -1,0 +1,215 @@
+---
+title: "Console interactive"
+description: "Pilotez un serveur ipmideck en cours d'exécution depuis votre terminal : une console d'opérateur à en-tête épinglé avec des actions à une seule touche pour la verbosité, les sessions, les serveurs, l'URL du tableau de bord et l'adresse de liaison."
+---
+
+Lorsque vous démarrez ipmideck dans un terminal, il affiche une console d'opérateur interactive : un
+en-tête épinglé avec la bannière et une barre d'aide au-dessus d'un journal défilant en direct. Chaque action est une
+seule pression de touche, pas de menus, pas de souris. La console s'exécute dans le processus aux côtés du serveur, donc
+ce que vous voyez est l'état en direct de la machine sur laquelle vous êtes.
+
+<Note>
+La console n'apparaît que sur un véritable **terminal interactif**, stdin et stdout doivent tous deux être
+des TTY. Sous Docker, systemd ou lorsque stdout est redirigé, ipmideck saute la console
+entièrement et écrit seulement des journaux simples défilants. Consultez [Où la console apparaît](#où-la-console-apparaît).
+</Note>
+
+## À quoi cela ressemble
+
+La console est une seule vue plein écran : un en-tête épinglé que vous voyez toujours, au-dessus d'un
+journal en direct qui défile en dessous.
+
+<Frame caption="La console juste après le démarrage : la bannière et la barre d'aide restent épinglées en haut tandis que la queue du journal défile en dessous.">
+  <img src="/console/home.png" alt="ipmideck interactive console showing the banner, help bar, status line, and the scrolling log panel" />
+</Frame>
+
+L'en-tête ne défile jamais. Les nouvelles lignes de journal apparaissent dans le panneau en dessous, et la ligne la plus
+récente est toujours maintenue à l'écran. Vous appuyez sur une seule touche pour agir ; tout se passe dans le processus
+contre le serveur que vous venez de démarrer.
+
+## L'en-tête
+
+Le haut de l'écran est un en-tête fixe qui ne défile jamais. Il s'empile, de haut en bas :
+
+- La bannière ipmideck.
+- La **barre d'aide** : chaque touche d'action et ce qu'elle fait.
+- La **ligne d'état** : l'état en direct de la session.
+- Une ligne de crédits compacte (auteur, version, licence).
+
+Le corps sous l'en-tête est la queue défilante du journal. La ligne la plus récente est toujours maintenue à
+l'écran, donc une URL ou une confirmation fraîchement apparue n'est jamais coupée en bas.
+
+### Ligne d'état
+
+La ligne d'état affiche trois champs en direct, séparés par `|` :
+
+- **Verbosity** : le niveau de journal actuel (`INFO`, `DEBUG` ou `WARNING`).
+- **Clients** : le nombre de clients du tableau de bord connectés en ce moment.
+- **last** : la dernière touche d'action que vous avez pressée, comme retour visuel immédiat.
+
+## Touches d'action
+
+Chaque action est une pression de touche. La barre d'aide les liste toutes :
+
+| Touche   | Action                                                                 |
+| ----- | ---------------------------------------------------------------------- |
+| `v`   | Faire défiler la **verbosité** du journal                              |
+| `c`   | Ouvrir la sous-vue des **sessions** connectées                         |
+| `s`   | Ouvrir la sous-vue des **serveurs** configurés                         |
+| `u`   | Afficher l'**url** du tableau de bord dans le journal                  |
+| `g`   | Vérification de **mise à jour** (affiche la version locale)            |
+| `b`   | Ouvrir l'éditeur de **changement de liaison**                          |
+| `r`   | **Redémarrer** le serveur                                              |
+| `q`   | **Quitter**, ou revenir à la vue journal depuis une sous-vue           |
+| `ESC` | **Retour**, revenir à la vue journal depuis une sous-vue               |
+
+Les touches fléchées, de fonction et de navigation sont consommées et ignorées, elles n'entrent jamais en collision avec une
+action ni ne comptent comme une pression.
+
+### v : verbosité
+
+`v` fait défiler le niveau de journal à l'exécution dans une boucle fixe à trois étapes :
+
+```
+INFO → DEBUG → WARNING → INFO
+```
+
+`INFO` est le défaut. `DEBUG` montre plus ; `WARNING` montre moins. Le changement prend effet
+immédiatement pour le reste de la session et la ligne d'état se met à jour en conséquence.
+
+<Note>
+La bascule de verbosité change uniquement le niveau en **cours d'exécution**. Au prochain démarrage, le niveau de
+votre configuration (ou la variable d'environnement `IPMIDECK_LOGGING_LEVEL`) l'emporte à nouveau. Consultez [Configuration](/fr/configuration).
+</Note>
+
+### c : sessions
+
+`c` ouvre la sous-vue **Connected sessions**, un tableau en lecture seule des clients du tableau de bord
+actuellement attachés, avec les colonnes :
+
+- **IP**
+- **Connected since**
+- **User-Agent**
+
+Appuyez sur `q` ou `ESC` pour revenir à la vue journal.
+
+<Frame caption="La sous-vue Connected sessions (touche c), une ligne par client du tableau de bord attaché.">
+  <img src="/console/connections.png" alt="Connected sessions table showing IP, Connected since, and User-Agent columns" />
+</Frame>
+
+### s : serveurs
+
+`s` ouvre la sous-vue **Configured servers**, un tableau en lecture seule des BMC avec lesquels ipmideck
+est configuré pour dialoguer, avec les colonnes :
+
+- **Name**
+- **Host**
+- **Status**
+
+Appuyez sur `q` ou `ESC` pour revenir à la vue journal.
+
+<Frame caption="La sous-vue Configured servers (touche s), listant chaque BMC et s'il est en ligne.">
+  <img src="/console/servers.png" alt="Configured servers table showing Name, Host, and Status columns with online and offline servers" />
+</Frame>
+
+### u : url
+
+`u` affiche l'URL du tableau de bord (`scheme://host:port`) dans le corps du journal. Si le serveur est
+lié à une adresse joker (`0.0.0.0`, `::` ou vide), l'URL est réécrite en
+`127.0.0.1` pour qu'elle soit réellement ouvrable dans un navigateur, `http://0.0.0.0:3000` est une adresse
+d'écoute, pas une adresse navigable.
+
+<Frame caption="La touche u affiche l'URL du tableau de bord au bas du journal, réécrite en une adresse joignable.">
+  <img src="/console/url.png" alt="The console log with the dashboard URL printed at the bottom after pressing u" />
+</Frame>
+
+### g : mise à jour
+
+`g` affiche la version locale et une note indiquant que la vérification de mise à jour en ligne est livrée avec la
+version pip. Il ne fait **aucun appel réseau**, ipmideck reste hors ligne.
+
+### r : redémarrage
+
+`r` effectue un redémarrage propre dans le processus : ipmideck démonte la console, relit
+`config.yaml` et redémarre à neuf. Utilisez-le après une modification de [changement de liaison](#b--changement-de-liaison) pour appliquer
+la nouvelle adresse.
+
+### q / ESC : quitter et retour
+
+- Depuis une sous-vue (`sessions` ou `servers`), `q` et `ESC` vous ramènent tous deux à la vue journal.
+- Depuis la vue journal, `q` déclenche une sortie propre, le serveur s'arrête proprement.
+
+## b : changement de liaison
+
+`b` ouvre l'éditeur de changement de liaison, une invite `host:port` en ligne qui remplace la barre d'aide
+pendant que vous tapez. L'en-tête affiche la liaison actuelle comme une étiquette en lecture seule `current: host:port`
+et un champ `new:` vide, donc la valeur que vous tapez apparaît immédiatement et n'est jamais confondue
+avec l'existante.
+
+<Frame caption="L'éditeur de changement de liaison (touche b) : la barre d'aide est remplacée par la liaison actuelle et une invite nouvelle host:port vide.">
+  <img src="/console/bind.png" alt="The change-bind editor showing the current bind address and an empty new field with apply, cancel, and delete key hints" />
+</Frame>
+
+Touches dans l'éditeur :
+
+- **Enter** : appliquer le `host:port` tapé.
+- **ESC** : annuler sans rien changer.
+- **Backspace** : supprimer le dernier caractère.
+- Tout caractère imprimable, ajouter au tampon.
+
+L'entrée doit être `host:port` avec un hôte non vide et un port qui est un entier dans la
+plage **1–65535**. Sur une entrée valide, ipmideck confirme la nouvelle liaison et vous rappelle qu'un redémarrage est
+requis (appuyez sur `r`). Sur une entrée invalide, il signale `Invalid host/port` et
+rien ne change.
+
+<Warning>
+Une modification de changement de liaison **n'est pas** en direct, elle est écrite dans la configuration et ne prend effet qu'après un
+redémarrage. Appuyez sur `r` pour l'appliquer. Et souvenez-vous de la précedence : une variable d'environnement `IPMIDECK_SERVER_HOST` /
+`IPMIDECK_SERVER_PORT` ou un flag `--host` / `--port` explicite au prochain démarrage
+surcharge ce que la console a persisté. Consultez [Configuration](/fr/configuration).
+</Warning>
+
+## Où la console apparaît
+
+La console interactive est conditionnée à un vrai TTY : ipmideck l'affiche uniquement lorsque **à la fois**
+stdin et stdout sont des terminaux interactifs. Lorsqu'ils ne le sont pas, il dégrade vers une bannière plus
+des journaux simples défilants et n'installe aucun écouteur de touches, donc rien ne tourne à vide sur un non-TTY.
+
+Cela signifie que la console apparaît lorsque vous exécutez ipmideck directement dans un terminal :
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck
+```
+
+```cmd cmd
+ipmideck
+```
+
+```bash bash
+ipmideck
+```
+
+</CodeGroup>
+
+Elle n'apparaît **pas** lorsque :
+
+- Exécuté sous **Docker** : le conteneur lance uvicorn directement et n'atteint jamais le
+  chemin de la console ; vous obtenez des journaux simples du conteneur (`docker logs`).
+- Exécuté sous **systemd** ou tout gestionnaire de services où stdout n'est pas un terminal.
+- **Rediriger** stdout (par ex. `ipmideck > server.log`) : stdout n'est plus un TTY.
+
+Dans chaque cas non-TTY, le serveur s'exécute toujours normalement et se lie au même défaut
+`0.0.0.0:3000` ; vous obtenez simplement des journaux simples au lieu de la console en direct.
+
+<Note>
+`ipmilink` est un alias rétrocompatible d'`ipmideck`, les deux lancent la même console.
+</Note>
+
+## Étapes suivantes
+
+- [Exécuter ipmideck](/fr/running) : démarrer, servir et les règles de précedence de liaison.
+- [La CLI](/fr/cli) : chaque sous-commande et flag en détail.
+- [Configuration](/fr/configuration) : définir l'adresse de liaison, la verbosité et les intervalles d'interrogation.
+- [Installation](/fr/installation) : installer avec Docker ou pip.

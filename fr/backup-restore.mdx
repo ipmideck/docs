@@ -1,0 +1,72 @@
+---
+title: "Sauvegarde et restauration"
+description: "Sauvegardez le répertoire de données d'ipmideck (configuration, base de données et clé de chiffrement) et restaurez-le après un déplacement ou une reconstruction."
+---
+
+Tout ce qu'ipmideck retient réside dans un seul répertoire de données : votre `config.yaml`, la base de données
+SQLite (`ipmideck.db`) avec vos serveurs et votre historique de capteurs, et le fichier `encryption.key`
+qui déchiffre vos identifiants BMC stockés. Sauvegardez-les et vous pourrez reconstruire ipmideck
+n'importe où.
+
+<Warning>
+  `encryption.key` fait partie de la sauvegarde pour une raison : sans lui, les noms d'utilisateur et
+  mots de passe BMC restaurés ne peuvent pas être déchiffrés. Une sauvegarde de la base de données seule laisse vos
+  identifiants enregistrés illisibles, gardez donc le fichier de clé aussi sûr que la base de données.
+</Warning>
+
+## Ce que contient une sauvegarde
+
+| Fichier | Ce qu'il contient |
+| --- | --- |
+| `ipmideck.db` | Serveurs, utilisateurs, historique de capteurs, journal de commandes et réglages. |
+| `config.yaml` | Liaison du serveur, auth, IPMI, journalisation et réglages des modules. |
+| `encryption.key` | La clé de 32 octets qui déchiffre vos identifiants BMC stockés. |
+
+Tous résident dans le [répertoire de données](/fr/configuration#où-réside-la-configuration) : `/data` sous Docker
+et Linux, `./data` sous Windows, ou là où pointe `IPMIDECK_DATA_DIR`.
+
+## Option A : sauvegarde dans l'application
+
+ipmideck peut vous remettre une sauvegarde prête à l'emploi. Depuis l'interface web, ouvrez **Settings** et utilisez
+l'action de sauvegarde : elle télécharge `ipmideck-backup-<timestamp>.zip` contenant les trois fichiers
+ci-dessus. La base de données passe d'abord par un point de contrôle, donc l'instantané inclut vos
+relevés les plus récents.
+
+Pour restaurer, téléversez ce zip depuis le même écran **Settings**. ipmideck le valide,
+prépare les fichiers et les applique au prochain démarrage, **redémarrez donc ipmideck pour terminer la
+restauration**.
+
+## Option B : copier le répertoire de données
+
+Comme tout l'état n'est que des fichiers, vous pouvez aussi sauvegarder en copiant le répertoire de données
+pendant qu'ipmideck est arrêté :
+
+<CodeGroup>
+
+```bash bash
+# stop ipmideck first, then:
+cp -r /data /data-backup-$(date +%Y%m%d)
+```
+
+```powershell PowerShell
+# stop ipmideck first, then:
+Copy-Item -Recurse .\data ".\data-backup-$(Get-Date -Format yyyyMMdd)"
+```
+
+</CodeGroup>
+
+Dans Docker, les données résident dans le volume que vous avez monté sur `/data`, sauvegardez donc ce
+volume. La restauration est l'inverse : arrêtez ipmideck, remettez les fichiers dans le répertoire de données et
+redémarrez-le.
+
+<Note>
+  Arrêtez ipmideck avant une copie au niveau fichier. La base de données s'exécute en mode WAL, donc la copier
+  pendant que l'application écrit peut capturer un instantané incohérent. La sauvegarde dans l'application évite
+  cela en effectuant d'abord un point de contrôle.
+</Note>
+
+## Étapes suivantes
+
+- [Configuration](/fr/configuration) : où réside le répertoire de données et ce que contient `config.yaml`.
+- [Mettre à jour ipmideck](/fr/updating) : vos données survivent à une mise à niveau.
+- [Sécurité](/fr/security) : comment les identifiants sont chiffrés au repos.

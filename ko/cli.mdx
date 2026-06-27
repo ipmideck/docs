@@ -1,0 +1,232 @@
+---
+title: "CLI 레퍼런스"
+description: "명령줄에서 ipmideck를 실행합니다. 서브 명령, 바인드 플래그, 0.0.0.0:3000 기본값, 자체 서명 HTTPS, 데모 모드, 종료 코드."
+---
+
+ipmideck는 단일 콘솔 명령 `ipmideck`를 제공하며, 이는 서버를 시작하거나, 관리자
+비밀번호를 재설정하거나, 자체 서명 인증서를 생성합니다. `ipmilink`는 동일한 명령의 하위
+호환 별칭으로, 아래의 모든 서브 명령과 플래그는 어느 이름으로든 동일하게 작동합니다.
+
+<Note>
+  CLI는 ipmideck를 직접 실행할 때 (pip 설치 또는 소스 체크아웃)에만 적용됩니다. Docker
+  이미지는 `uvicorn backend.main:app`을 직접 시작하고 CLI를 결코 호출하지 않으므로, 이러한
+  플래그, 바인드 우선순위, 단일 인스턴스 가드 중 어느 것도 컨테이너에 적용되지 않습니다. 컨테이너의 바인드는 자체 시작 명령으로 설정됩니다. [설치](/ko/installation)를 참조하세요.
+</Note>
+
+## 서버 시작
+
+`start`는 기본 서비스 명령입니다. 서브 명령이 없는 단순한 호출도 동일하게 서비스하므로,
+이것들은 동등합니다.
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start
+# or, with no subcommand:
+ipmideck
+```
+
+```cmd cmd
+ipmideck start
+:: or, with no subcommand:
+ipmideck
+```
+
+```bash bash
+ipmideck start
+# or, with no subcommand:
+ipmideck
+```
+
+</CodeGroup>
+
+플래그 없이 ipmideck는 기본적으로 **`0.0.0.0:3000`**에 바인드되어, 모든 인터페이스에서,
+포트 `3000`에서 도달 가능합니다. 가동되면 `http://<your-ip>:3000`을 엽니다.
+
+`--host`와 `--port`로 바인드를 재정의합니다.
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start --host 127.0.0.1 --port 8080
+```
+
+```cmd cmd
+ipmideck start --host 127.0.0.1 --port 8080
+```
+
+```bash bash
+ipmideck start --host 127.0.0.1 --port 8080
+```
+
+</CodeGroup>
+
+## 서브 명령
+
+| 서브 명령 | 하는 일 |
+| --- | --- |
+| `start` | 서버를 시작합니다 (기본값). 서브 명령이 없는 단순한 `ipmideck`도 서비스합니다. |
+| `serve` | `start`의 더 이상 사용되지 않는 별칭. 동일하게 동작합니다. 기존 스크립트가 계속 작동하도록 유지됩니다. |
+| `reset-password` | 관리자 로그인을 대화형으로 만들거나 업데이트한 다음, 서비스 없이 종료합니다. |
+
+<Note>
+  `serve`는 `start`의 더 이상 사용되지 않는 별칭입니다. 새 스크립트에서는 `start`
+  (또는 단순한 `ipmideck`)를 선호하세요.
+</Note>
+
+## 플래그
+
+이러한 최상위 플래그는 서비스 경로에 적용됩니다. `--demo`와 `--config`는 모든 서브 명령
+분기 전에 읽히므로, `reset-password`와 `--gen-cert`에도 영향을 줍니다.
+
+| 플래그 | 효과 |
+| --- | --- |
+| `--host <host>` | 바인드 호스트. 기본값은 `config.yaml` 또는 `0.0.0.0`에서. 명시적 플래그가 구성에 우선합니다. |
+| `--port <port>` | 바인드 포트. 기본값은 `config.yaml` 또는 `3000`에서. 명시적 플래그가 구성에 우선합니다. |
+| `--demo` | 시뮬레이션된 데이터로 데모 모드에서 실행합니다. |
+| `--config <path>` | 로드할 `config.yaml`에 대한 경로. |
+| `--reload` | 개발용 자동 리로드를 활성화합니다. |
+| `--gen-cert` | `data/certs/` 아래에 자체 서명 인증서 + 키를 생성하고, 경로를 `config.yaml`에 쓰고, 종료합니다. |
+
+## 바인드 우선순위
+
+ipmideck가 실제로 바인드하는 호스트와 포트는 이 순서로 해석됩니다. 우선순위가 높은 순:
+
+1. 명령줄의 명시적 `--host` / `--port` 플래그.
+2. 구성. 이것 자체가 환경 변수 (`IPMIDECK_SERVER_HOST` / `IPMIDECK_SERVER_PORT`)를
+   `config.yaml`보다, `config.yaml`을 내장 기본값보다 우선하여 해석합니다.
+3. 하드코딩된 폴백 **`0.0.0.0:3000`**. 초기 구성 로드가 실패하면 사용됩니다.
+
+다시 말해, `config.yaml`에 영속화한 값은 다음 부팅 시 **`IPMIDECK_` 환경 변수 또는
+`--host` / `--port` 플래그에 의해 재정의**됩니다. 환경과 CLI가 항상 이깁니다.
+`config.yaml`이 형식이 잘못되면, ipmideck는 stderr에 경고를 출력하고 `0.0.0.0:3000`으로
+폴백합니다.
+
+<Note>
+  `IPMIDECK_SERVER_HOST`와 `IPMIDECK_SERVER_PORT` 환경 변수는 `IPMIDECK_` 접두사를 사용합니다.
+  재정의의 전체 목록은 [구성](/ko/configuration)을 참조하세요.
+</Note>
+
+## --gen-cert로 HTTPS
+
+`--gen-cert`는 자체 서명 인증서와 키를 생성한 다음 종료합니다. 서버를 시작하지 **않으며**,
+HTTPS를 스스로 켜지 **않습니다**.
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck --gen-cert
+```
+
+```cmd cmd
+ipmideck --gen-cert
+```
+
+```bash bash
+ipmideck --gen-cert
+```
+
+</CodeGroup>
+
+`data/certs/` 아래에 인증서 + 키 쌍을 쓰고, 그 경로를 `config.yaml`의 `server` 블록에
+기록하고, 세 줄을 출력합니다.
+
+```text
+Generated: <path-to-cert>
+Generated: <path-to-key>
+Wrote cert_file/key_file to config.yaml. Set server.https=true and restart to serve over HTTPS.
+```
+
+실제로 HTTPS로 서비스하려면, `config.yaml`에서 `server.https: true`를 설정하고 ipmideck를 재시작합니다. HTTPS는 결코 자동으로 활성화되지 않습니다.
+
+## 데모 모드
+
+`--demo`는 실제 BMC 대신 시뮬레이션된 하드웨어에 대해 ipmideck를 실행하며, 서버를 하나도
+연결하지 않고 대시보드를 평가하는 데 유용합니다.
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start --demo
+```
+
+```cmd cmd
+ipmideck start --demo
+```
+
+```bash bash
+ipmideck start --demo
+```
+
+</CodeGroup>
+
+데모 모드는 모든 서브 명령 분기 전, 매우 일찍 설정되므로, 앱 전체 (구성과 실행 중인 서버)가 그것을 봅니다.
+
+## 관리자 비밀번호 재설정
+
+`reset-password`는 관리자 로그인을 대화형으로 만들거나 업데이트한 다음, 서버를 한 번도
+시작하지 않고 종료합니다.
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck reset-password
+```
+
+```cmd cmd
+ipmideck reset-password
+```
+
+```bash bash
+ipmideck reset-password
+```
+
+</CodeGroup>
+
+`Username:`을 묻고 그다음 `New password:` (숨겨진 입력)을 묻습니다. 계정이 이미 존재하면,
+그 사용자의 비밀번호를 업데이트하고 `Password updated for <username>`을 출력합니다. 그렇지
+않으면 사용자를 만들고 `User <username> created`를 출력합니다.
+
+## 개발용 자동 리로드
+
+`--reload`는 개발 전용 빠른 경로입니다. uvicorn 자체의 자동 리로드 슈퍼바이저로 넘기고
+반환합니다. 이는 의도적으로 아래에 설명된 **단일 인스턴스 포트 가드를 건너뜁니다**.
+리로더가 자체 슈퍼바이저 프로세스를 실행하기 때문입니다.
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start --reload
+```
+
+```cmd cmd
+ipmideck start --reload
+```
+
+```bash bash
+ipmideck start --reload
+```
+
+</CodeGroup>
+
+<Warning>
+  `--reload`는 개발 전용입니다. 단일 인스턴스 가드를 우회하므로, 다른 ipmideck 인스턴스가 같은
+  포트에 이미 바인드되어 있지 않은 호스트에서 실행하세요.
+</Warning>
+
+## 종료 코드
+
+| 종료 코드 | 언제 |
+| --- | --- |
+| `0` | `Ctrl+C` / SIGTERM에서 깨끗한 종료. 서버가 정상적으로 중지되며, 트레이스백 없음. |
+| `1` | 대상 호스트에서 포트가 이미 사용 중 (다른 인스턴스가 실행 중일 수 있음), **또는** 주소를 사용할 수 없거나 허용되지 않아 바인드가 실패 (예: 특권 포트 또는 존재하지 않는 인터페이스). |
+
+서비스 경로 (`--reload`가 아닌)에서 ipmideck는 바인드 전에 단일 인스턴스 가드를 실행합니다.
+포트가 이미 사용 중이면 stderr에 오류를 출력하고 `1`로 종료합니다. 주소를 사용할 수 없거나
+허용되지 않아 바인드가 실패하면, 별개의 오류를 출력하고 마찬가지로 `1`로 종료합니다.
+
+## 다음 단계
+
+- [구성](/ko/configuration): `config.yaml` 키와 `IPMIDECK_` 환경 변수 재정의.
+- [설치](/ko/installation): Docker 또는 pip로 ipmideck를 설치합니다.
+- [문제 해결](/ko/troubleshooting): 연결, 포트, IPMI 오류.

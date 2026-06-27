@@ -1,0 +1,59 @@
+---
+title: "FAQ"
+description: "Veelgestelde vragen over het draaien van ipmideck in een homelab."
+---
+
+<AccordionGroup>
+
+<Accordion title="Is ipmideck cloudgebaseerd?">
+  Nee. ipmideck is volledig zelf-gehost en draait volledig op je eigen netwerk. Het maakt geen
+  externe oproepen, geen telemetrie, geen cloud, geen account. Het praat rechtstreeks met je BMC's en
+  bewaart alles lokaal.
+</Accordion>
+
+<Accordion title="Met welke BMC's werkt het?">
+  Elke server met een IPMI 2.0-BMC zou moeten verbinden voor sensormonitoring, voedingsbeheer, SEL
+  en FRU. Dell PowerEdge / iDRAC is volledig getest; Supermicro, HPE iLO,
+  Lenovo XCC en IBM IMM zijn experimenteel. Zie [Ondersteunde hardware](/nl/supported-hardware).
+</Accordion>
+
+<Accordion title="Heb ik ipmitool nodig?">
+  Alleen voor de pip-installatie, waar het pakket je systeem-`ipmitool` aanroept. De
+  Docker-image bevat alles wat het nodig heeft, dus je hebt alleen Docker met `--network host` nodig.
+</Accordion>
+
+<Accordion title="Waarom heeft Docker --network host nodig?">
+  ipmideck bereikt BMC's via UDP-poort 623 op je lokale netwerk. Host networking laat de
+  container rechtstreeks met die poort praten in plaats van achter de NAT van Docker te zitten. Zie
+  [Installatie](/nl/installation).
+</Accordion>
+
+<Accordion title="Op welke poort draait het dashboard?">
+  Standaard 3000. Wijzig het in `config.yaml` (`server.port`) of met de
+  omgevingsvariabele `IPMIDECK_SERVER_PORT`.
+</Accordion>
+
+<Accordion title="Hoe lang wordt sensorhistorie bewaard?">
+  Standaard een jaar (`data.retention_days: 365`). Overschrijf het met
+  `IPMIDECK_DATA_RETENTION_DAYS`. Oudere data wordt opgeschoond volgens het schema ingesteld door
+  `data.cleanup_interval`.
+</Accordion>
+
+<Accordion title="Kan ik de login uitschakelen?">
+  Ja, stel `auth.enabled: false` in `config.yaml` in, of `IPMIDECK_AUTH_ENABLED=false`. Doe dit
+  alleen op een vertrouwd, geïsoleerd netwerk: met auth uit kan iedereen die het dashboard kan bereiken
+  je hardware bedienen.
+</Accordion>
+
+<Accordion title="Is fanregeling veilig?">
+  FanPilot faalt veilig. Fans worden op 100% gezet op of boven de kritieke temperatuur, en de
+  regellus draait autonoom op de achtergrond, zelfs met het dashboard gesloten. Zie
+  [Beveiliging](/nl/security) voor de volledige details over hardwarebescherming.
+</Accordion>
+
+<Accordion title="Hoe draai ik meerdere servers?">
+  Voeg elke BMC toe vanuit het dashboard. ipmideck beheert meerdere BMC's vanuit één instantie en
+  toont een panoramisch statusoverzicht van allemaal.
+</Accordion>
+
+</AccordionGroup>

@@ -1,0 +1,59 @@
+---
+title: "Lenovo XCC"
+description: "Lenovo XClarity Controller (XCC / XCC2)에서 IPMI over LAN을 활성화하여 ipmideck가 ThinkSystem 서버에 연결할 수 있도록 합니다."
+---
+
+**적용 대상:** XClarity Controller (XCC)와 XCC2가 있는 Lenovo ThinkSystem 서버.
+
+<Note>
+  Lenovo XCC는 ipmideck의 **실험적** 공급업체입니다. 이 단계는 공식 Lenovo 문서와 실제
+  XCC (ThinkSystem SR630 V2)에서 나왔습니다. IPMI over LAN은 보안을 위해 XCC에서
+  **기본적으로 비활성화**되어 있으며, Lenovo는 사용하지 않을 때 다시 비활성화할 것을
+  권장합니다.
+</Note>
+
+## 단계
+
+<Steps>
+  <Step title="XCC 웹 인터페이스 열기">
+    브라우저에서 XCC IP 주소로 이동하여 로그인합니다. 기본 자격 증명은
+    **USERID** / **PASSW0RD**입니다 ("PASSW0RD"의 **0**에 주의). 여전히 사용 중이면 즉시
+    변경하세요.
+
+    <Frame caption="Lenovo XClarity Controller 로그인 화면 (기본값 USERID / PASSW0RD).">
+      <img src="/tutorials/LENOVO/1_20221028032221331.jpg" alt="Lenovo XClarity Controller login screen on a ThinkSystem SR630 V2" />
+    </Frame>
+  </Step>
+  <Step title="BMC Configuration → Network 열기">
+    XCC 대시보드에서 왼쪽 탐색의 **BMC Configuration → Network**를 엽니다.
+
+    <Frame caption="XCC 대시보드에서 BMC Configuration → Network를 엽니다.">
+      <img src="/tutorials/LENOVO/2_20221028033229267.jpg" alt="Lenovo XCC dashboard with BMC Configuration and Network highlighted" />
+    </Frame>
+  </Step>
+  <Step title="IPMI over LAN 활성화">
+    **Service Enablement and Port Assignment** 아래에서 **IPMI over LAN**을 **Enabled**로
+    설정합니다 (포트 **623**을 사용합니다).
+
+    <Frame caption="Service Enablement and Port Assignment: IPMI over LAN을 켭니다 (포트 623).">
+      <img src="/tutorials/LENOVO/3_20221028033746252.jpg" alt="Lenovo XCC Service Enablement showing IPMI over LAN enabled on port 623" />
+    </Frame>
+  </Step>
+  <Step title="연결성 검증">
+    ipmideck를 실행할 호스트에서:
+
+    ```bash
+    ipmitool -I lanplus -H <xcc-ip> -U USERID -P <password> chassis status
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  **검토용으로 표시:** XCC2 (새 세대)는 동일한 경로를 사용하지만 재설계된 웹 인터페이스를
+  사용합니다. 탐색을 실제 하드웨어에 대해 검증하세요.
+</Note>
+
+## 출처
+
+[CITED: pubs.lenovo.com/xcc, Enabling or Disabling IPMI Network Access (XCC)](https://pubs.lenovo.com/xcc/NN1ia_c_configuringIPMI) ·
+[Lenovo Support HT514330, IPMI over LAN (XCC)](https://support.lenovo.com/us/en/solutions/ht514330-ipmi-over-lan-xcc)

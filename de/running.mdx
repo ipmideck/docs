@@ -1,0 +1,208 @@
+---
+title: "ipmideck ausführen"
+description: "Starten Sie ipmideck unter Windows, Linux oder Docker, finden Sie Ihr Datenverzeichnis und behandeln Sie Bind-Fehler, Herunterfahren und Neustarts."
+---
+
+Sobald ipmideck [installiert](/de/installation) ist, gibt es zwei sehr unterschiedliche Arten, wie es läuft:
+eine **Host-Installation**, die Sie mit dem Befehl `ipmideck` starten, und den **Docker-Container**,
+der den Webserver direkt ausführt. Sie verhalten sich unterschiedlich, der Host-Befehl gibt Ihnen eine
+interaktive Operator-Konsole, während der Container nur einfache Logs ausgibt. Diese Seite behandelt beide.
+
+## Host-Installation: `ipmideck start`
+
+Bei einer Host-Installation (pip) wird der Server mit dem Befehl `ipmideck` gestartet. Der primäre
+Befehl ist `start`:
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start
+```
+
+```text cmd
+ipmideck start
+```
+
+```bash bash
+ipmideck start
+```
+
+</CodeGroup>
+
+Ein bloßes `ipmideck` ohne Unterbefehl verhält sich identisch zu `ipmideck start`:
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck
+```
+
+```text cmd
+ipmideck
+```
+
+```bash bash
+ipmideck
+```
+
+</CodeGroup>
+
+Standardmäßig bindet der Server an `0.0.0.0:3000`, öffnen Sie also `http://<your-ip>:3000` in einem
+Browser, sobald er läuft.
+
+<Note>
+  `ipmilink` ist ein rückwärtskompatibler Alias für denselben Befehl, `ipmilink start`
+  verhält sich genau wie `ipmideck start`. Verwenden Sie `ipmideck` für alles Neue.
+</Note>
+
+Auf einem echten Terminal (einem TTY) öffnet `ipmideck start` eine interaktive Operator-Konsole. Wenn
+derselbe Befehl ohne Terminal läuft, zum Beispiel in eine Datei umgeleitet oder unter einem
+Prozess-Supervisor, überspringt er die Konsole und gibt stattdessen einfache Logs aus. Siehe
+[den Headless-/Non-TTY-Modus](#headless-non-tty-modus) weiter unten.
+
+## Docker: Der Container führt den Server direkt aus
+
+Der Docker-Container führt **nicht** den Befehl `ipmideck` aus. Sein Image startet den Webserver
+(uvicorn) direkt:
+
+```bash
+docker run --network host ipmideck/ipmideck:latest
+```
+
+Da der Container das `ipmideck`-CLI nie aufruft, gelten keine Unterbefehle, Flags oder die
+interaktive Konsole innerhalb von Docker, der Container gibt nur **einfache Logs** an stdout aus,
+genau wie der Headless-Host-Modus. Der Container bindet an `0.0.0.0:3000` und `--network host` ist
+erforderlich, damit er Ihre BMCs über UDP-Port `623` erreichen kann. Siehe
+[Installation](/de/installation) für die Netzwerkdetails.
+
+<Note>
+  Konfigurieren Sie den Container mit `IPMIDECK_`-präfixierten Umgebungsvariablen und einem Volume auf
+  `/data` statt mit CLI-Flags, siehe [Konfiguration](/de/configuration). Das veröffentlichte Image
+  kommt in Kürze; der obige Befehl ist genau der Befehl, den Sie ausführen werden, sobald es live ist.
+</Note>
+
+## Das Datenverzeichnis
+
+ipmideck schreibt `config.yaml`, die SQLite-Datenbank und den Verschlüsselungsschlüssel für die
+Zugangsdaten in ein einzelnes Datenverzeichnis. Wo das liegt, hängt von der Plattform ab:
+
+- **Linux / Docker:** `/data`
+- **Windows:** `./data` (relativ zu dem Verzeichnis, aus dem Sie `ipmideck` ausführen)
+
+Sie können den Speicherort auf jeder Plattform mit der Umgebungsvariablen `IPMIDECK_DATA_DIR`
+überschreiben:
+
+<CodeGroup>
+
+```powershell PowerShell
+$env:IPMIDECK_DATA_DIR = "C:\ipmideck-data"
+ipmideck start
+```
+
+```text cmd
+set IPMIDECK_DATA_DIR=C:\ipmideck-data
+ipmideck start
+```
+
+```bash bash
+IPMIDECK_DATA_DIR=/srv/ipmideck ipmideck start
+```
+
+</CodeGroup>
+
+In Docker setzt das Image bereits `IPMIDECK_DATA_DIR=/data`, bewahren Sie diesen Pfad also mit einem
+Volume auf, um Ihre Konfiguration und Ihren Verlauf über Container-Neustarts hinweg zu erhalten.
+
+## Umgebungs-Überschreibungen
+
+Jede `IPMIDECK_`-präfixierte Umgebungsvariable, die eine `config.yaml`-Einstellung überschreibt,
+funktioniert gleich, ob Sie auf dem Host oder in Docker laufen, siehe
+[Konfiguration](/de/configuration) für die vollständige Liste. Die beiden, die *ändern, wie* ipmideck
+bindet, sind:
+
+| Umgebungsvariable | Wirkung |
+|----------------------|--------|
+| `IPMIDECK_SERVER_HOST` | Bind-Host (Standard `0.0.0.0`). |
+| `IPMIDECK_SERVER_PORT` | Bind-Port (Standard `3000`). |
+
+<Note>
+  Umgebungsvariablen haben Vorrang vor `config.yaml`. Bei einer Host-Installation gewinnt ein
+  explizites Bind-Flag auf der Kommandozeile über die Umgebungsvariable und die Datei.
+</Note>
+
+## Port bereits in Verwendung
+
+Wenn bereits etwas auf dem Bind-Port lauscht, weigert sich ipmideck zu starten, statt mit einer anderen
+Instanz um den Port zu kämpfen. Es gibt dies an stderr aus und beendet sich mit Status `1`:
+
+```text
+ERROR: IPMIDeck refused to start — port 3000 is already in use on 0.0.0.0 (another instance may be running).
+```
+
+Das bedeutet meist, dass bereits eine zweite Kopie von ipmideck läuft, oder ein anderer Dienst hat den
+Port beansprucht. Stoppen Sie den anderen Prozess oder ändern Sie den Port mit `IPMIDECK_SERVER_PORT`
+(oder `server.port` in `config.yaml`) und starten Sie erneut.
+
+## Adresse nicht verfügbar
+
+Ein anderer Fehler tritt auf, wenn der *Host*, an den Sie binden wollten, nicht verwendet werden kann, zum
+Beispiel eine Adresse, die auf diesem Rechner nicht existiert, eine reine IPv6-Schnittstelle oder ein
+privilegierter Port, den Sie nicht binden dürfen. ipmideck meldet dies gesondert und beendet sich
+ebenfalls mit Status `1`:
+
+```text
+ERROR: IPMIDeck cannot bind 0.0.0.0:3000 — address unavailable or not permitted.
+```
+
+Prüfen Sie den Wert von `IPMIDECK_SERVER_HOST` (oder `server.host`), er muss eine Adresse sein, die
+tatsächlich auf dem Rechner existiert, und stellen Sie sicher, dass der Port einer ist, den Sie binden dürfen.
+
+## Sauberes Herunterfahren mit Strg+C
+
+Drücken Sie **Strg+C** (was `SIGINT` sendet; `SIGTERM` wird gleich behandelt), um ipmideck zu stoppen.
+Das Herunterfahren ist sauber: Der Webserver verlässt seine Schleife, das Lifespan-Shutdown der
+Anwendung läuft, **die Lüftersteuerung wird an Ihre BMCs zurückgegeben**, und der Prozess
+beendet sich sauber ohne Traceback.
+
+<Warning>
+  Da das Herunterfahren die Lüftersteuerung an den BMC zurückgibt, hört FanPilot in dem Moment auf,
+  Ihre Lüfter zu steuern, in dem ipmideck endet. Die eigene Lüfterrichtlinie Ihres BMC übernimmt,
+  dies ist die beabsichtigte Ausfallsicherung. Siehe [Funktionen](/de/features) für das Verhalten der
+  Lüfterschleife.
+</Warning>
+
+In Docker stoppt der Container bei `SIGTERM` (was `docker stop` sendet), sodass beim Stoppen des
+Containers dasselbe saubere Herunterfahren läuft.
+
+## Neustarten
+
+Wie ein Neustart funktioniert, hängt von Ihrem Betriebssystem ab:
+
+- **Linux (und andere POSIX-Systeme):** ipmideck startet **an Ort und Stelle** neu: Es startet einen
+  frischen Prozess, der `config.yaml` neu einliest und dasselbe steuernde Terminal behält.
+- **Windows:** Es gibt kein In-Place-Re-Exec. ipmideck fährt sauber herunter und gibt einen Hinweis aus,
+  der Sie bittet, den Befehl selbst erneut auszuführen:
+
+```text
+IPMIDeck: restart required to apply the new bind.
+  Run  ipmideck start  again to restart.
+```
+
+Unter Windows führen Sie einfach `ipmideck start` in derselben Shell erneut aus, der frische Prozess liest
+`config.yaml` neu ein und übernimmt die neuen Einstellungen.
+
+## Headless-/Non-TTY-Modus
+
+Wenn ipmideck ohne angehängtes Terminal läuft, in eine Datei umgeleitet, weitergeleitet oder unter einem
+Prozessmanager, erkennt es, dass kein TTY vorhanden ist, und **überspringt die interaktive Konsole**. Es
+bedient das Dashboard normal und gibt stattdessen **einfache Logs** an stdout aus. Das ist die
+gleiche Ausgabe, die Sie vom Docker-Container erhalten, der immer ohne Konsole läuft.
+
+Dieser Modus braucht nichts Besonderes: Starten Sie ipmideck einfach so, wie Ihr Supervisor oder Ihre
+Pipeline es aufruft, und lesen Sie die Logs von stdout.
+
+## Nächste Schritte
+
+- [Installation](/de/installation): Docker und pip im Detail.
+- [Konfiguration](/de/configuration): `config.yaml`, Umgebungs-Überschreibungen und wo die Daten liegen.
+- [Fehlerbehebung](/de/troubleshooting): Verbindungs- und IPMI-Fehler.

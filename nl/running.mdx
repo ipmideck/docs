@@ -1,0 +1,207 @@
+---
+title: "ipmideck draaien"
+description: "Start ipmideck op Windows, Linux of Docker, vind je datamap en handel bind-fouten, afsluiten en herstarts af."
+---
+
+Zodra ipmideck [geïnstalleerd](/nl/installation) is, zijn er twee heel verschillende manieren waarop het draait:
+een **host-installatie** die je start met het commando `ipmideck`, en de **Docker-container**,
+die de webserver rechtstreeks draait. Ze gedragen zich verschillend, het host-commando
+geeft je een interactieve operatorconsole, terwijl de container alleen platte
+logs uitstuurt. Deze pagina behandelt beide.
+
+## Host-installatie: `ipmideck start`
+
+Op een host-installatie (pip) wordt de server gestart met het commando `ipmideck`. Het primaire
+commando is `start`:
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start
+```
+
+```text cmd
+ipmideck start
+```
+
+```bash bash
+ipmideck start
+```
+
+</CodeGroup>
+
+Een kale `ipmideck` zonder subcommando werkt identiek aan `ipmideck start`:
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck
+```
+
+```text cmd
+ipmideck
+```
+
+```bash bash
+ipmideck
+```
+
+</CodeGroup>
+
+Standaard bindt de server aan `0.0.0.0:3000`, open dus `http://<your-ip>:3000` in een
+browser zodra hij draait.
+
+<Note>
+  `ipmilink` is een achterwaarts compatibele alias voor hetzelfde commando, `ipmilink start`
+  gedraagt zich precies als `ipmideck start`. Gebruik `ipmideck` voor alles wat nieuw is.
+</Note>
+
+Op een echte terminal (een TTY) opent `ipmideck start` een interactieve operatorconsole. Wanneer
+hetzelfde commando zonder terminal draait, bijvoorbeeld doorgesluisd naar een bestand of onder een
+procesbeheerder, slaat het de console over en serveert het met platte logs. Zie
+[de headless / non-TTY-modus](#headless--non-tty-modus) hieronder.
+
+## Docker: de container draait de server rechtstreeks
+
+De Docker-container draait het commando `ipmideck` **niet**. De image start de
+webserver (uvicorn) rechtstreeks:
+
+```bash
+docker run --network host ipmideck/ipmideck:latest
+```
+
+Omdat de container de `ipmideck`-CLI nooit aanroept, zijn geen van de subcommando's, vlaggen of
+de interactieve console binnen Docker van toepassing, de container stuurt alleen ooit **platte
+logs** naar stdout, precies zoals de headless host-modus. De container bindt aan
+`0.0.0.0:3000` en `--network host` is vereist zodat hij je BMC's kan bereiken via UDP-poort
+`623`. Zie [Installatie](/nl/installation) voor de netwerkdetails.
+
+<Note>
+  Configureer de container met omgevingsvariabelen met `IPMIDECK_`-prefix en een volume op
+  `/data` in plaats van CLI-vlaggen, zie [Configuratie](/nl/configuration). De gepubliceerde image
+  komt binnenkort; het commando hierboven is precies het commando dat je uitvoert zodra het live is.
+</Note>
+
+## De datamap
+
+ipmideck schrijft `config.yaml`, de SQLite-database en de versleutelingssleutel voor inloggegevens naar
+één datamap. Waar die staat, hangt af van het platform:
+
+- **Linux / Docker:** `/data`
+- **Windows:** `./data` (relatief aan de map waaruit je `ipmideck` uitvoert)
+
+Je kunt de locatie op elk platform overschrijven met de omgevingsvariabele `IPMIDECK_DATA_DIR`:
+
+<CodeGroup>
+
+```powershell PowerShell
+$env:IPMIDECK_DATA_DIR = "C:\ipmideck-data"
+ipmideck start
+```
+
+```text cmd
+set IPMIDECK_DATA_DIR=C:\ipmideck-data
+ipmideck start
+```
+
+```bash bash
+IPMIDECK_DATA_DIR=/srv/ipmideck ipmideck start
+```
+
+</CodeGroup>
+
+In Docker stelt de image `IPMIDECK_DATA_DIR=/data` al in, maak dat pad dus persistent met een
+volume om je configuratie en historie over herstarts van de container te behouden.
+
+## Overrides via omgevingsvariabelen
+
+Elke omgevingsvariabele met `IPMIDECK_`-prefix die een `config.yaml`-instelling overschrijft,
+werkt hetzelfde, of je nu op de host of in Docker draait, zie
+[Configuratie](/nl/configuration) voor de volledige lijst. De twee die wijzigen *hoe* ipmideck
+bindt zijn:
+
+| Omgevingsvariabele | Effect |
+|----------------------|--------|
+| `IPMIDECK_SERVER_HOST` | Bind-host (standaard `0.0.0.0`). |
+| `IPMIDECK_SERVER_PORT` | Bind-poort (standaard `3000`). |
+
+<Note>
+  Omgevingsvariabelen hebben voorrang op `config.yaml`. Op een host-installatie wint een expliciete
+  bind-vlag op de commandoregel van zowel de omgevingsvariabele als het bestand.
+</Note>
+
+## Poort al in gebruik
+
+Als er al iets luistert op de bind-poort, weigert ipmideck te starten in plaats van met
+een andere instantie om de poort te vechten. Het print dit naar stderr en sluit af met status `1`:
+
+```text
+ERROR: IPMIDeck refused to start — port 3000 is already in use on 0.0.0.0 (another instance may be running).
+```
+
+Dit betekent meestal dat er al een tweede kopie van ipmideck draait, of dat een andere dienst de
+poort heeft geclaimd. Stop het andere proces, of wijzig de poort met `IPMIDECK_SERVER_PORT`
+(of `server.port` in `config.yaml`), en start opnieuw.
+
+## Adres niet beschikbaar
+
+Een andere fout is wanneer de *host* die je wilde binden niet kan worden gebruikt, bijvoorbeeld een
+adres dat niet bestaat op deze machine, een IPv6-only interface, of een geprivilegieerde poort
+die je niet mag binden. ipmideck rapporteert dit apart en sluit ook af met status
+`1`:
+
+```text
+ERROR: IPMIDeck cannot bind 0.0.0.0:3000 — address unavailable or not permitted.
+```
+
+Controleer de waarde van `IPMIDECK_SERVER_HOST` (of `server.host`), het moet een adres zijn dat
+daadwerkelijk op de machine bestaat, en zorg dat de poort er een is die je mag binden.
+
+## Netjes afsluiten met Ctrl+C
+
+Druk op **Ctrl+C** (dat `SIGINT` stuurt; `SIGTERM` wordt op dezelfde manier afgehandeld) om
+ipmideck te stoppen. Het afsluiten verloopt netjes: de webserver verlaat zijn lus, de
+lifespan-shutdown van de applicatie draait, **fanregeling wordt teruggegeven aan je BMC's**, en het proces
+sluit netjes af zonder traceback.
+
+<Warning>
+  Omdat het afsluiten de fanregeling teruggeeft aan de BMC, stopt FanPilot met het aansturen van je fans op
+  het moment dat ipmideck afsluit. De eigen fanpolicy van je BMC neemt het over, dit is de bedoelde
+  fail-safe. Zie [Functies](/nl/features) voor hoe de fanlus zich gedraagt.
+</Warning>
+
+In Docker stopt de container op `SIGTERM` (wat `docker stop` stuurt), dus hetzelfde
+nette afsluiten draait wanneer je de container stopt.
+
+## Herstarten
+
+Hoe een herstart werkt, hangt af van je besturingssysteem:
+
+- **Linux (en andere POSIX-systemen):** ipmideck herstart **ter plekke**: het start een
+  vers proces dat `config.yaml` opnieuw inleest, met behoud van dezelfde besturende terminal.
+- **Windows:** er is geen in-place re-exec. ipmideck sluit netjes af en print een hint
+  die je vraagt het commando zelf opnieuw uit te voeren:
+
+```text
+IPMIDeck: restart required to apply the new bind.
+  Run  ipmideck start  again to restart.
+```
+
+Op Windows voer je gewoon `ipmideck start` opnieuw uit in dezelfde shell, het verse proces leest
+`config.yaml` opnieuw en pikt de nieuwe instellingen op.
+
+## Headless / non-TTY-modus
+
+Wanneer ipmideck draait zonder gekoppelde terminal, doorgesluisd naar een bestand, omgeleid, of onder een
+procesmanager, detecteert het dat er geen TTY is en **slaat het de interactieve console over**. Het
+serveert het dashboard normaal en stuurt **platte logs** naar stdout. Dit is dezelfde
+uitvoer die je krijgt van de Docker-container, die altijd zonder console draait.
+
+Deze modus heeft niets bijzonders nodig: start ipmideck gewoon zoals je supervisor of pipeline
+het aanroept, en lees de logs van stdout.
+
+## Volgende stappen
+
+- [Installatie](/nl/installation): Docker en pip in detail.
+- [Configuratie](/nl/configuration): `config.yaml`, overrides via omgevingsvariabelen, en waar data staat.
+- [Probleemoplossing](/nl/troubleshooting): verbindings- en IPMI-fouten.

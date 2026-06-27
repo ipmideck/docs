@@ -1,0 +1,215 @@
+---
+title: "Interactieve console"
+description: "Bestuur een draaiende ipmideck-server vanuit je terminal: een operatorconsole met vastgezette header en acties met één toets voor verbositeit, sessies, servers, de dashboard-URL en het bind-adres."
+---
+
+Wanneer je ipmideck in een terminal start, rendert het een interactieve operatorconsole: een
+vastgezette header met de banner en een hulpbalk boven een live, scrollende log. Elke actie is een
+enkele toetsaanslag, geen menu's, geen muis. De console draait in-process naast de server, dus
+wat je ziet is de live staat van de machine waarop je zit.
+
+<Note>
+De console verschijnt alleen op een echte **interactieve terminal**, zowel stdin als stdout moeten
+TTY's zijn. Onder Docker, systemd, of wanneer stdout doorgesluisd/omgeleid is, slaat ipmideck de console
+volledig over en schrijft het gewoon platte scrollende logs. Zie [Waar de console verschijnt](#waar-de-console-verschijnt).
+</Note>
+
+## Hoe het eruitziet
+
+De console is één volledig-schermweergave: een vastgezette header die je altijd ziet, boven een live log
+die eronder scrollt.
+
+<Frame caption="The console right after start: the banner and help bar stay pinned at the top while the log tail scrolls below.">
+  <img src="/console/home.png" alt="ipmideck interactive console showing the banner, help bar, status line, and the scrolling log panel" />
+</Frame>
+
+De header scrollt nooit. Nieuwe logregels verschijnen in het paneel eronder, en de nieuwste regel
+blijft altijd op het scherm. Je drukt op één toets om te handelen; alles gebeurt in-process
+tegen de server die je net hebt gestart.
+
+## De header
+
+De bovenkant van het scherm is een vaste header die nooit scrollt. Hij stapelt, van boven naar onder:
+
+- De ipmideck-banner.
+- De **hulpbalk**: elke actietoets en wat die doet.
+- De **statusregel**: de live staat van de sessie.
+- Een compacte creditsregel (auteur, versie, licentie).
+
+Het gedeelte onder de header is de scrollende log-tail. De nieuwste regel blijft altijd op
+het scherm, zodat een net verschenen URL of bevestiging nooit onderaan wordt afgesneden.
+
+### Statusregel
+
+De statusregel toont drie live velden, gescheiden door `|`:
+
+- **Verbosity**: het huidige logniveau (`INFO`, `DEBUG` of `WARNING`).
+- **Clients**: het aantal nu verbonden dashboard-clients.
+- **last**: de laatste actietoets die je hebt ingedrukt, als directe visuele terugkoppeling.
+
+## Actietoetsen
+
+Elke actie is één toetsaanslag. De hulpbalk somt ze allemaal op:
+
+| Toets   | Actie                                                                 |
+| ----- | ---------------------------------------------------------------------- |
+| `v`   | Wissel log-**verbositeit**                                             |
+| `c`   | Open de subweergave met verbonden **sessies**                          |
+| `s`   | Open de subweergave met geconfigureerde **servers**                    |
+| `u`   | Toon de dashboard-**url** in de log                                    |
+| `g`   | **Update**-controle (print de lokale versie)                          |
+| `b`   | Open de **change-bind**-editor                                         |
+| `r`   | **Herstart** de server                                                 |
+| `q`   | **Afsluiten**, of terug naar de logweergave vanuit een subweergave    |
+| `ESC` | **Terug**, terug naar de logweergave vanuit een subweergave           |
+
+Pijl-, functie- en navigatietoetsen worden opgevangen en genegeerd, ze botsen nooit met een
+actie en tellen niet als toetsaanslag.
+
+### v: verbositeit
+
+`v` doorloopt het runtime-logniveau in een vaste lus van drie stappen:
+
+```
+INFO → DEBUG → WARNING → INFO
+```
+
+`INFO` is de standaard. `DEBUG` toont meer; `WARNING` toont minder. De wijziging treedt
+direct in werking voor de rest van de sessie en de statusregel wordt bijgewerkt.
+
+<Note>
+De verbositeitswisseling wijzigt alleen het **draaiende** niveau. Bij de volgende boot wint het niveau uit
+je config (of de omgevingsvariabele `IPMIDECK_LOGGING_LEVEL`) weer. Zie [Configuratie](/nl/configuration).
+</Note>
+
+### c: sessies
+
+`c` opent de subweergave **Connected sessions**, een alleen-lezen tabel van de dashboard-clients
+die nu verbonden zijn, met kolommen:
+
+- **IP**
+- **Connected since**
+- **User-Agent**
+
+Druk op `q` of `ESC` om terug te keren naar de logweergave.
+
+<Frame caption="The Connected sessions sub-view (key c), one row per attached dashboard client.">
+  <img src="/console/connections.png" alt="Connected sessions table showing IP, Connected since, and User-Agent columns" />
+</Frame>
+
+### s: servers
+
+`s` opent de subweergave **Configured servers**, een alleen-lezen tabel van de BMC's waarmee ipmideck
+geconfigureerd is om te praten, met kolommen:
+
+- **Name**
+- **Host**
+- **Status**
+
+Druk op `q` of `ESC` om terug te keren naar de logweergave.
+
+<Frame caption="The Configured servers sub-view (key s), listing each BMC and whether it is online.">
+  <img src="/console/servers.png" alt="Configured servers table showing Name, Host, and Status columns with online and offline servers" />
+</Frame>
+
+### u: url
+
+`u` toont de dashboard-URL (`scheme://host:port`) in de log. Als de server gebonden is aan
+een wildcard-adres (`0.0.0.0`, `::`, of leeg), wordt de URL herschreven naar
+`127.0.0.1` zodat hij daadwerkelijk in een browser te openen is, `http://0.0.0.0:3000` is een luister-
+adres, geen navigeerbaar adres.
+
+<Frame caption="Key u prints the dashboard URL at the bottom of the log, rewritten to a reachable address.">
+  <img src="/console/url.png" alt="The console log with the dashboard URL printed at the bottom after pressing u" />
+</Frame>
+
+### g: update
+
+`g` print de lokale versie en een opmerking dat de online updatecontrole met de pip-
+release meekomt. Het doet **geen netwerkoproep**, ipmideck blijft offline.
+
+### r: herstart
+
+`r` voert een nette in-process herstart uit: ipmideck breekt de console af, leest
+`config.yaml` opnieuw en start vers. Gebruik het na een [change-bind](#b-change-bind)-bewerking om
+het nieuwe adres toe te passen.
+
+### q / ESC: afsluiten en terug
+
+- Vanuit een subweergave (`sessions` of `servers`) brengen `q` en `ESC` je beide terug naar de logweergave.
+- Vanuit de logweergave activeert `q` een nette afsluiting, de server sluit netjes af.
+
+## b: change-bind
+
+`b` opent de change-bind-editor, een inline `host:port`-prompt die de hulpbalk vervangt
+terwijl je typt. De header toont de huidige bind als een alleen-lezen label `current: host:port`
+en een leeg `new:`-veld, zodat de waarde die je typt direct verschijnt en nooit verward
+wordt met de bestaande.
+
+<Frame caption="The change-bind editor (key b): the help bar is replaced by the current bind and an empty new host:port prompt.">
+  <img src="/console/bind.png" alt="The change-bind editor showing the current bind address and an empty new field with apply, cancel, and delete key hints" />
+</Frame>
+
+Toetsen binnen de editor:
+
+- **Enter**: pas de getypte `host:port` toe.
+- **ESC**: annuleer zonder iets te wijzigen.
+- **Backspace**: verwijder het laatste teken.
+- Elk afdrukbaar teken, voeg toe aan de buffer.
+
+De invoer moet `host:port` zijn met een niet-lege host en een poort die een geheel getal is in het
+bereik **1–65535**. Bij een geldige invoer bevestigt ipmideck de nieuwe bind en herinnert je eraan dat een herstart
+vereist is (druk op `r`). Bij een ongeldige invoer meldt het `Invalid host/port` en
+verandert er niets.
+
+<Warning>
+Een change-bind-bewerking is **niet** live, het wordt naar config geschreven en treedt pas in werking na een
+herstart. Druk op `r` om het toe te passen. En onthoud de volgorde: een `IPMIDECK_SERVER_HOST` /
+`IPMIDECK_SERVER_PORT`-omgevingsvariabele of een expliciete `--host` / `--port`-vlag bij de volgende boot
+overschrijft wat de console ook heeft bewaard. Zie [Configuratie](/nl/configuration).
+</Warning>
+
+## Waar de console verschijnt
+
+De interactieve console is afhankelijk van een echte TTY: ipmideck rendert hem alleen wanneer **zowel**
+stdin als stdout interactieve terminals zijn. Wanneer ze dat niet zijn, valt het terug op een banner plus
+platte scrollende logs en installeert het geen toetsluisteraar, zodat er niets bezig-spint op een non-TTY.
+
+Dit betekent dat de console verschijnt wanneer je ipmideck rechtstreeks in een terminal draait:
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck
+```
+
+```cmd cmd
+ipmideck
+```
+
+```bash bash
+ipmideck
+```
+
+</CodeGroup>
+
+Het verschijnt **niet** wanneer:
+
+- Draaiend onder **Docker**: de container start uvicorn rechtstreeks en bereikt het
+  consolepad nooit; je krijgt platte containerlogs (`docker logs`).
+- Draaiend onder **systemd** of een willekeurige servicemanager waar stdout geen terminal is.
+- Het **doorsluizen of omleiden** van stdout (bijv. `ipmideck > server.log`): stdout is geen TTY meer.
+
+In elk non-TTY-geval draait de server nog steeds normaal en bindt aan dezelfde standaard
+`0.0.0.0:3000`; je krijgt alleen platte logs in plaats van de live console.
+
+<Note>
+`ipmilink` is een achterwaarts compatibele alias voor `ipmideck`, beide starten dezelfde console.
+</Note>
+
+## Volgende stappen
+
+- [ipmideck draaien](/nl/running): starten, serveren en de bind-volgorderegels.
+- [De CLI](/nl/cli): elk subcommando en elke vlag in detail.
+- [Configuratie](/nl/configuration): stel het bind-adres, de verbositeit en de polling-intervallen in.
+- [Installatie](/nl/installation): installeer met Docker of pip.

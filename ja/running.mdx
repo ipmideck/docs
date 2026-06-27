@@ -1,0 +1,204 @@
+---
+title: "ipmideck の実行"
+description: "Windows、Linux、または Docker で ipmideck を起動し、データディレクトリーを見つけ、バインドエラー、シャットダウン、再起動を処理します。"
+---
+
+ipmideck を [インストール](/ja/installation) したら、実行方法は大きく分けて 2 つあります。
+`ipmideck` コマンドで起動する **ホストインストール** と、Web サーバーを直接実行する
+**Docker コンテナー** です。両者の動作は異なります。ホストコマンドは対話型のオペレーター
+コンソールを提供しますが、コンテナーはプレーンなログを流すだけです。このページでは両方を扱います。
+
+## ホストインストール: `ipmideck start`
+
+ホストインストール (pip) では、サーバーは `ipmideck` コマンドで起動します。主要なコマンドは
+`start` です。
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start
+```
+
+```text cmd
+ipmideck start
+```
+
+```bash bash
+ipmideck start
+```
+
+</CodeGroup>
+
+サブコマンドなしの素の `ipmideck` は、`ipmideck start` と同一に動作します。
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck
+```
+
+```text cmd
+ipmideck
+```
+
+```bash bash
+ipmideck
+```
+
+</CodeGroup>
+
+デフォルトでは、サーバーは `0.0.0.0:3000` にバインドするので、起動したらブラウザーで
+`http://<your-ip>:3000` を開いてください。
+
+<Note>
+  `ipmilink` は同じコマンドの後方互換エイリアスです。`ipmilink start` は
+  `ipmideck start` とまったく同じように動作します。新しいものにはすべて `ipmideck` を使用してください。
+</Note>
+
+実際の端末 (TTY) では、`ipmideck start` は対話型のオペレーターコンソールを開きます。同じコマンドが
+端末なしで実行される場合、例えばファイルへのパイプやプロセススーパーバイザー下では、コンソールを
+スキップし、代わりにプレーンなログで配信します。下記の
+[ヘッドレス / 非 TTY モード](#ヘッドレス--非-tty-モード) を参照してください。
+
+## Docker: コンテナーはサーバーを直接実行する
+
+Docker コンテナーは `ipmideck` コマンドを実行 **しません**。そのイメージは Web サーバー
+(uvicorn) を直接起動します。
+
+```bash
+docker run --network host ipmideck/ipmideck:latest
+```
+
+コンテナーは `ipmideck` CLI を一切呼び出さないため、Docker 内ではサブコマンド、フラグ、
+対話型コンソールのいずれも適用されません。コンテナーは **プレーンなログ** を stdout に流すだけで、
+ヘッドレスのホストモードとまったく同じです。コンテナーは `0.0.0.0:3000` にバインドし、
+BMC に UDP ポート `623` で到達できるよう `--network host` が必要です。ネットワークの詳細は
+[インストール](/ja/installation) を参照してください。
+
+<Note>
+  コンテナーは CLI フラグではなく、`IPMIDECK_` プレフィックス付きの環境変数と `/data` 上のボリュームで
+  設定してください。[設定](/ja/configuration) を参照してください。公開イメージは近日公開です。
+  上記のコマンドは、それが利用可能になったときに実行する正確なコマンドです。
+</Note>
+
+## データディレクトリー
+
+ipmideck は `config.yaml`、SQLite データベース、資格情報の暗号化キーを単一のデータディレクトリーに
+書き込みます。その場所はプラットフォームによって異なります。
+
+- **Linux / Docker:** `/data`
+- **Windows:** `./data` (`ipmideck` を実行するディレクトリーからの相対パス)
+
+任意のプラットフォームで `IPMIDECK_DATA_DIR` 環境変数を使って場所を上書きできます。
+
+<CodeGroup>
+
+```powershell PowerShell
+$env:IPMIDECK_DATA_DIR = "C:\ipmideck-data"
+ipmideck start
+```
+
+```text cmd
+set IPMIDECK_DATA_DIR=C:\ipmideck-data
+ipmideck start
+```
+
+```bash bash
+IPMIDECK_DATA_DIR=/srv/ipmideck ipmideck start
+```
+
+</CodeGroup>
+
+Docker ではイメージがすでに `IPMIDECK_DATA_DIR=/data` を設定しているので、そのパスをボリュームで
+永続化して、コンテナーの再起動をまたいで設定と履歴を保持してください。
+
+## 環境変数による上書き
+
+`config.yaml` の設定を上書きするすべての `IPMIDECK_` プレフィックス付き環境変数は、ホストでも
+Docker でも同じように機能します。完全な一覧は [設定](/ja/configuration) を参照してください。ipmideck の
+バインド *方法* を変える 2 つは次のとおりです。
+
+| 環境変数 | 効果 |
+|----------------------|--------|
+| `IPMIDECK_SERVER_HOST` | バインドホスト (デフォルト `0.0.0.0`)。 |
+| `IPMIDECK_SERVER_PORT` | バインドポート (デフォルト `3000`)。 |
+
+<Note>
+  環境変数は `config.yaml` より優先されます。ホストインストールでは、明示的なコマンドライン
+  バインドフラグが環境変数とファイルの両方に勝ります。
+</Note>
+
+## ポートがすでに使用中
+
+バインドポートで何かがすでにリッスンしている場合、ipmideck は別のインスタンスとポートを
+奪い合うのではなく、起動を拒否します。これを stderr に出力し、ステータス `1` で終了します。
+
+```text
+ERROR: IPMIDeck refused to start — port 3000 is already in use on 0.0.0.0 (another instance may be running).
+```
+
+これは通常、ipmideck の 2 つ目のコピーがすでに実行中であるか、別のサービスがそのポートを
+要求していることを意味します。他のプロセスを停止するか、`IPMIDECK_SERVER_PORT`
+(または `config.yaml` の `server.port`) でポートを変更して、再度起動してください。
+
+## アドレスが利用不可
+
+別の失敗は、バインドを要求した *ホスト* が使用できない場合です。例えばこのマシンに存在しない
+アドレス、IPv6 のみのインターフェイス、またはバインドが許可されていない特権ポートです。ipmideck は
+これを別途報告し、同じくステータス `1` で終了します。
+
+```text
+ERROR: IPMIDeck cannot bind 0.0.0.0:3000 — address unavailable or not permitted.
+```
+
+`IPMIDECK_SERVER_HOST` (または `server.host`) の値を確認してください。マシンに実際に存在する
+アドレスでなければならず、ポートはバインドが許可されているものであることを確認してください。
+
+## Ctrl+C による正常なシャットダウン
+
+ipmideck を停止するには **Ctrl+C** (これは `SIGINT` を送信します。`SIGTERM` も同様に処理されます) を
+押します。シャットダウンは正常です。Web サーバーはループを抜け、アプリケーションの
+ライフスパンシャットダウンが実行され、**ファン制御は BMC に返され**、プロセスは
+トレースバックなしでクリーンに終了します。
+
+<Warning>
+  シャットダウンによってファン制御が BMC に戻るため、ipmideck が終了した瞬間に FanPilot は
+  ファンの駆動を停止します。BMC 自身のファンポリシーが引き継ぎます。これは意図された
+  フェイルセーフです。ファンループの動作については [機能](/ja/features) を参照してください。
+</Warning>
+
+Docker では、コンテナーは `SIGTERM` (`docker stop` が送信するもの) で停止するので、コンテナーを
+停止すると同じ正常なシャットダウンが実行されます。
+
+## 再起動
+
+再起動の仕組みはオペレーティングシステムによって異なります。
+
+- **Linux (および他の POSIX システム):** ipmideck は **その場で** 再起動します。`config.yaml` を
+  再読み込みする新しいプロセスを再起動し、同じ制御端末を保持します。
+- **Windows:** その場での再実行はありません。ipmideck はクリーンにシャットダウンし、
+  コマンドを自分で再実行するよう求めるヒントを出力します。
+
+```text
+IPMIDeck: restart required to apply the new bind.
+  Run  ipmideck start  again to restart.
+```
+
+Windows では、同じシェルで `ipmideck start` を再実行するだけで、新しいプロセスが `config.yaml` を
+再読み込みして新しい設定を取り込みます。
+
+## ヘッドレス / 非 TTY モード
+
+ipmideck が接続された端末なしで実行される場合、ファイルへのパイプ、リダイレクト、または
+プロセスマネージャー下では、TTY がないことを検出して **対話型コンソールをスキップ** します。
+ダッシュボードは通常どおり配信し、代わりに **プレーンなログ** を stdout に流します。これは
+常にコンソールなしで実行される Docker コンテナーから得られる出力と同じです。
+
+このモードには特別なものは必要ありません。スーパーバイザーやパイプラインが呼び出す方法で
+ipmideck を起動し、stdout からログを読むだけです。
+
+## 次のステップ
+
+- [インストール](/ja/installation): Docker と pip の詳細。
+- [設定](/ja/configuration): `config.yaml`、環境変数による上書き、データの場所。
+- [トラブルシューティング](/ja/troubleshooting): 接続と IPMI のエラー。

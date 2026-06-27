@@ -1,0 +1,69 @@
+---
+title: "IBM IMM"
+description: "System x サーバー向けの IBM Integrated Management Module II (IMM2) で IPMI over LAN を有効にします。低信頼、使用前にハードウェアで検証してください。"
+---
+
+<Warning>
+  **低信頼ガイド。これらの手順に頼る前にハードウェアで検証してください。**
+  IBM IMM2 ハードウェアはレガシーで (IBM は 2014 年に System x ラインを Lenovo に売却しました)、
+  オンラインドキュメントは乏しいです。正確な Web インターフェイスパスは IMM2 ファームウェアの
+  バージョンに依存します。これは **高いレビュー優先度** です。すべてのパスを自分のサーバーに対して
+  確認し、修正を報告してください。所有者によるハードウェア検証は保留中です。
+</Warning>
+
+**対象:** IMM2 (Integrated Management Module II) を持つ IBM System x サーバー。例えば
+IBM x3650 M4 と x3550 M4。
+
+<Note>
+  IBM IMM は ipmideck の **実験的** ベンダーです。
+</Note>
+
+## 手順
+
+<Steps>
+  <Step title="IMM2 Web インターフェイスを開く">
+    ブラウザーで IMM2 IP アドレスに移動し、ログインします。デフォルト資格情報は
+    **USERID** / **PASSW0RD** です ("PASSW0RD" の **ゼロ** に注意)。まだ使用中の場合は、すぐに
+    変更してください。
+  </Step>
+  <Step title="IMM Management → Network Protocol Properties を開く">
+    上部メニューから **IMM Management → Network Protocol Properties** に移動します。Ethernet、SNMP、
+    DNS、…、**IPMI** のタブがあるページです。
+  </Step>
+  <Step title="IPMI アクセスを有効化">
+    **IPMI** タブを開き、**Allow IPMI access** にチェックを入れ、**Apply** をクリックします。
+
+    <Frame caption="IMM Management → Network Protocol Properties → IPMI タブ: Allow IPMI access にチェックを入れます。">
+      <img src="/tutorials/IBM/IPMI_tab.jpg" alt="IBM IMM2 Network Protocol Properties IPMI tab with Allow IPMI access enabled" />
+    </Frame>
+
+    <Note>
+      IPMI ポート設定の変更は、有効になるために **IMM の再起動が必要** です。IMM は IPMI タブに
+      このリマインダーを表示します。
+    </Note>
+  </Step>
+  <Step title="IPMI ユーザー ID が存在することを確認">
+    IBM のドキュメントは次のように述べています: *"If no IPMI User IDs have been configured by the CMM, the
+    network port associated with the IPMI protocol will be closed."* 少なくとも 1 つの IPMI ユーザー ID が
+    設定されていることを確認してください。そうでないと LAN ポートは閉じたままになります。
+  </Step>
+  <Step title="接続性を検証">
+    ipmideck を実行するホストから:
+
+    ```bash
+    ipmitool -I lanplus -H <imm2-ip> -U USERID -P <password> chassis status
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  **レビュー用にフラグ:** IMM2 の Web UI パスはファームウェアバージョンによって異なり、IBM の BMC
+  ドキュメントはオンラインで乏しいです。完全なリファレンスは
+  [IMM2 Configuration User's Guide (PDF)](https://public.dhe.ibm.com/systems/support/system_x_pdf/imm2_configurations_usersguide.pdf) です。
+  このガイドに頼る前に、すべての手順を実際のハードウェアに対して検証してください。
+</Note>
+
+## ソース
+
+[CITED: pubs.lenovo.com/imm2, Managing the IMM2 with IPMI](https://pubs.lenovo.com/imm2/dw1lm_t_managingtheimmwithipmi.html) ·
+[IMM2 Configuration User's Guide (IBM)](https://public.dhe.ibm.com/systems/support/system_x_pdf/imm2_configurations_usersguide.pdf)

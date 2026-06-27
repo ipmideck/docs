@@ -1,0 +1,61 @@
+---
+title: "Risoluzione dei problemi"
+description: "Errori di connessione, autenticazione e IPMI quando ipmideck parla con il tuo BMC."
+---
+
+## ipmideck non riesce a raggiungere il BMC
+
+ipmideck comunica con i BMC sulla porta UDP 623 (IPMI/RMCP+). Se un server risulta
+offline:
+
+- In Docker, conferma di aver avviato il container con `--network host`. Senza, il
+  container non può raggiungere i BMC sulla tua LAN.
+- Verifica che l'IP del BMC sia raggiungibile dall'host (`ping <bmc-ip>`).
+- Conferma che IPMI-over-LAN sia abilitato sul BMC e che la porta UDP 623 non sia bloccata da un
+  firewall o da un confine VLAN.
+
+<Note>
+  ipmideck usa sempre `lanplus` (IPMI 2.0) per sessioni cifrate. Un BMC bloccato su
+  solo IPMI 1.5, o con le cipher suite RMCP+ disabilitate, può rifiutare la connessione.
+</Note>
+
+## Errori di autenticazione / privilegi
+
+Se i comandi falliscono con un errore di autenticazione o privilegio:
+
+- Ricontrolla il nome utente e la password del BMC che hai inserito per il server.
+- L'account del BMC necessita almeno del privilegio Operator per il controllo dell'alimentazione e delle ventole;
+  Administrator è richiesto per le modifiche di configurazione.
+- Alcuni BMC bloccano un account dopo ripetuti login falliti, aspetta, o reimposta l'account dalla
+  UI web del BMC stesso.
+
+## I comandi vanno in timeout
+
+L'hardware più vecchio può essere lento a rispondere. ipmideck applica un timeout per comando impostato da
+`ipmi.command_timeout` (predefinito 30 secondi). Se vedi timeout su un BMC lento, aumenta
+quel valore in `config.yaml`. Le letture dei sensori e del SEL su repository grandi sono le più
+probabilmente lente.
+
+## I sensori mancano o leggono zero
+
+- Conferma che il BMC esponga davvero quei sensori (il supporto a `sdr elist` varia per produttore).
+- Alcuni sensori si popolano solo mentre il server è acceso.
+- Controlla l'intervallo di polling (`ipmi.poll_interval`, predefinito 30s / `IPMIDECK_IPMI_POLL_INTERVAL`);
+  intervalli molto lunghi ritardano la prima lettura.
+
+## Le ventole tornano al controllo del BMC inaspettatamente
+
+FanPilot restituisce deliberatamente le ventole alla gestione termica del BMC stesso in due casi:
+
+- **Override di sicurezza**: al raggiungimento o oltre la temperatura critica, le ventole vanno al 100%.
+- **Recupero**: dopo un arresto non pulito, server-offline o rilevamento di sensori obsoleti,
+  ipmideck ripristina la modalità auto del BMC così l'hardware non resta mai non gestito.
+
+Questo è un comportamento fail-safe previsto, non un bug. Vedi [Sicurezza](/it/security).
+
+## La dashboard non si carica
+
+- Conferma che il container o il processo sia in esecuzione e in ascolto sulla porta configurata
+  (`server.port` / `IPMIDECK_SERVER_PORT`, predefinito 3000).
+- Apri `http://<your-ip>:3000`, non `https`, a meno che tu non abbia impostato `server.https: true`.
+- Controlla i log dell'applicazione; alza `logging.level` a `debug` per più dettaglio.

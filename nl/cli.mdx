@@ -1,0 +1,233 @@
+---
+title: "CLI-referentie"
+description: "Draai ipmideck vanaf de commandoregel: subcommando's, bind-vlaggen, de standaard 0.0.0.0:3000, zelfondertekende HTTPS, demomodus en exitcodes."
+---
+
+ipmideck levert één console-commando, `ipmideck`, dat de server start, het
+beheerderswachtwoord reset of een zelfondertekend certificaat genereert. `ipmilink` is een achterwaarts compatibele
+alias voor hetzelfde commando, elk subcommando en elke vlag hieronder werkt identiek onder beide
+namen.
+
+<Note>
+  De CLI is alleen van toepassing wanneer je ipmideck rechtstreeks draait (pip-installatie of een source-checkout). De
+  Docker-image start `uvicorn backend.main:app` rechtstreeks en roept de CLI nooit aan, dus geen
+  van deze vlaggen, de bind-volgorde of de single-instance-bewaking is van toepassing op de container. De bind van de container wordt ingesteld door zijn eigen startcommando. Zie [Installatie](/nl/installation).
+</Note>
+
+## De server starten
+
+`start` is het primaire serve-commando. Een kale aanroep zonder subcommando serveert identiek,
+dus deze zijn gelijkwaardig:
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start
+# or, with no subcommand:
+ipmideck
+```
+
+```cmd cmd
+ipmideck start
+:: or, with no subcommand:
+ipmideck
+```
+
+```bash bash
+ipmideck start
+# or, with no subcommand:
+ipmideck
+```
+
+</CodeGroup>
+
+Zonder vlaggen bindt ipmideck standaard **`0.0.0.0:3000`**, bereikbaar op elke interface,
+op poort `3000`. Open `http://<your-ip>:3000` zodra hij draait.
+
+Overschrijf de bind met `--host` en `--port`:
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start --host 127.0.0.1 --port 8080
+```
+
+```cmd cmd
+ipmideck start --host 127.0.0.1 --port 8080
+```
+
+```bash bash
+ipmideck start --host 127.0.0.1 --port 8080
+```
+
+</CodeGroup>
+
+## Subcommando's
+
+| Subcommando | Wat het doet |
+| --- | --- |
+| `start` | Start de server (standaard). Een kale `ipmideck` zonder subcommando serveert ook. |
+| `serve` | Verouderde alias van `start`. Gedraagt zich identiek; behouden zodat bestaande scripts blijven werken. |
+| `reset-password` | Maak of werk de beheerderslogin interactief bij, sluit dan af zonder te serveren. |
+
+<Note>
+  `serve` is een verouderde alias van `start`, geef de voorkeur aan `start` (of een kale `ipmideck`) in nieuwe
+  scripts.
+</Note>
+
+## Vlaggen
+
+Deze top-level vlaggen zijn van toepassing op het serve-pad. `--demo` en `--config` worden gelezen vóór elke
+subcommando-tak, dus ze beïnvloeden ook `reset-password` en `--gen-cert`.
+
+| Vlag | Effect |
+| --- | --- |
+| `--host <host>` | Bind-host. Standaard komt uit `config.yaml` of `0.0.0.0`. Een expliciete vlag wint van config. |
+| `--port <port>` | Bind-poort. Standaard komt uit `config.yaml` of `3000`. Een expliciete vlag wint van config. |
+| `--demo` | Draai in demomodus met gesimuleerde data. |
+| `--config <path>` | Pad naar een te laden `config.yaml`. |
+| `--reload` | Schakel auto-reload voor ontwikkeling in. |
+| `--gen-cert` | Genereer een zelfondertekend cert + sleutel onder `data/certs/`, schrijf de paden naar `config.yaml` en sluit af. |
+
+## Bind-volgorde
+
+De host en poort waaraan ipmideck daadwerkelijk bindt, worden in deze volgorde bepaald, hoogste prioriteit eerst:
+
+1. Een expliciete `--host` / `--port`-vlag op de commandoregel.
+2. Configuratie, die zelf de omgevingsvariabele (`IPMIDECK_SERVER_HOST` / `IPMIDECK_SERVER_PORT`)
+   boven `config.yaml` boven de ingebouwde standaard plaatst.
+3. De hardgecodeerde fallback **`0.0.0.0:3000`**, gebruikt als het vroege laden van config mislukt.
+
+Met andere woorden: een waarde die je naar `config.yaml` bewaart, wordt **overschreven door een `IPMIDECK_`
+omgevingsvariabele of een `--host` / `--port`-vlag** bij de volgende boot, env en CLI winnen altijd.
+Als `config.yaml` ongeldig is, print ipmideck een waarschuwing naar stderr en valt terug op
+`0.0.0.0:3000`.
+
+<Note>
+  De omgevingsvariabelen `IPMIDECK_SERVER_HOST` en `IPMIDECK_SERVER_PORT` gebruiken de
+  `IPMIDECK_`-prefix. Zie [Configuratie](/nl/configuration) voor de volledige lijst met overrides.
+</Note>
+
+## HTTPS met --gen-cert
+
+`--gen-cert` genereert een zelfondertekend certificaat en sleutel, en sluit dan af. Het start de
+server **niet** en zet HTTPS niet vanzelf aan:
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck --gen-cert
+```
+
+```cmd cmd
+ipmideck --gen-cert
+```
+
+```bash bash
+ipmideck --gen-cert
+```
+
+</CodeGroup>
+
+Het schrijft een cert + sleutelpaar onder `data/certs/`, legt hun paden vast in het `server`-blok van
+`config.yaml`, en print drie regels:
+
+```text
+Generated: <path-to-cert>
+Generated: <path-to-key>
+Wrote cert_file/key_file to config.yaml. Set server.https=true and restart to serve over HTTPS.
+```
+
+Om daadwerkelijk over HTTPS te serveren, stel je `server.https: true` in `config.yaml` in en herstart je ipmideck. HTTPS wordt nooit automatisch ingeschakeld.
+
+## Demomodus
+
+`--demo` draait ipmideck tegen gesimuleerde hardware in plaats van echte BMC's, nuttig om
+het dashboard te evalueren zonder dat er servers aangesloten zijn:
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start --demo
+```
+
+```cmd cmd
+ipmideck start --demo
+```
+
+```bash bash
+ipmideck start --demo
+```
+
+</CodeGroup>
+
+De demomodus wordt heel vroeg ingesteld, vóór elke subcommando-tak, zodat de hele app (config en de draaiende server) het ziet.
+
+## Het beheerderswachtwoord resetten
+
+`reset-password` maakt of werkt de beheerderslogin interactief bij, sluit dan af zonder ooit
+de server te starten:
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck reset-password
+```
+
+```cmd cmd
+ipmideck reset-password
+```
+
+```bash bash
+ipmideck reset-password
+```
+
+</CodeGroup>
+
+Het vraagt om `Username:` en daarna `New password:` (verborgen invoer). Als er al een account
+bestaat, werkt het het wachtwoord van die gebruiker bij en print `Password updated for <username>`; anders
+maakt het de gebruiker aan en print `User <username> created`.
+
+## Auto-reload voor ontwikkeling
+
+`--reload` is een snelpad alleen voor ontwikkeling: het draagt over aan uvicorn's eigen auto-reloading
+supervisor en keert terug. Het **slaat opzettelijk de single-instance-poortbewaking over** die hieronder
+wordt beschreven, omdat de reloader zijn eigen supervisorproces draait.
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start --reload
+```
+
+```cmd cmd
+ipmideck start --reload
+```
+
+```bash bash
+ipmideck start --reload
+```
+
+</CodeGroup>
+
+<Warning>
+  `--reload` is alleen voor ontwikkeling. Omdat het de single-instance-bewaking omzeilt, draai het op een
+  host waar nog geen andere ipmideck-instantie aan dezelfde poort gebonden is.
+</Warning>
+
+## Exitcodes
+
+| Exitcode | Wanneer |
+| --- | --- |
+| `0` | Nette afsluiting bij `Ctrl+C` / SIGTERM, de server stopt netjes, geen traceback. |
+| `1` | De poort is al in gebruik op de doelhost (er draait mogelijk een andere instantie), **of** de bind mislukt omdat het adres niet beschikbaar of niet toegestaan is (bijvoorbeeld een geprivilegieerde poort of een interface die niet bestaat). |
+
+Op het serve-pad (niet `--reload`) draait ipmideck een single-instance-bewaking vóór het binden. Als de
+poort al in gebruik is, print het een fout naar stderr en sluit af met `1`. Als de bind mislukt omdat het
+adres niet beschikbaar of niet toegestaan is, print het een aparte fout en sluit ook af met `1`.
+
+## Volgende stappen
+
+- [Configuratie](/nl/configuration): `config.yaml`-sleutels en de `IPMIDECK_`-omgevingsoverrides.
+- [Installatie](/nl/installation): installeer ipmideck met Docker of pip.
+- [Probleemoplossing](/nl/troubleshooting): verbindings-, poort- en IPMI-fouten.

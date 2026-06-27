@@ -1,0 +1,72 @@
+---
+title: "Aan de slag"
+description: "Wat ipmideck is, en hoe je met één commando een dashboard tegen de BMC's van je servers laat draaien."
+---
+
+## Wat is ipmideck?
+
+ipmideck is een zelf-gehost, webgebaseerd IPMI-beheerplatform. Het maakt verbinding met de
+BMC (Baseboard Management Controller) van je servers via IPMI 2.0 en geeft je realtime
+sensormonitoring, intelligente regeling van fan-curves (FanPilot), beheer van voeding op afstand
+en hardware-gebeurtenislogs, allemaal vanuit je browser, zonder CLI.
+
+ipmideck draait volledig op je eigen netwerk. Er is geen cloud, geen telemetrie en geen
+externe afhankelijkheid: het praat rechtstreeks met je BMC's en bewaart alles lokaal.
+
+<Note>
+  ipmideck moet je BMC's over het netwerk kunnen bereiken op UDP-poort 623 (de IPMI/RMCP+
+  poort). Wanneer je het in Docker draait, gebruik dan `--network host` zodat de container
+  BMC's op je LAN rechtstreeks kan bereiken.
+</Note>
+
+## Snel starten
+
+De snelste manier om ipmideck te proberen is Docker:
+
+```bash
+docker run --network host ipmideck/ipmideck:latest
+```
+
+Open daarna `http://<your-ip>:3000` in een browser en volg de installatiewizard om je
+eerste server toe te voegen.
+
+Liever Python-packaging? Installeer dan vanaf PyPI:
+
+```bash
+pip install ipmideck
+```
+
+Het pip-pakket vereist dat `ipmitool` op de host is geïnstalleerd.
+
+<Note>
+  ipmideck is in pre-release: de gepubliceerde Docker-image en het PyPI-pakket komen
+  binnenkort. De commando's hierboven zijn precies de commando's die je uitvoert zodra ze
+  live zijn.
+</Note>
+
+## Wat je krijgt
+
+- **Sensormonitoring**: live temperatuur, fan-RPM, voltage en vermogen, met tot een
+  jaar aan historie.
+- **FanPilot**: een drag-and-drop-editor voor fan-curves met een veilige autonome regellus.
+- **Voedingsbeheer**: On, Soft Off, Hard Off, Reset en Power Cycle met een volledig auditlog.
+- **System Event Log (SEL)**: blader door het hardware-gebeurtenislog van je BMC en exporteer het.
+- **Hardware-inventaris (FRU)**: serienummers, onderdeelnummers en fabrikantgegevens.
+- **Multi-serverdashboard**: beheer veel BMC's vanuit één instantie.
+
+## Volgende stappen
+
+<CardGroup cols={2}>
+  <Card title="ipmideck installeren" icon="download" href="/nl/installation">
+    Docker en pip, met uitleg over het `--network host`-vereiste.
+  </Card>
+  <Card title="Eerste installatie" icon="wand-magic-sparkles" href="/nl/setup">
+    De installatiewizard: kies een inlogmodus en voeg je eerste BMC toe.
+  </Card>
+  <Card title="IPMI inschakelen" icon="server" href="/nl/enable-ipmi">
+    Stappen per leverancier om IPMI-over-LAN in je BMC aan te zetten.
+  </Card>
+  <Card title="Configuratie" icon="sliders" href="/nl/configuration">
+    Poorten, polling-intervallen, bewaartermijn en overrides via omgevingsvariabelen.
+  </Card>
+</CardGroup>

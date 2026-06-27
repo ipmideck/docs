@@ -1,0 +1,53 @@
+---
+title: "Installation"
+description: "Installez ipmideck avec Docker ou pip, et comprenez l'exigence --network host."
+---
+
+## Docker (recommandé)
+
+```bash
+docker run --network host ipmideck/ipmideck:latest
+```
+
+`--network host` est nécessaire pour que le conteneur puisse atteindre vos BMC directement sur votre réseau
+local via le port UDP 623 (le port IPMI/RMCP+). Sans le réseau hôte, le conteneur
+se trouve derrière le NAT de Docker et ne peut pas établir de session IPMI avec votre matériel.
+
+Une fois le conteneur démarré, ouvrez `http://<your-ip>:3000` et suivez l'assistant de configuration.
+
+<Note>
+  L'image publiée se trouve sur Docker Hub à l'adresse
+  [hub.docker.com/r/ipmideck/ipmideck](https://hub.docker.com/r/ipmideck/ipmideck).
+  L'image arrive bientôt, la commande ci-dessus est exactement celle que vous exécuterez une fois
+  qu'elle sera publiée.
+</Note>
+
+## pip
+
+```bash
+pip install ipmideck
+```
+
+Le paquet pip nécessite l'installation d'`ipmitool` sur l'hôte, ipmideck délègue à
+`ipmitool` pour chaque opération IPMI. Installez-le d'abord depuis le gestionnaire de paquets de votre distribution
+(par exemple `apt install ipmitool` ou `dnf install ipmitool`).
+
+## Où ipmideck stocke les données
+
+ipmideck écrit sa configuration et sa base de données dans un répertoire de données :
+
+- **Docker :** `/data` à l'intérieur du conteneur (l'image définit `IPMIDECK_DATA_DIR=/data` ;
+  persistez-le avec un volume).
+- **pip sous Linux :** `/data` par défaut : définissez `IPMIDECK_DATA_DIR` pour le déplacer.
+- **pip sous Windows :** `./data`, relatif au répertoire depuis lequel vous exécutez `ipmideck`.
+
+Vous pouvez surcharger l'emplacement sur n'importe quelle plateforme avec la variable d'environnement `IPMIDECK_DATA_DIR`.
+Ce répertoire contient `config.yaml`, la base de données SQLite et le fichier de clé de chiffrement
+utilisé pour protéger vos identifiants BMC stockés. Consultez [Configuration](/fr/configuration) et
+[Exécuter ipmideck](/fr/running) pour plus de détails.
+
+## Étapes suivantes
+
+- [Configuration](/fr/configuration) : réglez les ports, les intervalles d'interrogation et la rétention.
+- [Matériel pris en charge](/fr/supported-hardware) : confirmez que votre BMC est couvert.
+- [Dépannage](/fr/troubleshooting) : erreurs de connexion et IPMI.

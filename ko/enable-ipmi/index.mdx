@@ -1,0 +1,61 @@
+---
+title: "서버에서 IPMI 활성화"
+description: "ipmideck가 연결할 수 있기 전에, 서버의 BMC에서 IPMI over LAN을 활성화해야 합니다. Dell, Supermicro, HPE, Lenovo, IBM에 대한 공급업체별 안내."
+---
+
+ipmideck는 **IPMI 2.0 over LAN**으로 서버와 통신합니다. 대부분의 서버에서 이 LAN
+채널은 기본적으로 비활성화되어 있으므로 (또는 기본 자격 증명으로 출하), ipmideck가 BMC에
+도달할 수 있기 전에, IPMI over LAN을 활성화하고 컨트롤러 자체에 사용자 계정을 구성해야
+합니다.
+
+IPMI over LAN은 **UDP 포트 623** (IPMI/RMCP+ 포트)을 사용합니다. 그 포트가 ipmideck를
+실행하는 호스트에서 도달 가능한지, 그리고 호스트와 BMC 사이의 모든 방화벽이 그것을
+허용하는지 확인하세요.
+
+<Warning>
+  이 가이드의 단계는 각 공급업체의 **공식 문서**에서 나왔지만, BMC 웹 인터페이스
+  경로는 펌웨어 세대와 모델에 따라 다릅니다. 의존하기 전에 **각 경로를 자신의 하드웨어에 대해
+  검증하세요**. 공급업체의 문서가 부족한 경우, 페이지가 그것을 명시적으로 밝힙니다.
+</Warning>
+
+## BMC 선택
+
+각 가이드는 기본 자격 증명, 활성화 토글, 검증 명령을 포함하여, 그 공급업체의 BMC 웹
+인터페이스에서 IPMI over LAN을 활성화하는 과정을 안내합니다.
+
+<CardGroup cols={2}>
+  <Card title="Dell iDRAC" href="/ko/enable-ipmi/dell-idrac">
+    iDRAC7 / iDRAC8 / iDRAC9, PowerEdge 서버.
+  </Card>
+  <Card title="Supermicro" href="/ko/enable-ipmi/supermicro">
+    Supermicro IPMI 2.0 BMC (X8–X12 보드). <b>낮은 신뢰도, 하드웨어에서 검증하세요.</b>
+  </Card>
+  <Card title="HPE iLO" href="/ko/enable-ipmi/hpe-ilo">
+    HPE iLO 4 / iLO 5, ProLiant 서버.
+  </Card>
+  <Card title="Lenovo XCC" href="/ko/enable-ipmi/lenovo-xcc">
+    Lenovo XClarity Controller (XCC / XCC2), ThinkSystem 서버.
+  </Card>
+  <Card title="IBM IMM" href="/ko/enable-ipmi/ibm-imm">
+    IBM IMM2, System x 서버. <b>낮은 신뢰도, 하드웨어에서 검증하세요.</b>
+  </Card>
+</CardGroup>
+
+## 활성화한 후
+
+IPMI over LAN이 켜지고 BMC 사용자 계정이 있으면, ipmideck를 실행할 호스트에서
+연결성을 검증합니다.
+
+```bash
+ipmitool -I lanplus -H <bmc-ip> -U <user> -P <password> chassis status
+```
+
+성공적인 응답은 LAN 채널이 활성 상태임을 확인합니다. 그런 다음 ipmideck의 설정
+마법사에서 서버를 추가합니다. [시작하기](/ko/getting-started)와
+[지원 하드웨어](/ko/supported-hardware)를 참조하세요.
+
+<Note>
+  많은 공급업체는 **사용하지 않을 때 IPMI over LAN을 다시 비활성화할 것**을 권장합니다.
+  프로토콜의 인증이 BMC의 HTTPS 인터페이스보다 약하기 때문입니다. BMC를 신뢰할 수 있는
+  관리 네트워크에 두고 강력하고 기본이 아닌 자격 증명을 사용하세요.
+</Note>

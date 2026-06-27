@@ -1,0 +1,52 @@
+---
+title: "インストール"
+description: "Docker または pip で ipmideck をインストールし、--network host 要件を理解します。"
+---
+
+## Docker (推奨)
+
+```bash
+docker run --network host ipmideck/ipmideck:latest
+```
+
+`--network host` は、コンテナーがローカルネットワーク上で UDP ポート 623 (IPMI/RMCP+ ポート) を通じて
+BMC に直接到達できるようにするために必要です。ホストネットワークがないと、コンテナーは Docker の
+NAT の背後に置かれ、ハードウェアとの IPMI セッションを完了できません。
+
+コンテナーが起動したら、`http://<your-ip>:3000` を開いてセットアップウィザードに従います。
+
+<Note>
+  公開イメージは Docker Hub の
+  [hub.docker.com/r/ipmideck/ipmideck](https://hub.docker.com/r/ipmideck/ipmideck) にあります。
+  イメージは近日公開です。上記のコマンドは、公開されたときに実行する正確なコマンドです。
+</Note>
+
+## pip
+
+```bash
+pip install ipmideck
+```
+
+pip パッケージはホストに `ipmitool` がインストールされている必要があります。ipmideck はすべての IPMI 操作で
+`ipmitool` を呼び出します。まずディストリビューションのパッケージマネージャーからインストールしてください
+(例: `apt install ipmitool` または `dnf install ipmitool`)。
+
+## ipmideck がデータを保存する場所
+
+ipmideck は設定とデータベースをデータディレクトリーに書き込みます。
+
+- **Docker:** コンテナー内の `/data` (イメージが `IPMIDECK_DATA_DIR=/data` を設定します。
+  ボリュームで永続化してください)。
+- **Linux 上の pip:** デフォルトで `/data`。`IPMIDECK_DATA_DIR` を設定して移動します。
+- **Windows 上の pip:** `./data`。`ipmideck` を実行するディレクトリーからの相対パス。
+
+任意のプラットフォームで `IPMIDECK_DATA_DIR` 環境変数を使って場所を上書きできます。
+このディレクトリーには `config.yaml`、SQLite データベース、保存された BMC 資格情報を保護するために
+使用される暗号化キーファイルが含まれます。詳細は [設定](/ja/configuration) と
+[ipmideck の実行](/ja/running) を参照してください。
+
+## 次のステップ
+
+- [設定](/ja/configuration): ポート、ポーリング間隔、保持期間を調整します。
+- [対応ハードウェア](/ja/supported-hardware): BMC がカバーされていることを確認します。
+- [トラブルシューティング](/ja/troubleshooting): 接続と IPMI のエラー。

@@ -1,0 +1,58 @@
+---
+title: "HPE iLO"
+description: "Ative o IPMI/DCMI-over-LAN no HPE iLO 4 / iLO 5 para que o ipmideck se possa ligar ao seu servidor ProLiant."
+---
+
+**Aplica-se a:** HPE iLO 4 e iLO 5 (servidores ProLiant).
+
+<Note>
+  O HPE iLO é um fabricante **Experimental** para o ipmideck, estes passos são da documentação oficial
+  da HPE e de um iLO 4 real. No **iLO 4** o IPMI-over-LAN está normalmente **ativado por
+  predefinição**; no **iLO 5** está **desativado por predefinição** por segurança e tem de ser ligado
+  (passos abaixo).
+</Note>
+
+## iLO 5: ative IPMI/DCMI por LAN
+
+<Steps>
+  <Step title="Abra a interface web do iLO">
+    Num navegador, navegue para o endereço IP do iLO e inicie sessão com credenciais de administrador
+    do iLO.
+  </Step>
+  <Step title="Security → Access Settings → Network">
+    No painel de navegação esquerdo clique em **Security**, abra o separador **Access Settings**, depois
+    clique no ícone de **lápis / editar** para a secção **Network**.
+  </Step>
+  <Step title="Ative IPMI/DCMI por LAN">
+    Marque **IPMI/DCMI over LAN** e clique em **Apply**. O IPMI-over-LAN usa a porta padrão
+    **623**.
+  </Step>
+</Steps>
+
+## iLO 4: confirme o endereço de rede
+
+No iLO 4, o IPMI-over-LAN está geralmente já ativado; precisa sobretudo do endereço IP do iLO.
+Abra **Network → iLO Dedicated Network Port** e leia o **Network Summary**.
+
+<Frame caption="iLO 4 → Network → iLO Dedicated Network Port → Network Summary. The IPv4 Summary block holds the iLO address, subnet, and gateway you need (the red highlight on the SNTP tab is incidental to this capture).">
+  <img src="/tutorials/HPE/HP-Proliant-BL460C-Gen9-Network-info-screenshot-IPMI_web-interface.png" alt="HPE iLO 4 Network Summary page on a ProLiant BL460c Gen9" />
+</Frame>
+
+## Verificação
+
+A partir do host que vai correr o ipmideck:
+
+```bash
+ipmitool -I lanplus -H <ilo-ip> -U <user> -P <password> chassis status
+```
+
+<Note>
+  **Sinalizar para revisão:** o caminho difere entre iLO 4 (um separador **Network**; IPMI normalmente
+  ativado) e iLO 5 (**Security → Access Settings**; IPMI desativado por predefinição). Verifique
+  contra a sua versão específica do iLO antes de confiar nestes passos.
+</Note>
+
+## Fonte
+
+[CITED: support.hpe.com, HPE iLO 5 IPMI User Guide](https://support.hpe.com/hpesc/public/docDisplay?docId=a00018321en_us) ·
+[Guidelines for using iLO with IPMI or DCMI over LAN](https://support.hpe.com/hpesc/public/docDisplay?docId=a00026171en_us)

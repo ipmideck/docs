@@ -1,0 +1,72 @@
+---
+title: "Sicherung & Wiederherstellung"
+description: "Sichern Sie das Datenverzeichnis von ipmideck (Konfiguration, Datenbank und Verschlüsselungsschlüssel) und stellen Sie es nach einem Umzug oder einem Neuaufbau wieder her."
+---
+
+Alles, woran sich ipmideck erinnert, liegt in einem Datenverzeichnis: Ihre `config.yaml`, die SQLite-
+Datenbank (`ipmideck.db`) mit Ihren Servern und dem Sensorverlauf und die Datei `encryption.key`,
+die Ihre gespeicherten BMC-Zugangsdaten entschlüsselt. Sichern Sie diese, und Sie können ipmideck
+überall neu aufbauen.
+
+<Warning>
+  `encryption.key` ist aus gutem Grund Teil der Sicherung: Ohne sie können die wiederhergestellten
+  BMC-Benutzernamen und -Passwörter nicht entschlüsselt werden. Eine Sicherung nur der Datenbank lässt Ihre
+  gespeicherten Zugangsdaten unlesbar, halten Sie die Schlüsseldatei also so sicher wie die Datenbank.
+</Warning>
+
+## Was in einer Sicherung enthalten ist
+
+| Datei | Was sie enthält |
+| --- | --- |
+| `ipmideck.db` | Server, Benutzer, Sensorverlauf, Befehlsprotokoll und Einstellungen. |
+| `config.yaml` | Server-Bind, Auth, IPMI, Logging und Moduleinstellungen. |
+| `encryption.key` | Der 32-Byte-Schlüssel, der Ihre gespeicherten BMC-Zugangsdaten entschlüsselt. |
+
+Diese liegen alle im [Datenverzeichnis](/de/configuration#wo-die-konfiguration-liegt): `/data` unter Docker
+und Linux, `./data` unter Windows oder dort, wohin `IPMIDECK_DATA_DIR` zeigt.
+
+## Option A: In-App-Sicherung
+
+ipmideck kann Ihnen eine fertige Sicherung übergeben. Öffnen Sie in der Web-Oberfläche **Settings** und
+verwenden Sie die Sicherungsaktion: Sie lädt `ipmideck-backup-<timestamp>.zip` herunter, das die drei
+obigen Dateien enthält. Die Datenbank wird zuerst per Checkpoint gesichert, sodass der Snapshot Ihre
+neuesten Messwerte enthält.
+
+Zum Wiederherstellen laden Sie diese Zip-Datei über denselben **Settings**-Bildschirm hoch. ipmideck
+validiert sie, stellt die Dateien bereit und wendet sie beim nächsten Start an, **starten Sie ipmideck
+also neu, um die Wiederherstellung abzuschließen**.
+
+## Option B: Das Datenverzeichnis kopieren
+
+Da der gesamte Zustand nur aus Dateien besteht, können Sie auch sichern, indem Sie das Datenverzeichnis
+kopieren, während ipmideck gestoppt ist:
+
+<CodeGroup>
+
+```bash bash
+# stop ipmideck first, then:
+cp -r /data /data-backup-$(date +%Y%m%d)
+```
+
+```powershell PowerShell
+# stop ipmideck first, then:
+Copy-Item -Recurse .\data ".\data-backup-$(Get-Date -Format yyyyMMdd)"
+```
+
+</CodeGroup>
+
+In Docker liegen die Daten in dem Volume, das Sie auf `/data` gemountet haben, sichern Sie also dieses
+Volume. Die Wiederherstellung ist der umgekehrte Weg: Stoppen Sie ipmideck, legen Sie die Dateien zurück
+ins Datenverzeichnis und starten Sie es erneut.
+
+<Note>
+  Stoppen Sie ipmideck vor einer dateibasierten Kopie. Die Datenbank läuft im WAL-Modus, das Kopieren
+  während die App schreibt kann also einen inkonsistenten Snapshot erfassen. Die In-App-Sicherung
+  vermeidet dies, indem sie zuerst einen Checkpoint setzt.
+</Note>
+
+## Nächste Schritte
+
+- [Konfiguration](/de/configuration): wo das Datenverzeichnis liegt und was `config.yaml` enthält.
+- [ipmideck aktualisieren](/de/updating): Ihre Daten überstehen ein Upgrade.
+- [Sicherheit](/de/security): wie Zugangsdaten im Ruhezustand verschlüsselt werden.

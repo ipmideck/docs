@@ -1,0 +1,72 @@
+---
+title: "备份与恢复"
+description: "备份 ipmideck 的数据目录（配置、数据库和加密密钥），并在迁移或重建后恢复它。"
+---
+
+ipmideck 记住的一切都位于一个数据目录中：你的 `config.yaml`、包含你服务器和
+传感器历史的 SQLite 数据库（`ipmideck.db`），以及解密你存储的 BMC
+凭据的 `encryption.key` 文件。备份这些内容，你就可以在任何地方重建
+ipmideck。
+
+<Warning>
+  `encryption.key` 是备份的一部分是有原因的：没有它，恢复的 BMC
+  用户名和密码就无法解密。仅备份数据库会让你
+  保存的凭据无法读取，因此请像保护数据库一样保护密钥文件。
+</Warning>
+
+## 备份中包含什么
+
+| 文件 | 它包含什么 |
+| --- | --- |
+| `ipmideck.db` | 服务器、用户、传感器历史、命令日志和设置。 |
+| `config.yaml` | 服务器绑定、auth、IPMI、日志和模块设置。 |
+| `encryption.key` | 解密你存储的 BMC 凭据的 32 字节密钥。 |
+
+这些全都位于[数据目录](/zh-Hans/configuration#配置文件位于何处)中：Docker
+和 Linux 上为 `/data`，Windows 上为 `./data`，或 `IPMIDECK_DATA_DIR` 指向的任何位置。
+
+## 选项 A：应用内备份
+
+ipmideck 可以为你提供一份现成的备份。在 Web UI 中，打开 **Settings** 并使用
+备份操作：它会下载包含上述三个文件的
+`ipmideck-backup-<timestamp>.zip`。数据库会先进行检查点，因此快照包含你最近的
+读数。
+
+要恢复，请从同一个 **Settings** 界面上传该 zip。ipmideck 会验证它，
+暂存文件，并在下次启动时应用它们，因此**重启 ipmideck 以完成
+恢复**。
+
+## 选项 B：复制数据目录
+
+因为整个状态只是文件，你也可以在 ipmideck 停止时通过复制数据目录
+来备份：
+
+<CodeGroup>
+
+```bash bash
+# stop ipmideck first, then:
+cp -r /data /data-backup-$(date +%Y%m%d)
+```
+
+```powershell PowerShell
+# stop ipmideck first, then:
+Copy-Item -Recurse .\data ".\data-backup-$(Get-Date -Format yyyyMMdd)"
+```
+
+</CodeGroup>
+
+在 Docker 中，数据位于你挂载到 `/data` 的卷中，因此请备份该卷。
+恢复是相反的过程：停止 ipmideck，将文件放回数据目录，然后
+再次启动它。
+
+<Note>
+  在文件级复制之前先停止 ipmideck。数据库在 WAL 模式下运行，因此在应用
+  正在写入时复制它可能会捕获不一致的快照。应用内备份通过
+  先做检查点来避免这一点。
+</Note>
+
+## 后续步骤
+
+- [配置](/zh-Hans/configuration)：数据目录所在位置以及 `config.yaml` 包含什么。
+- [更新 ipmideck](/zh-Hans/updating)：你的数据在升级中得以保留。
+- [安全](/zh-Hans/security)：凭据如何在静态时加密。

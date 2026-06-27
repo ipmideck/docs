@@ -1,0 +1,62 @@
+---
+title: "Sécurité"
+description: "Chaque affirmation de sécurité ici est fondée sur le propre code backend d'ipmideck, pas sur le marketing."
+---
+
+ipmideck est conçu pour les personnes qui lisent le code source plutôt que de faire confiance à un fabricant. Les affirmations
+ci-dessous sont fondées sur le code backend du produit.
+
+## Sécurité des données et des comptes
+
+Les identifiants sont chiffrés au repos, les connexions sont hachées et les sessions sont signées, la
+base de données seule ne suffit jamais pour entrer.
+
+### Chiffrement des identifiants AES-256-CBC
+
+Les identifiants BMC sont chiffrés au repos avec AES-256-CBC et un IV aléatoire par secret. La
+clé de chiffrement réside dans un fichier de clé distinct (`data/encryption.key`, 32 octets aléatoires,
+permissions réservées au propriétaire), jamais dans la base de données, donc une base de données volée seule ne peut rien
+déchiffrer.
+
+### Connexions bcrypt + sessions signées HMAC-SHA256
+
+Les mots de passe de connexion sont hachés avec bcrypt (sel par mot de passe, vérification en temps constant). Les jetons
+de session sont signés avec HMAC-SHA256, revalidés à chaque requête et invalidés lorsqu'un
+nom d'utilisateur change. Les cookies sont HttpOnly et SameSite=Lax.
+
+### Verrouillage anti-force brute
+
+Verrouillage par nom d'utilisateur avec recul exponentiel après cinq tentatives échouées (jusqu'à une heure),
+plus des erreurs génériques à l'épreuve des fuites temporelles pour qu'un attaquant n'apprenne rien de la façon dont une connexion échoue.
+
+### ipmitool sans shell, entièrement hors ligne
+
+ipmitool est invoqué via une liste d'arguments (`create_subprocess_exec`), jamais un shell,
+donc il n'y a pas de surface d'injection de commandes. Tout le système s'exécute entièrement hors ligne : pas de
+télémétrie, pas de cloud, pas d'appels externes.
+
+## Protection du matériel
+
+FanPilot est conçu pour échouer en mode sûr : les limites thermiques l'emportent sur toute courbe, et la boucle de contrôle
+continue de fonctionner même quand vous ne regardez pas.
+
+### Forçage de sécurité à la température critique
+
+Les ventilateurs sont forcés à 100 % à la température critique ou au-delà (par défaut 85 °C, configurable).
+Aucune courbe de ventilateurs ne peut surcharger le forçage, la limite thermique l'emporte toujours.
+
+### Hystérésis pour stopper l'oscillation
+
+Une marge d'hystérésis configurable (par défaut 3 °C) empêche les ventilateurs d'osciller rapidement vers le haut
+et vers le bas autour d'une limite de température, gardant les changements de vitesse fluides et prévisibles.
+
+### Boucle autonome en arrière-plan
+
+Le contrôle des ventilateurs s'exécute dans une tâche d'arrière-plan (~30 s d'interrogation) qui continue de fonctionner avec le tableau de bord
+fermé, la protection ne dépend pas d'un onglet de navigateur ouvert.
+
+### Récupération après arrêt non propre + arrêt propre
+
+Après un arrêt non propre (coupure de courant ou `kill -9`), ipmideck restaure le propre mode automatique du BMC,
+et il se récupère automatiquement lors de la détection de serveur hors ligne et de capteurs périmés. Un arrêt propre rend les
+ventilateurs à la gestion thermique du BMC.

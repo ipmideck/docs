@@ -1,0 +1,55 @@
+---
+title: "Functies"
+description: "Sensormonitoring, FanPilot-fanregeling, voedingsbeheer, SEL, FRU en het multi-serverdashboard."
+---
+
+## Sensormonitoring
+
+- Realtime metingen van temperatuur, fan-RPM, voltage en stroomverbruik.
+- Live grafieken met historische data (tot een jaar, geregeld door `data.retention_days`).
+- Configureerbare alarmdrempels met browsermeldingen.
+
+ipmideck pollt elke BMC op een interval ingesteld door `ipmi.poll_interval` (standaard 30 seconden,
+overschrijfbaar met `IPMIDECK_IPMI_POLL_INTERVAL`).
+
+## FanPilot: intelligente fanregeling
+
+- Visuele drag-and-drop-editor voor fan-curves.
+- Ingebouwde profielen: Silent, Balanced, Performance, Full Speed en Custom.
+- Configureerbare hysterese om fan-oscillatie rond een temperatuurlimiet te voorkomen.
+- Veiligheidsoverride: fans worden op 100% gezet op of boven de kritieke temperatuur.
+- Autonome lus die onafhankelijk van het dashboard blijft werken.
+
+<Warning>
+  De veiligheidsoverride van FanPilot wint altijd. Geen enkele fan-curve kan fans onder de 100% houden zodra
+  de kritieke temperatuur is bereikt, de thermische limiet heeft voorrang op elk profiel.
+</Warning>
+
+## Voedingsbeheer
+
+- Power On, Soft Off, Hard Off, Reset en Power Cycle.
+- Realtime indicator van de voedingsstatus.
+- Bevestigingsdialogen voor destructieve acties.
+- Volledig commando-auditlog van elke statuswijzigende bewerking.
+
+## System Event Log (SEL)
+
+- Bekijk het hardware-gebeurtenislog van de BMC met filtering op ernst.
+- Zoeken, datumbereikfilters en export naar CSV of JSON.
+
+## Hardware-inventaris (FRU)
+
+- Serienummers, onderdeelnummers en fabrikantinformatie.
+- Board-, chassis- en productgegevens in één oogopslag.
+
+## Multi-serverdashboard
+
+- Beheer meerdere BMC's vanuit één ipmideck-instantie.
+- Panoramisch overzicht met een statusoverzicht van alle servers.
+
+## Hoe het met je hardware praat
+
+ipmideck stuurt elke IPMI-bewerking aan via `ipmitool`, aangeroepen over `lanplus`
+(IPMI 2.0) voor versleutelde sessies. Argumenten worden altijd als een lijst doorgegeven, nooit via
+een shell, dus er is geen command-injection-oppervlak. Zie [Beveiliging](/nl/security) voor het
+volledige beeld.

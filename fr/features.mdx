@@ -1,0 +1,55 @@
+---
+title: "Fonctionnalités"
+description: "Surveillance des capteurs, contrôle des ventilateurs FanPilot, gestion de l'alimentation, SEL, FRU et le tableau de bord multiserveur."
+---
+
+## Surveillance des capteurs
+
+- Relevés en temps réel de température, RPM des ventilateurs, tension et consommation d'énergie.
+- Graphiques en direct avec données historiques (jusqu'à un an, contrôlé par `data.retention_days`).
+- Seuils d'alerte configurables avec notifications du navigateur.
+
+ipmideck interroge chaque BMC à un intervalle défini par `ipmi.poll_interval` (par défaut 30 secondes,
+surchargeable avec `IPMIDECK_IPMI_POLL_INTERVAL`).
+
+## FanPilot : contrôle intelligent des ventilateurs
+
+- Éditeur visuel de courbes de ventilateurs en glisser-déposer.
+- Profils intégrés : Silent, Balanced, Performance, Full Speed et Custom.
+- Hystérésis configurable pour éviter l'oscillation des ventilateurs autour d'une limite de température.
+- Forçage de sécurité : les ventilateurs sont forcés à 100 % à la température critique ou au-delà.
+- Boucle autonome qui continue de fonctionner indépendamment du tableau de bord.
+
+<Warning>
+  Le forçage de sécurité de FanPilot l'emporte toujours. Aucune courbe de ventilateurs ne peut maintenir les ventilateurs en dessous de 100 % une fois
+  la température critique atteinte, la limite thermique a priorité sur tout profil.
+</Warning>
+
+## Contrôle de l'alimentation
+
+- Power On, Soft Off, Hard Off, Reset et Power Cycle.
+- Indicateur d'état d'alimentation en temps réel.
+- Boîtes de dialogue de confirmation pour les actions destructrices.
+- Journal d'audit complet des commandes de chaque opération modifiant l'état.
+
+## System Event Log (SEL)
+
+- Afficher le journal d'événements matériels du BMC avec filtrage par gravité.
+- Recherche, filtres par plage de dates et export en CSV ou JSON.
+
+## Inventaire matériel (FRU)
+
+- Numéros de série, références et informations du fabricant.
+- Données de carte, châssis et produit en un coup d'œil.
+
+## Tableau de bord multiserveur
+
+- Gérez plusieurs BMC depuis une seule instance ipmideck.
+- Vue panoramique avec un aperçu de l'état de tous les serveurs.
+
+## Comment il dialogue avec votre matériel
+
+ipmideck pilote chaque opération IPMI via `ipmitool`, invoqué sur `lanplus`
+(IPMI 2.0) pour des sessions chiffrées. Les arguments sont toujours passés sous forme de liste, jamais via
+un shell, donc il n'y a pas de surface d'injection de commandes. Consultez [Sécurité](/fr/security) pour le
+tableau complet.

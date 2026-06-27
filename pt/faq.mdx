@@ -1,0 +1,59 @@
+---
+title: "FAQ"
+description: "Perguntas frequentes sobre correr o ipmideck num homelab."
+---
+
+<AccordionGroup>
+
+<Accordion title="O ipmideck é baseado na nuvem?">
+  Não. O ipmideck é totalmente auto-hospedado e corre inteiramente na sua própria rede. Não faz
+  chamadas externas, sem telemetria, sem nuvem, sem conta. Fala diretamente com os seus BMCs e
+  guarda tudo localmente.
+</Accordion>
+
+<Accordion title="Com que BMCs funciona?">
+  Qualquer servidor com um BMC IPMI 2.0 deve ligar-se para monitorização de sensores, controlo de energia, SEL
+  e FRU. O Dell PowerEdge / iDRAC está totalmente testado; Supermicro, HPE iLO,
+  Lenovo XCC e IBM IMM são experimentais. Veja [Hardware suportado](/pt/supported-hardware).
+</Accordion>
+
+<Accordion title="Preciso de ter o ipmitool instalado?">
+  Apenas para a instalação pip, onde o pacote recorre ao seu `ipmitool` do sistema. A imagem
+  Docker inclui tudo o que precisa, por isso só precisa de Docker com `--network host`.
+</Accordion>
+
+<Accordion title="Porque é que o Docker precisa de --network host?">
+  O ipmideck alcança os BMCs pela porta UDP 623 na sua rede local. A rede de host permite ao
+  contentor falar com essa porta diretamente em vez de ficar atrás do NAT do Docker. Veja
+  [Instalação](/pt/installation).
+</Accordion>
+
+<Accordion title="Em que porta corre o painel?">
+  3000 por predefinição. Mude-a em `config.yaml` (`server.port`) ou com a
+  variável de ambiente `IPMIDECK_SERVER_PORT`.
+</Accordion>
+
+<Accordion title="Durante quanto tempo é mantido o histórico de sensores?">
+  Um ano por predefinição (`data.retention_days: 365`). Substitua-o com
+  `IPMIDECK_DATA_RETENTION_DAYS`. Os dados mais antigos são limpos no horário definido por
+  `data.cleanup_interval`.
+</Accordion>
+
+<Accordion title="Posso desativar o início de sessão?">
+  Sim, defina `auth.enabled: false` em `config.yaml`, ou `IPMIDECK_AUTH_ENABLED=false`. Faça isto
+  apenas numa rede de confiança e isolada: com a auth desligada, qualquer pessoa que alcance o painel
+  pode controlar o seu hardware.
+</Accordion>
+
+<Accordion title="O controlo de ventoinha é seguro?">
+  O FanPilot falha em segurança. As ventoinhas são forçadas a 100% no ou acima da temperatura crítica, e o
+  ciclo de controlo corre autonomamente em segundo plano mesmo com o painel fechado. Veja
+  [Segurança](/pt/security) para os detalhes completos de proteção de hardware.
+</Accordion>
+
+<Accordion title="Como corro múltiplos servidores?">
+  Adicione cada BMC a partir do painel. O ipmideck faz a gestão de múltiplos BMCs a partir de uma única instância e
+  mostra uma visão geral panorâmica do estado de todos eles.
+</Accordion>
+
+</AccordionGroup>

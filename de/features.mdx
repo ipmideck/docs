@@ -1,0 +1,55 @@
+---
+title: "Funktionen"
+description: "Sensorüberwachung, FanPilot-Lüftersteuerung, Stromverwaltung, SEL, FRU und das Multi-Server-Dashboard."
+---
+
+## Sensorüberwachung
+
+- Echtzeit-Messwerte für Temperatur, Lüfterdrehzahl, Spannung und Stromverbrauch.
+- Live-Diagramme mit historischen Daten (bis zu einem Jahr, gesteuert durch `data.retention_days`).
+- Konfigurierbare Alarmschwellen mit Browser-Benachrichtigungen.
+
+ipmideck fragt jeden BMC in einem Intervall ab, das durch `ipmi.poll_interval` gesetzt wird (Standard 30 Sekunden,
+überschreibbar mit `IPMIDECK_IPMI_POLL_INTERVAL`).
+
+## FanPilot: Intelligente Lüftersteuerung
+
+- Visueller Drag-and-Drop-Editor für Lüfterkurven.
+- Eingebaute Profile: Silent, Balanced, Performance, Full Speed und Custom.
+- Konfigurierbare Hysterese, um Lüfterschwingungen um eine Temperaturgrenze zu verhindern.
+- Sicherheits-Override: Lüfter werden bei oder über der kritischen Temperatur auf 100 % gezwungen.
+- Autonome Schleife, die unabhängig vom Dashboard weiterarbeitet.
+
+<Warning>
+  Der Sicherheits-Override von FanPilot gewinnt immer. Keine Lüfterkurve kann Lüfter unter 100 % halten, sobald
+  die kritische Temperatur erreicht ist, die thermische Grenze hat Vorrang vor jedem Profil.
+</Warning>
+
+## Stromsteuerung
+
+- Power On, Soft Off, Hard Off, Reset und Power Cycle.
+- Echtzeit-Anzeige des Power-Status.
+- Bestätigungsdialoge für zerstörerische Aktionen.
+- Vollständiges Befehls-Audit-Log jeder zustandsändernden Operation.
+
+## System Event Log (SEL)
+
+- Das Hardware-Ereignisprotokoll des BMC mit Schweregrad-Filterung anzeigen.
+- Suche, Datumsbereich-Filter und Export nach CSV oder JSON.
+
+## Hardware-Inventar (FRU)
+
+- Seriennummern, Teilenummern und Herstellerinfos.
+- Board-, Chassis- und Produktdaten auf einen Blick.
+
+## Multi-Server-Dashboard
+
+- Mehrere BMCs von einer einzigen ipmideck-Instanz aus verwalten.
+- Panoramaansicht mit einer Statusübersicht aller Server.
+
+## Wie es mit Ihrer Hardware spricht
+
+ipmideck treibt jede IPMI-Operation über `ipmitool` an, aufgerufen über `lanplus`
+(IPMI 2.0) für verschlüsselte Sitzungen. Argumente werden immer als Liste übergeben, nie über
+eine Shell, sodass es keine Command-Injection-Angriffsfläche gibt. Siehe [Sicherheit](/de/security) für das
+vollständige Bild.

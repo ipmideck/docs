@@ -1,0 +1,61 @@
+---
+title: "Configurazione iniziale"
+description: "La prima volta che apri ipmideck parte una breve procedura guidata: scegli una modalità di accesso, aggiungi il tuo primo BMC e apri la dashboard."
+---
+
+La prima volta che apri ipmideck su `http://<your-ip>:3000`, al posto della dashboard
+compare una procedura guidata in quattro passaggi. Puoi cambiare la lingua dal selettore
+in alto a destra in qualsiasi passaggio.
+
+<Steps>
+  <Step title="Benvenuto">
+    Una breve schermata introduttiva. Clicca **Inizia** per cominciare.
+  </Step>
+  <Step title="Scegli una modalità di accesso">
+    Scegli come proteggere la dashboard:
+
+    - **Richiedi login** (l'impostazione predefinita sicura): crea ora un account amministratore. Inserisci un nome utente,
+      una password e di nuovo la password per conferma. ipmideck archivia la password come
+      hash bcrypt, mai in chiaro.
+    - **Accesso aperto**: nessun login. Chiunque possa raggiungere la dashboard può controllare il tuo
+      hardware, quindi scegli questa opzione solo su una rete fidata e isolata.
+
+    Puoi cambiarla in seguito, e puoi reimpostare la password da riga di comando con
+    [`ipmideck reset-password`](/it/cli).
+  </Step>
+  <Step title="Aggiungi il tuo primo server">
+    Inserisci i dettagli di connessione di un BMC:
+
+    | Campo | Note |
+    | --- | --- |
+    | **Nome** | Un'etichetta per il server, per esempio `R710-homelab`. |
+    | **Host** | L'indirizzo IP o l'hostname del BMC. |
+    | **Porta** | La porta IPMI/RMCP+. Predefinita `623`. |
+    | **Nome utente** | L'account del BMC. Predefinito `ADMIN`. |
+    | **Password** | La password dell'account del BMC. |
+    | **Produttore** | Supermicro, Dell, HP o Generic. |
+
+    Clicca **Prova connessione** per verificare le credenziali prima di salvare (ipmideck esegue una
+    query sullo stato dell'alimentazione tramite `lanplus`), poi **Aggiungi server**.
+
+    <Note>
+      IPMI-over-LAN deve essere prima abilitato sul BMC, altrimenti la prova di connessione fallisce. Vedi
+      [Abilita IPMI sul tuo server](/it/enable-ipmi) per i passaggi di ciascun produttore.
+    </Note>
+  </Step>
+  <Step title="Fatto">
+    La procedura conferma che il server è stato aggiunto. Clicca **Vai alla dashboard** per iniziare il monitoraggio.
+  </Step>
+</Steps>
+
+## Aggiungere altri server
+
+Non sei limitato a un solo BMC. Dalla dashboard puoi aggiungere altri server in seguito, e
+ipmideck li gestisce tutti da una sola istanza. Vedi
+[Hardware supportato](/it/supported-hardware) per scoprire quali produttori sono testati.
+
+## Prossimi passi
+
+- [Abilita IPMI sul tuo server](/it/enable-ipmi): attiva IPMI-over-LAN prima di collegarti.
+- [Configurazione](/it/configuration): porte, intervalli di polling e conservazione.
+- [Backup e ripristino](/it/backup-restore): conserva una copia della configurazione e dello storico.

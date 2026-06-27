@@ -1,0 +1,59 @@
+---
+title: "FAQ"
+description: "Questions courantes sur l'exécution d'ipmideck dans un homelab."
+---
+
+<AccordionGroup>
+
+<Accordion title="ipmideck est-il basé sur le cloud ?">
+  Non. ipmideck est entièrement auto-hébergé et s'exécute entièrement sur votre propre réseau. Il ne fait aucun
+  appel externe, pas de télémétrie, pas de cloud, pas de compte. Il dialogue directement avec vos BMC et
+  stocke tout en local.
+</Accordion>
+
+<Accordion title="Avec quels BMC fonctionne-t-il ?">
+  Tout serveur avec un BMC IPMI 2.0 devrait se connecter pour la surveillance des capteurs, le contrôle de l'alimentation, le SEL
+  et le FRU. Dell PowerEdge / iDRAC est entièrement testé ; Supermicro, HPE iLO,
+  Lenovo XCC et IBM IMM sont expérimentaux. Consultez [Matériel pris en charge](/fr/supported-hardware).
+</Accordion>
+
+<Accordion title="Ai-je besoin d'ipmitool installé ?">
+  Uniquement pour l'installation pip, où le paquet délègue à l'`ipmitool` de votre système. L'
+  image Docker embarque tout ce dont elle a besoin, donc vous n'avez besoin que de Docker avec `--network host`.
+</Accordion>
+
+<Accordion title="Pourquoi Docker a-t-il besoin de --network host ?">
+  ipmideck atteint les BMC via le port UDP 623 sur votre réseau local. Le réseau hôte permet au
+  conteneur de dialoguer directement avec ce port au lieu de se trouver derrière le NAT de Docker. Consultez
+  [Installation](/fr/installation).
+</Accordion>
+
+<Accordion title="Sur quel port le tableau de bord s'exécute-t-il ?">
+  3000 par défaut. Changez-le dans `config.yaml` (`server.port`) ou avec la
+  variable d'environnement `IPMIDECK_SERVER_PORT`.
+</Accordion>
+
+<Accordion title="Combien de temps l'historique des capteurs est-il conservé ?">
+  Un an par défaut (`data.retention_days: 365`). Surchargez-le avec
+  `IPMIDECK_DATA_RETENTION_DAYS`. Les données plus anciennes sont nettoyées selon le calendrier défini par
+  `data.cleanup_interval`.
+</Accordion>
+
+<Accordion title="Puis-je désactiver la connexion ?">
+  Oui, définissez `auth.enabled: false` dans `config.yaml`, ou `IPMIDECK_AUTH_ENABLED=false`. Ne faites cela que
+  sur un réseau de confiance et isolé : avec l'auth désactivée, quiconque peut atteindre le tableau de bord
+  peut contrôler votre matériel.
+</Accordion>
+
+<Accordion title="Le contrôle des ventilateurs est-il sûr ?">
+  FanPilot échoue en mode sûr. Les ventilateurs sont forcés à 100 % à la température critique ou au-delà, et la
+  boucle de contrôle s'exécute de façon autonome en arrière-plan même avec le tableau de bord fermé. Consultez
+  [Sécurité](/fr/security) pour les détails complets de protection du matériel.
+</Accordion>
+
+<Accordion title="Comment exécuter plusieurs serveurs ?">
+  Ajoutez chaque BMC depuis le tableau de bord. ipmideck gère plusieurs BMC depuis une seule instance et
+  affiche un aperçu d'état panoramique de tous.
+</Accordion>
+
+</AccordionGroup>

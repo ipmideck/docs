@@ -1,0 +1,67 @@
+---
+title: "更新 ipmideck"
+description: "使用 Docker 或 pip 将 ipmideck 升级到新版本。你的数据目录在升级中得以保留。"
+---
+
+升级 ipmideck 替换的是应用程序，而不是你的数据。你的 `config.yaml`、数据库
+和加密密钥位于[数据目录](/zh-Hans/configuration#配置文件位于何处)中，它
+在升级过程中保持原位，因此你的服务器、历史记录和设置都会延续。
+
+<Note>
+  ipmideck 处于预发布阶段。已发布的 Docker 镜像和 PyPI 包即将推出；
+  下面的命令正是它们上线后你将使用的命令。
+</Note>
+
+## Docker
+
+拉取新镜像并用相同的数据卷重新创建容器：
+
+```bash
+docker pull ipmideck/ipmideck:latest
+docker stop ipmideck && docker rm ipmideck
+docker run -d --name ipmideck --network host -v ipmideck-data:/data ipmideck/ipmideck:latest
+```
+
+卷 `-v ipmideck-data:/data` 保存你的数据，因此重用相同的卷名会保留
+一切。如果你想精确控制何时在版本之间切换，可以固定一个版本而不是
+`latest`（例如 `ipmideck/ipmideck:2.0.0`）。
+
+## pip
+
+就地升级包，然后再次启动 ipmideck：
+
+<CodeGroup>
+
+```bash bash
+pip install -U ipmideck
+ipmideck start
+```
+
+```powershell PowerShell
+pip install -U ipmideck
+ipmideck start
+```
+
+</CodeGroup>
+
+数据目录独立于包，因此升级不会触及你的配置
+或数据库。
+
+## 检查你的版本
+
+运行中的版本会显示在仪表板上，控制台会在横幅下方的致谢行中
+打印它（例如 `v2.0.0a1`）。你也可以从 health 端点读取它：
+
+```bash
+curl http://<your-ip>:3000/api/health
+```
+
+<Note>
+  在重大升级前先做一次[备份](/zh-Hans/backup-restore)。这样一来，如果出现问题，
+  恢复只是把数据目录放回去的事情。
+</Note>
+
+## 后续步骤
+
+- [备份与恢复](/zh-Hans/backup-restore)：在升级前为你的数据做快照。
+- [运行 ipmideck](/zh-Hans/running)：启动、停止以及各平台上数据目录的位置。

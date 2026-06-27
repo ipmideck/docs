@@ -1,0 +1,232 @@
+---
+title: "CLI 参考"
+description: "从命令行运行 ipmideck：子命令、绑定标志、0.0.0.0:3000 默认值、自签名 HTTPS、演示模式和退出码。"
+---
+
+ipmideck 提供单个控制台命令 `ipmideck`，用于启动服务器、重置
+管理员密码或生成自签名证书。`ipmilink` 是同一命令的向后兼容
+别名，下面的每个子命令和标志在任一名称下的工作方式都相同。
+
+<Note>
+  CLI 仅在你直接运行 ipmideck 时适用（pip 安装或源码检出）。Docker
+  镜像直接启动 `uvicorn backend.main:app`，从不调用 CLI，因此这些
+  标志、绑定优先级或单实例守卫都不适用于容器。容器的绑定由其自己的启动命令设置。请参阅 [安装](/zh-Hans/installation)。
+</Note>
+
+## 启动服务器
+
+`start` 是主要的服务命令。不带子命令的裸调用提供完全相同的服务，
+因此这些是等价的：
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start
+# or, with no subcommand:
+ipmideck
+```
+
+```cmd cmd
+ipmideck start
+:: or, with no subcommand:
+ipmideck
+```
+
+```bash bash
+ipmideck start
+# or, with no subcommand:
+ipmideck
+```
+
+</CodeGroup>
+
+不带标志时，ipmideck 默认绑定 **`0.0.0.0:3000`**，在每个接口上、
+端口 `3000` 上可达。启动后打开 `http://<your-ip>:3000`。
+
+用 `--host` 和 `--port` 覆盖绑定：
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start --host 127.0.0.1 --port 8080
+```
+
+```cmd cmd
+ipmideck start --host 127.0.0.1 --port 8080
+```
+
+```bash bash
+ipmideck start --host 127.0.0.1 --port 8080
+```
+
+</CodeGroup>
+
+## 子命令
+
+| 子命令 | 它做什么 |
+| --- | --- |
+| `start` | 启动服务器（默认）。不带子命令的裸 `ipmideck` 也会提供服务。 |
+| `serve` | `start` 的已弃用别名。行为相同；保留以便现有脚本继续工作。 |
+| `reset-password` | 交互式创建或更新管理员登录，然后退出而不提供服务。 |
+
+<Note>
+  `serve` 是 `start` 的已弃用别名，在新脚本中请优先使用 `start`（或裸
+  `ipmideck`）。
+</Note>
+
+## 标志
+
+这些顶层标志适用于服务路径。`--demo` 和 `--config` 在任何子命令
+分支之前被读取，因此它们也影响 `reset-password` 和 `--gen-cert`。
+
+| 标志 | 效果 |
+| --- | --- |
+| `--host <host>` | 绑定主机。默认来自 `config.yaml` 或 `0.0.0.0`。显式标志胜过配置。 |
+| `--port <port>` | 绑定端口。默认来自 `config.yaml` 或 `3000`。显式标志胜过配置。 |
+| `--demo` | 以带模拟数据的演示模式运行。 |
+| `--config <path>` | 要加载的 `config.yaml` 的路径。 |
+| `--reload` | 为开发启用自动重新加载。 |
+| `--gen-cert` | 在 `data/certs/` 下生成自签名 cert + 密钥，将路径写入 `config.yaml`，然后退出。 |
+
+## 绑定优先级
+
+ipmideck 实际绑定的主机和端口按此顺序解析，优先级最高的在前：
+
+1. 命令行上显式的 `--host` / `--port` 标志。
+2. 配置，它本身将环境变量（`IPMIDECK_SERVER_HOST` / `IPMIDECK_SERVER_PORT`）
+   解析为优先于 `config.yaml`，再优先于内置默认值。
+3. 硬编码的回退值 **`0.0.0.0:3000`**，在早期配置加载失败时使用。
+
+换句话说：你持久化到 `config.yaml` 的值，在下次启动时会**被 `IPMIDECK_`
+环境变量或 `--host` / `--port` 标志覆盖**，env 和 CLI 始终胜出。
+如果 `config.yaml` 格式错误，ipmideck 会向 stderr 打印一条警告并回退到
+`0.0.0.0:3000`。
+
+<Note>
+  环境变量 `IPMIDECK_SERVER_HOST` 和 `IPMIDECK_SERVER_PORT` 使用
+  `IPMIDECK_` 前缀。请参阅 [配置](/zh-Hans/configuration) 了解完整的覆盖列表。
+</Note>
+
+## 使用 --gen-cert 的 HTTPS
+
+`--gen-cert` 生成自签名证书和密钥，然后退出。它**不**启动
+服务器，也**不**自行开启 HTTPS：
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck --gen-cert
+```
+
+```cmd cmd
+ipmideck --gen-cert
+```
+
+```bash bash
+ipmideck --gen-cert
+```
+
+</CodeGroup>
+
+它在 `data/certs/` 下写入一对 cert + 密钥，将它们的路径记录到
+`config.yaml` 的 `server` 块中，并打印三行：
+
+```text
+Generated: <path-to-cert>
+Generated: <path-to-key>
+Wrote cert_file/key_file to config.yaml. Set server.https=true and restart to serve over HTTPS.
+```
+
+要真正通过 HTTPS 提供服务，请在 `config.yaml` 中设置 `server.https: true` 并重启 ipmideck。HTTPS 从不会自动启用。
+
+## 演示模式
+
+`--demo` 让 ipmideck 针对模拟硬件而非真实 BMC 运行，便于在没有任何
+服务器接入的情况下评估仪表板：
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start --demo
+```
+
+```cmd cmd
+ipmideck start --demo
+```
+
+```bash bash
+ipmideck start --demo
+```
+
+</CodeGroup>
+
+演示模式设置得非常早，在任何子命令分支之前，因此整个应用（配置和运行中的服务器）都能看到它。
+
+## 重置管理员密码
+
+`reset-password` 交互式创建或更新管理员登录，然后退出，完全不
+启动服务器：
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck reset-password
+```
+
+```cmd cmd
+ipmideck reset-password
+```
+
+```bash bash
+ipmideck reset-password
+```
+
+</CodeGroup>
+
+它会提示 `Username:`，然后是 `New password:`（隐藏输入）。如果账户已
+存在，它会更新该用户的密码并打印 `Password updated for <username>`；否则
+它会创建用户并打印 `User <username> created`。
+
+## 开发自动重新加载
+
+`--reload` 是仅用于开发的快速路径：它交给 uvicorn 自己的自动重新加载
+监管程序并返回。它有意**跳过下面描述的单实例端口守卫**，
+因为重新加载器运行其自己的监管进程。
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start --reload
+```
+
+```cmd cmd
+ipmideck start --reload
+```
+
+```bash bash
+ipmideck start --reload
+```
+
+</CodeGroup>
+
+<Warning>
+  `--reload` 仅用于开发。因为它绕过单实例守卫，请在没有其他
+  ipmideck 实例已绑定到同一端口的主机上运行它。
+</Warning>
+
+## 退出码
+
+| 退出码 | 何时 |
+| --- | --- |
+| `0` | 在 `Ctrl+C` / SIGTERM 时干净关闭，服务器优雅停止，没有 traceback。 |
+| `1` | 端口在目标主机上已被占用（可能有另一个实例在运行），**或**因为地址不可用或不被允许而绑定失败（例如特权端口或不存在的接口）。 |
+
+在服务路径上（非 `--reload`），ipmideck 在绑定前运行单实例守卫。如果
+端口已被占用，它会向 stderr 打印错误并以 `1` 退出。如果因为
+地址不可用或不被允许而绑定失败，它会打印一个不同的错误并同样以 `1` 退出。
+
+## 后续步骤
+
+- [配置](/zh-Hans/configuration)：`config.yaml` 键和 `IPMIDECK_` 环境覆盖。
+- [安装](/zh-Hans/installation)：用 Docker 或 pip 安装 ipmideck。
+- [故障排除](/zh-Hans/troubleshooting)：连接、端口和 IPMI 错误。

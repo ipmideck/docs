@@ -1,0 +1,62 @@
+---
+title: "Sicurezza"
+description: "Ogni affermazione sulla sicurezza qui è radicata nel codice backend di ipmideck, non nel marketing."
+---
+
+ipmideck è costruito per chi legge il sorgente invece di fidarsi di un fornitore. Le affermazioni
+qui sotto sono radicate nel codice backend del prodotto.
+
+## Sicurezza dei dati e degli account
+
+Le credenziali sono cifrate a riposo, i login sono sottoposti a hash e le sessioni sono firmate, il
+solo database non basta mai per entrare.
+
+### Cifratura delle credenziali AES-256-CBC
+
+Le credenziali BMC sono cifrate a riposo con AES-256-CBC e un IV casuale per segreto. La
+chiave di cifratura vive in un file di chiave separato (`data/encryption.key`, 32 byte casuali,
+permessi solo per il proprietario), mai nel database, così un database rubato da solo non può
+decifrare nulla.
+
+### Login bcrypt + sessioni firmate HMAC-SHA256
+
+Le password di login sono sottoposte a hash con bcrypt (salt per password, verifica a tempo costante). I token
+di sessione sono firmati con HMAC-SHA256, rivalidati a ogni richiesta e invalidati quando un
+nome utente cambia. I cookie sono HttpOnly e SameSite=Lax.
+
+### Blocco anti-brute-force
+
+Blocco per nome utente con backoff esponenziale dopo cinque tentativi falliti (fino a un'ora),
+più errori generici a prova di timing-leak così un attaccante non impara nulla da come fallisce un login.
+
+### ipmitool senza shell, completamente offline
+
+ipmitool viene invocato tramite una lista di argomenti (`create_subprocess_exec`), mai una shell,
+quindi non c'è superficie di command-injection. L'intero sistema gira completamente offline: niente
+telemetria, niente cloud, nessuna chiamata esterna.
+
+## Protezione dell'hardware
+
+FanPilot è costruito per fallire in sicurezza: i limiti termici vincono su qualsiasi curva, e il loop di controllo
+continua a girare anche quando non stai guardando.
+
+### Override di sicurezza alla temperatura critica
+
+Le ventole sono forzate al 100% al raggiungimento o oltre la temperatura critica (predefinita 85°C, configurabile).
+Nessuna curva delle ventole può sovrascrivere l'override, il limite termico vince sempre.
+
+### Isteresi per fermare l'oscillazione
+
+Un margine di isteresi configurabile (predefinito 3°C) impedisce alle ventole di oscillare rapidamente su
+e giù attorno a un limite di temperatura, mantenendo i cambi di velocità fluidi e prevedibili.
+
+### Loop autonomo in background
+
+Il controllo delle ventole gira in un task di background (polling ~30s) che continua a funzionare con la dashboard
+chiusa, la protezione non dipende dal fatto che una scheda del browser sia aperta.
+
+### Recupero da arresto non pulito + arresto pulito
+
+Dopo un arresto non pulito (perdita di alimentazione o `kill -9`) ipmideck ripristina la modalità auto del BMC,
+e si auto-recupera al rilevamento di server-offline e sensori obsoleti. Un arresto pulito restituisce
+le ventole alla gestione termica del BMC.

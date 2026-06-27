@@ -1,0 +1,206 @@
+---
+title: "Exécuter ipmideck"
+description: "Démarrez ipmideck sous Windows, Linux ou Docker, trouvez votre répertoire de données et gérez les erreurs de liaison, l'arrêt et les redémarrages."
+---
+
+Une fois ipmideck [installé](/fr/installation), il s'exécute de deux façons très différentes :
+une **installation sur hôte** que vous lancez avec la commande `ipmideck`, et le **conteneur Docker**,
+qui exécute le serveur web directement. Ils se comportent différemment, la commande hôte vous donne une
+console d'opérateur interactive, tandis que le conteneur n'émet que des journaux simples. Cette page couvre les deux.
+
+## Installation sur hôte : `ipmideck start`
+
+Sur une installation sur hôte (pip), le serveur est démarré avec la commande `ipmideck`. La commande
+principale est `start` :
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start
+```
+
+```text cmd
+ipmideck start
+```
+
+```bash bash
+ipmideck start
+```
+
+</CodeGroup>
+
+Un `ipmideck` seul, sans sous-commande, sert de façon identique à `ipmideck start` :
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck
+```
+
+```text cmd
+ipmideck
+```
+
+```bash bash
+ipmideck
+```
+
+</CodeGroup>
+
+Par défaut, le serveur se lie à `0.0.0.0:3000`, ouvrez donc `http://<your-ip>:3000` dans un
+navigateur une fois qu'il est en route.
+
+<Note>
+  `ipmilink` est un alias rétrocompatible de la même commande, `ipmilink start`
+  se comporte exactement comme `ipmideck start`. Utilisez `ipmideck` pour tout ce qui est nouveau.
+</Note>
+
+Sur un vrai terminal (un TTY), `ipmideck start` ouvre une console d'opérateur interactive. Lorsque
+la même commande s'exécute sans terminal, par exemple redirigée vers un fichier ou sous un
+superviseur de processus, elle saute la console et sert plutôt avec des journaux simples. Consultez
+[le mode headless / non-TTY](#mode-headless--non-tty) ci-dessous.
+
+## Docker : le conteneur exécute le serveur directement
+
+Le conteneur Docker n'exécute **pas** la commande `ipmideck`. Son image lance le serveur web
+(uvicorn) directement :
+
+```bash
+docker run --network host ipmideck/ipmideck:latest
+```
+
+Comme le conteneur n'invoque jamais la CLI `ipmideck`, aucune des sous-commandes, aucun flag ni la
+console interactive ne s'appliquent à l'intérieur de Docker, le conteneur n'émet jamais que des **journaux
+simples** vers stdout, exactement comme le mode headless sur hôte. Le conteneur se lie à
+`0.0.0.0:3000` et `--network host` est nécessaire pour qu'il puisse atteindre vos BMC via le port UDP
+`623`. Consultez [Installation](/fr/installation) pour les détails réseau.
+
+<Note>
+  Configurez le conteneur avec des variables d'environnement préfixées par `IPMIDECK_` et un volume sur
+  `/data` plutôt qu'avec des flags de CLI, consultez [Configuration](/fr/configuration). L'image publiée
+  arrive bientôt ; la commande ci-dessus est exactement celle que vous exécuterez une fois disponible.
+</Note>
+
+## Le répertoire de données
+
+ipmideck écrit `config.yaml`, la base de données SQLite et la clé de chiffrement des identifiants dans
+un seul répertoire de données. Son emplacement dépend de la plateforme :
+
+- **Linux / Docker :** `/data`
+- **Windows :** `./data` (relatif au répertoire depuis lequel vous exécutez `ipmideck`)
+
+Vous pouvez surcharger l'emplacement sur n'importe quelle plateforme avec la variable d'environnement `IPMIDECK_DATA_DIR` :
+
+<CodeGroup>
+
+```powershell PowerShell
+$env:IPMIDECK_DATA_DIR = "C:\ipmideck-data"
+ipmideck start
+```
+
+```text cmd
+set IPMIDECK_DATA_DIR=C:\ipmideck-data
+ipmideck start
+```
+
+```bash bash
+IPMIDECK_DATA_DIR=/srv/ipmideck ipmideck start
+```
+
+</CodeGroup>
+
+Dans Docker, l'image définit déjà `IPMIDECK_DATA_DIR=/data`, persistez donc ce chemin avec un
+volume pour conserver votre configuration et votre historique entre les redémarrages du conteneur.
+
+## Surcharges d'environnement
+
+Chaque variable d'environnement préfixée par `IPMIDECK_` qui surcharge un réglage de `config.yaml`
+fonctionne de la même façon que vous soyez sur l'hôte ou dans Docker, consultez
+[Configuration](/fr/configuration) pour la liste complète. Les deux qui changent *la façon dont* ipmideck
+se lie sont :
+
+| Variable d'environnement | Effet |
+|----------------------|--------|
+| `IPMIDECK_SERVER_HOST` | Hôte de liaison (par défaut `0.0.0.0`). |
+| `IPMIDECK_SERVER_PORT` | Port de liaison (par défaut `3000`). |
+
+<Note>
+  Les variables d'environnement ont priorité sur `config.yaml`. Sur une installation sur hôte, un flag
+  de liaison explicite en ligne de commande l'emporte sur la variable d'environnement et le fichier.
+</Note>
+
+## Port déjà utilisé
+
+Si quelque chose écoute déjà sur le port de liaison, ipmideck refuse de démarrer plutôt que de
+se battre pour le port avec une autre instance. Il affiche ceci sur stderr et se termine avec le statut `1` :
+
+```text
+ERROR: IPMIDeck refused to start — port 3000 is already in use on 0.0.0.0 (another instance may be running).
+```
+
+Cela signifie généralement qu'une deuxième copie d'ipmideck s'exécute déjà, ou qu'un autre service a
+revendiqué le port. Arrêtez l'autre processus, ou changez le port avec `IPMIDECK_SERVER_PORT`
+(ou `server.port` dans `config.yaml`), et redémarrez.
+
+## Adresse indisponible
+
+Une autre défaillance survient lorsque l'*hôte* que vous avez demandé de lier ne peut pas être utilisé, par exemple une
+adresse qui n'existe pas sur cette machine, une interface IPv6 uniquement ou un port privilégié
+que vous n'êtes pas autorisé à lier. ipmideck le signale séparément et se termine également avec le statut
+`1` :
+
+```text
+ERROR: IPMIDeck cannot bind 0.0.0.0:3000 — address unavailable or not permitted.
+```
+
+Vérifiez la valeur de `IPMIDECK_SERVER_HOST` (ou `server.host`), elle doit être une adresse qui
+existe réellement sur la machine, et assurez-vous que le port en est un que vous êtes autorisé à lier.
+
+## Arrêt propre avec Ctrl+C
+
+Appuyez sur **Ctrl+C** (qui envoie `SIGINT` ; `SIGTERM` est traité de la même manière) pour arrêter
+ipmideck. L'arrêt est propre : le serveur web sort de sa boucle, l'arrêt du lifespan de
+l'application s'exécute, **le contrôle des ventilateurs est rendu à vos BMC**, et le processus
+se termine proprement sans trace d'erreur.
+
+<Warning>
+  Comme l'arrêt restitue le contrôle des ventilateurs au BMC, FanPilot cesse de piloter vos ventilateurs au
+  moment où ipmideck se termine. La politique de ventilateurs de votre BMC prend le relais, c'est le
+  comportement de sécurité prévu. Consultez [Fonctionnalités](/fr/features) pour le comportement de la boucle de ventilateurs.
+</Warning>
+
+Dans Docker, le conteneur s'arrête sur `SIGTERM` (ce qu'envoie `docker stop`), donc le même
+arrêt propre s'exécute lorsque vous arrêtez le conteneur.
+
+## Redémarrage
+
+La façon dont fonctionne un redémarrage dépend de votre système d'exploitation :
+
+- **Linux (et autres systèmes POSIX) :** ipmideck redémarre **sur place** : il relance un
+  nouveau processus qui relit `config.yaml`, en conservant le même terminal de contrôle.
+- **Windows :** il n'y a pas de ré-exécution sur place. ipmideck s'arrête proprement et affiche une indication
+  vous demandant de relancer la commande vous-même :
+
+```text
+IPMIDeck: restart required to apply the new bind.
+  Run  ipmideck start  again to restart.
+```
+
+Sous Windows, relancez simplement `ipmideck start` dans le même shell, le nouveau processus relit
+`config.yaml` et prend en compte les nouveaux réglages.
+
+## Mode headless / non-TTY
+
+Lorsqu'ipmideck s'exécute sans terminal attaché, redirigé vers un fichier, redirigé ou sous un
+gestionnaire de processus, il détecte qu'il n'y a pas de TTY et **saute la console interactive**. Il
+sert le tableau de bord normalement et émet plutôt des **journaux simples** vers stdout. C'est la
+même sortie que vous obtenez du conteneur Docker, qui s'exécute toujours sans console.
+
+Ce mode ne nécessite rien de particulier : démarrez simplement ipmideck de la façon dont votre superviseur ou
+pipeline l'invoque, et lisez les journaux depuis stdout.
+
+## Étapes suivantes
+
+- [Installation](/fr/installation) : Docker et pip en détail.
+- [Configuration](/fr/configuration) : `config.yaml`, surcharges d'environnement et où résident les données.
+- [Dépannage](/fr/troubleshooting) : erreurs de connexion et IPMI.

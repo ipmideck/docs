@@ -1,0 +1,206 @@
+---
+title: "运行 ipmideck"
+description: "在 Windows、Linux 或 Docker 上启动 ipmideck，找到你的数据目录，并处理 bind 错误、关闭和重启。"
+---
+
+ipmideck [安装](/zh-Hans/installation) 完成后，它有两种截然不同的运行方式：
+用 `ipmideck` 命令启动的**主机安装**，以及直接运行 Web 服务器的
+**Docker 容器**。它们的行为不同，主机命令给你一个交互式
+操作员控制台，而容器只是输出纯文本日志。本页涵盖两者。
+
+## 主机安装：`ipmideck start`
+
+在主机安装（pip）中，服务器用 `ipmideck` 命令启动。主要
+命令是 `start`：
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start
+```
+
+```text cmd
+ipmideck start
+```
+
+```bash bash
+ipmideck start
+```
+
+</CodeGroup>
+
+不带子命令的裸 `ipmideck` 与 `ipmideck start` 行为完全相同：
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck
+```
+
+```text cmd
+ipmideck
+```
+
+```bash bash
+ipmideck
+```
+
+</CodeGroup>
+
+默认情况下服务器绑定到 `0.0.0.0:3000`，因此启动后在浏览器中打开
+`http://<your-ip>:3000`。
+
+<Note>
+  `ipmilink` 是同一命令的向后兼容别名，`ipmilink start`
+  的行为与 `ipmideck start` 完全一样。对于所有新内容请使用 `ipmideck`。
+</Note>
+
+在真实终端（TTY）上，`ipmideck start` 会打开一个交互式操作员控制台。当
+同一命令在没有终端的情况下运行时，例如管道输出到文件或在
+进程监管程序下运行，它会跳过控制台并改用纯文本日志服务。请参阅
+下面的 [headless / 非 TTY 模式](#headless--非-tty-模式)。
+
+## Docker：容器直接运行服务器
+
+Docker 容器**不**运行 `ipmideck` 命令。它的镜像直接启动 Web 服务器
+（uvicorn）：
+
+```bash
+docker run --network host ipmideck/ipmideck:latest
+```
+
+因为容器从不调用 `ipmideck` CLI，所以任何子命令、标志或
+交互式控制台都不适用于 Docker 内部，容器始终只向 stdout 输出**纯文本
+日志**，与 headless 主机模式完全一样。容器绑定到
+`0.0.0.0:3000`，并且需要 `--network host` 以便它能通过 UDP 端口
+`623` 访问你的 BMC。网络详情请参阅 [安装](/zh-Hans/installation)。
+
+<Note>
+  用带 `IPMIDECK_` 前缀的环境变量以及 `/data` 上的卷来配置容器，
+  而不是 CLI 标志，请参阅 [配置](/zh-Hans/configuration)。已发布的镜像
+  即将推出；上面的命令正是它上线后你将运行的确切命令。
+</Note>
+
+## 数据目录
+
+ipmideck 将 `config.yaml`、SQLite 数据库和凭据加密密钥写入
+单个数据目录。它的位置取决于平台：
+
+- **Linux / Docker：** `/data`
+- **Windows：** `./data`（相对于你运行 `ipmideck` 的目录）
+
+你可以在任意平台用环境变量 `IPMIDECK_DATA_DIR` 覆盖此位置：
+
+<CodeGroup>
+
+```powershell PowerShell
+$env:IPMIDECK_DATA_DIR = "C:\ipmideck-data"
+ipmideck start
+```
+
+```text cmd
+set IPMIDECK_DATA_DIR=C:\ipmideck-data
+ipmideck start
+```
+
+```bash bash
+IPMIDECK_DATA_DIR=/srv/ipmideck ipmideck start
+```
+
+</CodeGroup>
+
+在 Docker 中，镜像已经设置了 `IPMIDECK_DATA_DIR=/data`，因此用卷使该路径
+持久化，以便在容器重启之间保留你的配置和历史记录。
+
+## 环境覆盖
+
+每个覆盖 `config.yaml` 设置的 `IPMIDECK_` 前缀环境变量，
+无论你在主机上还是在 Docker 中运行，工作方式都相同，请参阅
+[配置](/zh-Hans/configuration) 了解完整列表。其中两个改变 ipmideck *如何*
+绑定：
+
+| 环境变量 | 效果 |
+|----------------------|--------|
+| `IPMIDECK_SERVER_HOST` | 绑定主机（默认 `0.0.0.0`）。 |
+| `IPMIDECK_SERVER_PORT` | 绑定端口（默认 `3000`）。 |
+
+<Note>
+  环境变量优先于 `config.yaml`。在主机安装中，命令行上显式的
+  绑定标志胜过环境变量和文件二者。
+</Note>
+
+## 端口已被占用
+
+如果绑定端口上已有进程在监听，ipmideck 会拒绝启动，而不是
+与另一个实例争抢端口。它会将以下内容打印到 stderr 并以状态 `1` 退出：
+
+```text
+ERROR: IPMIDeck refused to start — port 3000 is already in use on 0.0.0.0 (another instance may be running).
+```
+
+这通常意味着已有第二个 ipmideck 副本在运行，或者另一个服务已占用
+该端口。停止另一个进程，或用 `IPMIDECK_SERVER_PORT`
+（或 `config.yaml` 中的 `server.port`）更改端口，然后重新启动。
+
+## 地址不可用
+
+另一种不同的故障是你请求绑定的*主机*无法使用，例如
+本机上不存在的地址、仅 IPv6 的接口，或你
+无权绑定的特权端口。ipmideck 会单独报告此情况并同样以状态
+`1` 退出：
+
+```text
+ERROR: IPMIDeck cannot bind 0.0.0.0:3000 — address unavailable or not permitted.
+```
+
+检查 `IPMIDECK_SERVER_HOST`（或 `server.host`）的值，它必须是机器上
+实际存在的地址，并确保该端口是你被允许绑定的。
+
+## 用 Ctrl+C 优雅关闭
+
+按 **Ctrl+C**（它发送 `SIGINT`；`SIGTERM` 以相同方式处理）来停止
+ipmideck。关闭是优雅的：Web 服务器退出其循环，应用程序
+lifespan 关闭运行，**风扇控制交还给你的 BMC**，进程
+干净退出，没有 traceback。
+
+<Warning>
+  因为关闭会将风扇控制恢复给 BMC，所以 FanPilot 在 ipmideck 退出的那一刻
+  就停止驱动你的风扇。你 BMC 自己的风扇策略会接管，这是预期的
+  故障保护。请参阅 [功能](/zh-Hans/features) 了解风扇回路的行为。
+</Warning>
+
+在 Docker 中，容器在收到 `SIGTERM`（`docker stop` 发送的信号）时停止，因此
+当你停止容器时会运行同样的优雅关闭。
+
+## 重启
+
+重启的工作方式取决于你的操作系统：
+
+- **Linux（以及其他 POSIX 系统）：** ipmideck **就地**重启：它重新启动一个
+  全新的进程，重新读取 `config.yaml`，保持相同的控制终端。
+- **Windows：** 没有就地 re-exec。ipmideck 会干净关闭并打印一条提示，
+  要求你自己再次运行命令：
+
+```text
+IPMIDeck: restart required to apply the new bind.
+  Run  ipmideck start  again to restart.
+```
+
+在 Windows 上，只需在同一个 shell 中重新运行 `ipmideck start`，全新的进程会重新读取
+`config.yaml` 并采用新设置。
+
+## Headless / 非 TTY 模式
+
+当 ipmideck 在没有附加终端的情况下运行，管道输出到文件、被重定向，或在
+进程管理器下运行时，它会检测到没有 TTY，并**跳过交互式控制台**。它会
+正常提供仪表板服务，并改为向 stdout 输出**纯文本日志**。这与
+你从 Docker 容器得到的输出相同，因为容器始终在没有控制台的情况下运行。
+
+此模式不需要任何特殊设置：只需按照你的监管程序或管道调用它的方式
+启动 ipmideck，并从 stdout 读取日志。
+
+## 后续步骤
+
+- [安装](/zh-Hans/installation)：详细的 Docker 和 pip。
+- [配置](/zh-Hans/configuration)：`config.yaml`、环境覆盖以及数据所在位置。
+- [故障排除](/zh-Hans/troubleshooting)：连接和 IPMI 错误。

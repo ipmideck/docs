@@ -1,0 +1,89 @@
+---
+title: "配置"
+description: "ipmideck 读取 data/config.yaml，并接受带 IPMIDECK_ 前缀的环境变量覆盖。"
+---
+
+## config.yaml
+
+ipmideck 从 `data/config.yaml` 读取其设置，该文件在首次运行时以合理的
+默认值写入。你可以直接编辑该文件，或在运行时用环境变量
+覆盖任意值（对 Docker 很方便，见下文）。
+
+```yaml
+# data/config.yaml (auto-generated on first run)
+server:
+  host: "0.0.0.0"
+  port: 3000
+  https: false
+auth:
+  enabled: true
+  session_expiry: "24h"
+  max_login_attempts: 5
+ipmi:
+  poll_interval: 30
+  power_poll_interval: 30
+  command_timeout: 30
+data:
+  retention_days: 365
+  cleanup_interval: "24h"
+logging:
+  level: "info"
+modules:
+  sensors:
+    enabled: true
+  fanpilot:
+    enabled: true
+  power:
+    enabled: true
+  sel:
+    enabled: true
+  fru:
+    enabled: true
+```
+
+上面的键是 ipmideck 写入 `config.yaml` 的真实的、无前缀的嵌套键。
+环境变量覆盖使用单独的 `IPMIDECK_` 前缀，绝不会出现在
+YAML 文件本身内部。
+
+## 环境覆盖
+
+每个设置都可以在运行时用带 `IPMIDECK_` 前缀的环境变量覆盖。
+这是在 Docker 中配置 ipmideck 最简单的方式，因为你不想
+编辑容器内部的文件。
+
+| 环境变量 | 描述 |
+|----------------------|-------------|
+| `IPMIDECK_SERVER_HOST` | 仪表板绑定的主机/接口（默认 `0.0.0.0`）。 |
+| `IPMIDECK_SERVER_PORT` | 仪表板绑定的 HTTP 端口（默认 `3000`）。 |
+| `IPMIDECK_AUTH_ENABLED` | 启用或禁用内置登录（默认 `true`）。 |
+| `IPMIDECK_AUTH_SESSION_EXPIRY` | 登录会话保持有效的时长（默认 `24h`）。 |
+| `IPMIDECK_IPMI_POLL_INTERVAL` | BMC 传感器轮询之间的秒数（默认 `30`）。 |
+| `IPMIDECK_IPMI_POWER_POLL_INTERVAL` | 电源状态轮询之间的秒数（默认 `30`）。 |
+| `IPMIDECK_DATA_RETENTION_DAYS` | 清理前保留的传感器历史天数（默认 `365`）。 |
+| `IPMIDECK_DATA_DB_PATH` | SQLite 数据库文件的绝对路径。 |
+| `IPMIDECK_LOGGING_LEVEL` | 日志详细程度：`debug`、`info`、`warning` 或 `error`（默认 `info`）。 |
+| `IPMIDECK_DEMO` | 针对模拟硬件而非真实 BMC 运行（默认 `false`）。 |
+
+另外两个变量控制文件的*位置*，而不是 `config.yaml` 的值：
+`IPMIDECK_DATA_DIR`（数据目录，见下文）和 `IPMIDECK_CONFIG_PATH`（要
+加载的 `config.yaml` 的显式路径）。
+
+<Note>
+  环境变量优先于 `config.yaml` 中的值。在你的 `docker run` 命令
+  （`-e IPMIDECK_SERVER_PORT=8080`）或你的 `docker-compose.yml` 中设置它们。
+</Note>
+
+## 配置文件位于何处
+
+ipmideck 如果设置了 `IPMIDECK_DATA_DIR` 就从中解析其数据目录，否则回退
+到平台默认值。`config.yaml` 始终位于 `<data-dir>/config.yaml`：
+
+- **Docker：** `/data/config.yaml`：镜像设置 `IPMIDECK_DATA_DIR=/data`；用卷使
+  `/data` 持久化。
+- **Linux 上的 pip：** 默认 `/data/config.yaml`：设置 `IPMIDECK_DATA_DIR` 以重新定位。
+- **Windows 上的 pip：** `./data/config.yaml`，相对于你运行 `ipmideck` 的目录。
+
+## 后续步骤
+
+- [安全](/zh-Hans/security)：凭据和会话如何受到保护。
+- [功能](/zh-Hans/features)：每个模块做什么。

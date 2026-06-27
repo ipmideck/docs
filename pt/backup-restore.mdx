@@ -1,0 +1,72 @@
+---
+title: "Cópia de segurança e restauro"
+description: "Faça uma cópia de segurança do diretório de dados do ipmideck (configuração, base de dados e chave de cifragem) e restaure-o após uma mudança ou reconstrução."
+---
+
+Tudo o que o ipmideck recorda vive num único diretório de dados: o seu `config.yaml`, a base de dados SQLite
+(`ipmideck.db`) com os seus servidores e histórico de sensores, e o ficheiro `encryption.key`
+que decifra as suas credenciais BMC guardadas. Faça uma cópia de segurança disso e poderá reconstruir o ipmideck
+em qualquer lugar.
+
+<Warning>
+  O `encryption.key` faz parte da cópia de segurança por uma razão: sem ele, os nomes de utilizador e
+  palavras-passe BMC restaurados não podem ser decifrados. Uma cópia de segurança só da base de dados deixa as suas
+  credenciais guardadas ilegíveis, por isso mantenha o ficheiro da chave tão seguro como a base de dados.
+</Warning>
+
+## O que há numa cópia de segurança
+
+| Ficheiro | O que contém |
+| --- | --- |
+| `ipmideck.db` | Servidores, utilizadores, histórico de sensores, registo de comandos e definições. |
+| `config.yaml` | Bind do servidor, auth, IPMI, registos e definições de módulos. |
+| `encryption.key` | A chave de 32 bytes que decifra as suas credenciais BMC guardadas. |
+
+Todos estes ficam no [diretório de dados](/pt/configuration#onde-a-configuração-fica): `/data` no Docker
+e Linux, `./data` no Windows, ou para onde quer que o `IPMIDECK_DATA_DIR` aponte.
+
+## Opção A: cópia de segurança na app
+
+O ipmideck pode dar-lhe uma cópia de segurança pronta. A partir da interface web, abra **Settings** e use a
+ação de cópia de segurança: descarrega `ipmideck-backup-<timestamp>.zip` contendo os três ficheiros
+acima. A base de dados é primeiro submetida a checkpoint, por isso o snapshot inclui as suas leituras mais
+recentes.
+
+Para restaurar, carregue esse zip a partir do mesmo ecrã **Settings**. O ipmideck valida-o,
+prepara os ficheiros e aplica-os no próximo arranque, por isso **reinicie o ipmideck para concluir o
+restauro**.
+
+## Opção B: copie o diretório de dados
+
+Como todo o estado são apenas ficheiros, também pode fazer cópia de segurança copiando o diretório de dados
+enquanto o ipmideck está parado:
+
+<CodeGroup>
+
+```bash bash
+# stop ipmideck first, then:
+cp -r /data /data-backup-$(date +%Y%m%d)
+```
+
+```powershell PowerShell
+# stop ipmideck first, then:
+Copy-Item -Recurse .\data ".\data-backup-$(Get-Date -Format yyyyMMdd)"
+```
+
+</CodeGroup>
+
+No Docker os dados vivem no volume que montou em `/data`, por isso faça cópia de segurança desse volume.
+Restaurar é o inverso: pare o ipmideck, volte a colocar os ficheiros no diretório de dados e
+inicie-o novamente.
+
+<Note>
+  Pare o ipmideck antes de uma cópia ao nível de ficheiros. A base de dados corre em modo WAL, por isso copiá-la
+  enquanto a app está a escrever pode capturar um snapshot inconsistente. A cópia de segurança na app evita
+  isto fazendo primeiro um checkpoint.
+</Note>
+
+## Próximos passos
+
+- [Configuração](/pt/configuration): onde fica o diretório de dados e o que o `config.yaml` contém.
+- [Atualizar o ipmideck](/pt/updating): os seus dados sobrevivem a uma atualização.
+- [Segurança](/pt/security): como as credenciais são cifradas em repouso.

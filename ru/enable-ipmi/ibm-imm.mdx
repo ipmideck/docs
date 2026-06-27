@@ -1,0 +1,69 @@
+---
+title: "IBM IMM"
+description: "Включите IPMI-over-LAN на IBM Integrated Management Module II (IMM2) для серверов System x. Низкая достоверность, проверьте на вашем оборудовании перед использованием."
+---
+
+<Warning>
+  **Руководство с низкой достоверностью, проверьте на вашем оборудовании, прежде чем полагаться на эти шаги.**
+  Оборудование IBM IMM2 устарело (IBM продала линейку System x компании Lenovo в 2014 году), а онлайн-
+  документация скудна. Точный путь веб-интерфейса зависит от версии прошивки IMM2.
+  Это **высокий приоритет проверки**, подтвердите каждый путь на вашем собственном сервере
+  и сообщайте об исправлениях. Проверка оборудования владельцем ожидается.
+</Warning>
+
+**Применимо к:** серверы IBM System x с IMM2 (Integrated Management Module II), например
+IBM x3650 M4 и x3550 M4.
+
+<Note>
+  IBM IMM, **Экспериментальный** производитель для ipmideck.
+</Note>
+
+## Шаги
+
+<Steps>
+  <Step title="Откройте веб-интерфейс IMM2">
+    В браузере перейдите по IP-адресу IMM2 и войдите. Учётные данные по умолчанию:
+    **USERID** / **PASSW0RD** (обратите внимание на **ноль** в "PASSW0RD"). Измените их немедленно,
+    если они всё ещё используются.
+  </Step>
+  <Step title="Откройте IMM Management → Network Protocol Properties">
+    Из верхнего меню перейдите в **IMM Management → Network Protocol Properties**, страницу
+    с вкладками для Ethernet, SNMP, DNS, …, **IPMI**.
+  </Step>
+  <Step title="Включите доступ IPMI">
+    Откройте вкладку **IPMI** и отметьте **Allow IPMI access**, затем нажмите **Apply**.
+
+    <Frame caption="IMM Management → Network Protocol Properties → IPMI tab: tick Allow IPMI access.">
+      <img src="/tutorials/IBM/IPMI_tab.jpg" alt="IBM IMM2 Network Protocol Properties IPMI tab with Allow IPMI access enabled" />
+    </Frame>
+
+    <Note>
+      Изменение конфигурации порта IPMI **требует перезагрузки IMM**, чтобы вступить в силу,
+      IMM показывает это напоминание на вкладке IPMI.
+    </Note>
+  </Step>
+  <Step title="Убедитесь, что существует идентификатор пользователя IPMI">
+    Документация IBM отмечает: *"If no IPMI User IDs have been configured by the CMM, the
+    network port associated with the IPMI protocol will be closed."* Убедитесь, что настроен хотя бы один
+    идентификатор пользователя IPMI, иначе порт LAN остаётся закрытым.
+  </Step>
+  <Step title="Проверьте связь">
+    С хоста, который будет запускать ipmideck:
+
+    ```bash
+    ipmitool -I lanplus -H <imm2-ip> -U USERID -P <password> chassis status
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  **Пометка для проверки:** путь веб-интерфейса IMM2 различается по версии прошивки, а документация
+  BMC IBM скудна онлайн. Полный справочник, это
+  [IMM2 Configuration User's Guide (PDF)](https://public.dhe.ibm.com/systems/support/system_x_pdf/imm2_configurations_usersguide.pdf).
+  Проверьте каждый шаг на реальном оборудовании, прежде чем полагаться на это руководство.
+</Note>
+
+## Источник
+
+[CITED: pubs.lenovo.com/imm2, Managing the IMM2 with IPMI](https://pubs.lenovo.com/imm2/dw1lm_t_managingtheimmwithipmi.html) ·
+[IMM2 Configuration User's Guide (IBM)](https://public.dhe.ibm.com/systems/support/system_x_pdf/imm2_configurations_usersguide.pdf)

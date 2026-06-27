@@ -1,0 +1,67 @@
+---
+title: "Aggiornamento di ipmideck"
+description: "Aggiorna ipmideck a una nuova release con Docker o pip. La tua directory dati sopravvive all'aggiornamento."
+---
+
+Aggiornare ipmideck sostituisce l'applicazione, non i tuoi dati. Il tuo `config.yaml`, il database
+e la chiave di cifratura vivono nella [directory dati](/it/configuration#dove-vive-la-configurazione), che
+resta al suo posto attraverso un aggiornamento, così i tuoi server, lo storico e le impostazioni vengono trasferiti.
+
+<Note>
+  ipmideck è in pre-release. L'immagine Docker e il pacchetto PyPI pubblicati arrivano presto;
+  i comandi qui sotto sono quelli che userai una volta che saranno disponibili.
+</Note>
+
+## Docker
+
+Scarica la nuova immagine e ricrea il container con lo stesso volume dati:
+
+```bash
+docker pull ipmideck/ipmideck:latest
+docker stop ipmideck && docker rm ipmideck
+docker run -d --name ipmideck --network host -v ipmideck-data:/data ipmideck/ipmideck:latest
+```
+
+Il volume `-v ipmideck-data:/data` contiene i tuoi dati, quindi riusare lo stesso nome di volume conserva
+tutto. Fissa una versione invece di `latest` (per esempio `ipmideck/ipmideck:2.0.0`) se
+vuoi controllare esattamente quando passare da una release all'altra.
+
+## pip
+
+Aggiorna il pacchetto sul posto, poi avvia di nuovo ipmideck:
+
+<CodeGroup>
+
+```bash bash
+pip install -U ipmideck
+ipmideck start
+```
+
+```powershell PowerShell
+pip install -U ipmideck
+ipmideck start
+```
+
+</CodeGroup>
+
+La directory dati è indipendente dal pacchetto, quindi l'aggiornamento non tocca la tua configurazione
+o il database.
+
+## Controlla la tua versione
+
+La versione in esecuzione compare nella dashboard, e la console la stampa nella riga dei crediti
+sotto il banner (per esempio `v2.0.0a1`). Puoi anche leggerla dall'endpoint di health:
+
+```bash
+curl http://<your-ip>:3000/api/health
+```
+
+<Note>
+  Fai un [backup](/it/backup-restore) prima di un aggiornamento importante. Ripristinare è poi solo una questione di
+  rimettere a posto la directory dati se qualcosa va storto.
+</Note>
+
+## Prossimi passi
+
+- [Backup e ripristino](/it/backup-restore): fai uno snapshot dei tuoi dati prima di aggiornare.
+- [Esecuzione di ipmideck](/it/running): avvio, arresto e dove vive la directory dati per piattaforma.

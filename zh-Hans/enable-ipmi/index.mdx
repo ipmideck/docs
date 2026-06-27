@@ -1,0 +1,62 @@
+---
+title: "在你的服务器上启用 IPMI"
+description: "在 ipmideck 能够连接之前，必须在你服务器的 BMC 中启用 IPMI-over-LAN。针对 Dell、Supermicro、HPE、Lenovo 和 IBM 的逐厂商演练。"
+---
+
+ipmideck 通过 **IPMI 2.0 over LAN** 与你的服务器通信。在大多数服务器上，这个 LAN
+通道默认是禁用的（或出厂时带有默认凭据），因此在 ipmideck
+能够访问 BMC 之前，你需要启用 IPMI-over-LAN 并在控制器
+本身上配置一个用户账户。
+
+IPMI-over-LAN 使用 **UDP 端口 623**（IPMI/RMCP+ 端口）。请确保该端口
+从运行 ipmideck 的主机可达，并且主机与你的 BMC 之间的任何
+防火墙都允许它。
+
+<Warning>
+  这些指南中的步骤来自每个厂商的**官方文档**，但 BMC
+  Web 界面路径在固件代际和型号之间各不相同。**在依赖之前请针对
+  你自己的硬件验证每条路径**。在厂商文档稀少之处，
+  页面会明确说明。
+</Warning>
+
+## 选择你的 BMC
+
+每个指南都会演练在该厂商的 BMC Web 界面中启用 IPMI-over-LAN，
+包括默认凭据、启用开关和一条验证命令。
+
+<CardGroup cols={2}>
+  <Card title="Dell iDRAC" href="/zh-Hans/enable-ipmi/dell-idrac">
+    iDRAC7 / iDRAC8 / iDRAC9，PowerEdge 服务器。
+  </Card>
+  <Card title="Supermicro" href="/zh-Hans/enable-ipmi/supermicro">
+    Supermicro IPMI 2.0 BMC（X8–X12 主板）。<b>低置信度，请在硬件上验证。</b>
+  </Card>
+  <Card title="HPE iLO" href="/zh-Hans/enable-ipmi/hpe-ilo">
+    HPE iLO 4 / iLO 5，ProLiant 服务器。
+  </Card>
+  <Card title="Lenovo XCC" href="/zh-Hans/enable-ipmi/lenovo-xcc">
+    Lenovo XClarity Controller（XCC / XCC2），ThinkSystem 服务器。
+  </Card>
+  <Card title="IBM IMM" href="/zh-Hans/enable-ipmi/ibm-imm">
+    IBM IMM2，System x 服务器。<b>低置信度，请在硬件上验证。</b>
+  </Card>
+</CardGroup>
+
+## 启用之后
+
+一旦 IPMI-over-LAN 已开启且你拥有 BMC 用户账户，请从将运行 ipmideck 的
+主机验证连通性：
+
+```bash
+ipmitool -I lanplus -H <bmc-ip> -U <user> -P <password> chassis status
+```
+
+成功的响应确认 LAN 通道已激活。然后在 ipmideck 的设置
+向导中添加该服务器，请参阅 [快速开始](/zh-Hans/getting-started) 和
+[支持的硬件](/zh-Hans/supported-hardware)。
+
+<Note>
+  许多厂商建议**在不使用时再次禁用 IPMI-over-LAN**，因为
+  该协议的身份验证比 BMC 的 HTTPS 界面更弱。请将你的 BMC
+  保持在受信任的管理网络上，并使用强壮的、非默认的凭据。
+</Note>

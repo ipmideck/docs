@@ -1,0 +1,61 @@
+---
+title: "故障排除"
+description: "当 ipmideck 与你的 BMC 通信时出现的连接、身份验证和 IPMI 错误。"
+---
+
+## ipmideck 无法访问 BMC
+
+ipmideck 通过 UDP 端口 623（IPMI/RMCP+）与 BMC 通信。如果某台服务器显示为
+离线：
+
+- 在 Docker 中，确认你用 `--network host` 启动了容器。没有它，
+  容器无法访问你 LAN 上的 BMC。
+- 验证 BMC IP 从主机可达（`ping <bmc-ip>`）。
+- 确认 BMC 上已启用 IPMI-over-LAN，并且 UDP 623 没有被
+  防火墙或 VLAN 边界阻挡。
+
+<Note>
+  ipmideck 始终使用 `lanplus`（IPMI 2.0）进行加密会话。卡在
+  仅 IPMI 1.5、或禁用了 RMCP+ 密码套件的 BMC 可能会拒绝连接。
+</Note>
+
+## 身份验证 / 权限错误
+
+如果命令因身份验证或权限错误而失败：
+
+- 仔细检查你为该服务器输入的 BMC 用户名和密码。
+- BMC 账户至少需要 Operator 权限才能进行电源和风扇控制；
+  配置更改需要 Administrator。
+- 某些 BMC 会在重复登录失败后锁定账户，请等待，或从
+  BMC 自己的 Web UI 重置账户。
+
+## 命令超时
+
+较旧的硬件可能响应缓慢。ipmideck 应用一个由
+`ipmi.command_timeout` 设置的每命令超时（默认 30 秒）。如果你在慢速 BMC 上看到超时，请在
+`config.yaml` 中增大该值。大型仓库上的传感器和 SEL 读取最
+可能会变慢。
+
+## 传感器缺失或读数为零
+
+- 确认 BMC 确实暴露这些传感器（`sdr elist` 支持因厂商而异）。
+- 某些传感器仅在服务器开机时才填充。
+- 检查轮询间隔（`ipmi.poll_interval`，默认 30 秒 / `IPMIDECK_IPMI_POLL_INTERVAL`）；
+  非常长的间隔会延迟首次读数。
+
+## 风扇意外返回 BMC 控制
+
+FanPilot 在两种情况下有意将风扇交还给 BMC 自己的热管理：
+
+- **安全覆盖**：在达到或超过临界温度时，风扇升至 100%。
+- **恢复**：在非干净关闭、服务器离线或传感器陈旧检测后，
+  ipmideck 恢复 BMC 的自动模式，使硬件永远不会处于无人管理状态。
+
+这是预期的故障安全行为，而非 bug。请参阅 [安全](/zh-Hans/security)。
+
+## 仪表板无法加载
+
+- 确认容器或进程正在运行并在已配置的端口上监听
+  （`server.port` / `IPMIDECK_SERVER_PORT`，默认 3000）。
+- 打开 `http://<your-ip>:3000`，而不是 `https`，除非你设置了 `server.https: true`。
+- 检查应用日志；将 `logging.level` 提升到 `debug` 以获取更多细节。

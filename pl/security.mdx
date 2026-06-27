@@ -1,0 +1,62 @@
+---
+title: "Bezpieczeństwo"
+description: "Każde twierdzenie o bezpieczeństwie tutaj jest oparte na własnym kodzie backendu ipmideck, a nie na marketingu."
+---
+
+ipmideck jest zbudowany dla osób, które czytają źródło zamiast ufać producentowi. Twierdzenia
+poniżej są oparte na kodzie backendu produktu.
+
+## Bezpieczeństwo danych i kont
+
+Poświadczenia są szyfrowane w spoczynku, loginy są haszowane, a sesje są podpisywane, sama
+baza danych nigdy nie wystarczy, aby się dostać.
+
+### Szyfrowanie poświadczeń AES-256-CBC
+
+Poświadczenia BMC są szyfrowane w spoczynku za pomocą AES-256-CBC i losowego IV na sekret.
+Klucz szyfrujący znajduje się w osobnym pliku klucza (`data/encryption.key`, 32 losowe bajty,
+uprawnienia tylko dla właściciela), nigdy w bazie danych, więc sama skradziona baza danych nie może
+niczego odszyfrować.
+
+### Loginy bcrypt + sesje podpisane HMAC-SHA256
+
+Hasła logowania są haszowane za pomocą bcrypt (sól na hasło, weryfikacja w stałym czasie). Tokeny
+sesji są podpisywane za pomocą HMAC-SHA256, rewalidowane przy każdym żądaniu i unieważniane, gdy
+nazwa użytkownika się zmienia. Pliki cookie są HttpOnly i SameSite=Lax.
+
+### Blokada przed atakami brute-force
+
+Blokada na nazwę użytkownika z wykładniczym backoffem po pięciu nieudanych próbach (do godziny),
+plus bezpieczne wobec wycieków czasowych ogólne błędy, więc atakujący niczego się nie dowiaduje z tego, jak login zawodzi.
+
+### ipmitool bez powłoki, w pełni offline
+
+ipmitool jest wywoływany przez listę argumentów (`create_subprocess_exec`), nigdy przez powłokę,
+więc nie ma powierzchni do wstrzykiwania poleceń. Cały system działa w pełni offline: bez
+telemetrii, bez chmury, bez zewnętrznych wywołań.
+
+## Ochrona sprzętu
+
+FanPilot jest zbudowany tak, aby zawodzić bezpiecznie: limity termiczne wygrywają nad dowolną krzywą, a pętla sterowania
+działa dalej, nawet gdy nie patrzysz.
+
+### Nadpisanie bezpieczeństwa przy temperaturze krytycznej
+
+Wentylatory są wymuszane na 100% na poziomie lub powyżej temperatury krytycznej (domyślnie 85°C, konfigurowalne).
+Żadna krzywa wentylatorów nie może nadpisać nadpisania, limit termiczny zawsze wygrywa.
+
+### Histereza, aby zatrzymać oscylację
+
+Konfigurowalny margines histerezy (domyślnie 3°C) zapobiega szybkiemu oscylowaniu wentylatorów w górę
+i w dół wokół limitu temperatury, utrzymując zmiany prędkości płynne i przewidywalne.
+
+### Autonomiczna pętla w tle
+
+Sterowanie wentylatorami działa w zadaniu w tle (~30s odpytywania), które działa dalej z zamkniętym
+pulpitem, ochrona nie zależy od otwartej karty przeglądarki.
+
+### Odzyskiwanie po nieczystym wyłączeniu + łagodne wyłączanie
+
+Po nieczystym zatrzymaniu (utrata zasilania lub `kill -9`) ipmideck przywraca własny tryb auto BMC,
+i automatycznie odzyskuje przy wykryciu offline serwera i nieaktualnych czujników. Czyste wyłączenie przekazuje
+wentylatory z powrotem do zarządzania termicznego BMC.

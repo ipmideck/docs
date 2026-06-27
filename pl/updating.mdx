@@ -1,0 +1,67 @@
+---
+title: "Aktualizacja ipmideck"
+description: "Zaktualizuj ipmideck do nowego wydania za pomocą Dockera lub pip. Twój katalog danych przetrwa aktualizację."
+---
+
+Aktualizacja ipmideck zastępuje aplikację, a nie twoje dane. Twoje `config.yaml`, baza danych
+i klucz szyfrujący znajdują się w [katalogu danych](/pl/configuration#gdzie-znajduje-się-konfiguracja), który
+pozostaje na miejscu po aktualizacji, więc twoje serwery, historia i ustawienia są zachowane.
+
+<Note>
+  ipmideck jest w fazie przedpremierowej. Opublikowany obraz Docker i pakiet PyPI pojawią się wkrótce;
+  polecenia poniżej to te, których użyjesz, gdy będą już dostępne.
+</Note>
+
+## Docker
+
+Pobierz nowy obraz i odtwórz kontener z tym samym wolumenem danych:
+
+```bash
+docker pull ipmideck/ipmideck:latest
+docker stop ipmideck && docker rm ipmideck
+docker run -d --name ipmideck --network host -v ipmideck-data:/data ipmideck/ipmideck:latest
+```
+
+Wolumen `-v ipmideck-data:/data` zawiera twoje dane, więc ponowne użycie tej samej nazwy wolumenu zachowuje
+wszystko. Przypnij wersję zamiast `latest` (na przykład `ipmideck/ipmideck:2.0.0`), jeśli
+chcesz dokładnie kontrolować, kiedy przechodzisz między wydaniami.
+
+## pip
+
+Zaktualizuj pakiet w miejscu, a następnie uruchom ipmideck ponownie:
+
+<CodeGroup>
+
+```bash bash
+pip install -U ipmideck
+ipmideck start
+```
+
+```powershell PowerShell
+pip install -U ipmideck
+ipmideck start
+```
+
+</CodeGroup>
+
+Katalog danych jest niezależny od pakietu, więc aktualizacja nie dotyka twojej konfiguracji
+ani bazy danych.
+
+## Sprawdź swoją wersję
+
+Działająca wersja jest pokazana na pulpicie, a konsola wypisuje ją w wierszu z podziękowaniami
+pod banerem (na przykład `v2.0.0a1`). Możesz ją również odczytać z punktu końcowego health:
+
+```bash
+curl http://<your-ip>:3000/api/health
+```
+
+<Note>
+  Wykonaj [kopię zapasową](/pl/backup-restore) przed dużą aktualizacją. Przywracanie to wtedy kwestia
+  ponownego umieszczenia katalogu danych, jeśli coś pójdzie nie tak.
+</Note>
+
+## Następne kroki
+
+- [Kopia zapasowa i przywracanie](/pl/backup-restore): zrób migawkę swoich danych przed aktualizacją.
+- [Uruchamianie ipmideck](/pl/running): start, stop i gdzie znajduje się katalog danych na danej platformie.

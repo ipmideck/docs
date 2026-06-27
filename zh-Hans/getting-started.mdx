@@ -1,0 +1,71 @@
+---
+title: "快速开始"
+description: "了解 ipmideck 是什么，以及如何用一条命令针对服务器的 BMC 运行一个仪表板。"
+---
+
+## 什么是 ipmideck？
+
+ipmideck 是一个自托管的、基于 Web 的 IPMI 管理平台。它通过 IPMI 2.0 连接到你
+服务器的 BMC（Baseboard Management Controller），并提供实时
+传感器监控、智能风扇曲线控制（FanPilot）、远程电源管理
+以及硬件事件日志，全部都在你的浏览器中完成，无需 CLI。
+
+ipmideck 完全运行在你自己的网络上。没有云、没有遥测，也没有
+外部依赖：它直接与你的 BMC 通信，并将一切存储在本地。
+
+<Note>
+  ipmideck 需要通过网络在 UDP 端口 623（IPMI/RMCP+ 端口）上访问你的 BMC。
+  在 Docker 中运行时，请使用 `--network host`，以便容器可以直接访问
+  你 LAN 上的 BMC。
+</Note>
+
+## 快速开始
+
+试用 ipmideck 最快的方式是 Docker：
+
+```bash
+docker run --network host ipmideck/ipmideck:latest
+```
+
+然后在浏览器中打开 `http://<your-ip>:3000`，并按照设置向导添加你的
+第一台服务器。
+
+更喜欢 Python 打包？可以改为从 PyPI 安装：
+
+```bash
+pip install ipmideck
+```
+
+pip 包要求主机上已安装 `ipmitool`。
+
+<Note>
+  ipmideck 处于预发布阶段：已发布的 Docker 镜像和 PyPI 包即将
+  推出。上面的命令正是它们上线后你将运行的确切命令。
+</Note>
+
+## 你将获得什么
+
+- **传感器监控**：实时温度、风扇 RPM、电压和功率，最长可保留
+  一年的历史记录。
+- **FanPilot**：拖放式风扇曲线编辑器，配有安全的自主控制回路。
+- **电源控制**：On、Soft Off、Hard Off、Reset 和 Power Cycle，配有完整的审计日志。
+- **System Event Log (SEL)**：浏览并导出你 BMC 的硬件事件日志。
+- **硬件清单 (FRU)**：序列号、部件号和制造商数据。
+- **多服务器仪表板**：从单个实例管理多个 BMC。
+
+## 后续步骤
+
+<CardGroup cols={2}>
+  <Card title="安装 ipmideck" icon="download" href="/zh-Hans/installation">
+    Docker 和 pip，并解释 `--network host` 要求。
+  </Card>
+  <Card title="首次运行设置" icon="wand-magic-sparkles" href="/zh-Hans/setup">
+    设置向导：选择登录模式并添加你的第一个 BMC。
+  </Card>
+  <Card title="启用 IPMI" icon="server" href="/zh-Hans/enable-ipmi">
+    各厂商在 BMC 中开启 IPMI-over-LAN 的步骤。
+  </Card>
+  <Card title="配置" icon="sliders" href="/zh-Hans/configuration">
+    端口、轮询间隔、保留时间和环境覆盖。
+  </Card>
+</CardGroup>

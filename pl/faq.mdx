@@ -1,0 +1,59 @@
+---
+title: "FAQ"
+description: "Częste pytania o uruchamianie ipmideck w homelabie."
+---
+
+<AccordionGroup>
+
+<Accordion title="Czy ipmideck działa w chmurze?">
+  Nie. ipmideck jest w pełni samodzielnie hostowany i działa w całości w twojej własnej sieci. Nie wykonuje
+  zewnętrznych wywołań, bez telemetrii, bez chmury, bez konta. Rozmawia bezpośrednio z twoimi BMC i
+  przechowuje wszystko lokalnie.
+</Accordion>
+
+<Accordion title="Z którymi BMC współpracuje?">
+  Każdy serwer z BMC IPMI 2.0 powinien się łączyć w celu monitorowania czujników, sterowania zasilaniem, SEL
+  i FRU. Dell PowerEdge / iDRAC jest w pełni przetestowany; Supermicro, HPE iLO,
+  Lenovo XCC i IBM IMM są eksperymentalne. Zobacz [Obsługiwany sprzęt](/pl/supported-hardware).
+</Accordion>
+
+<Accordion title="Czy potrzebuję zainstalowanego ipmitool?">
+  Tylko dla instalacji pip, gdzie pakiet wywołuje twój systemowy `ipmitool`. Obraz
+  Docker zawiera wszystko, czego potrzebuje, więc potrzebujesz tylko Dockera z `--network host`.
+</Accordion>
+
+<Accordion title="Dlaczego Docker potrzebuje --network host?">
+  ipmideck dociera do BMC przez port UDP 623 w twojej lokalnej sieci. Sieć hosta pozwala
+  kontenerowi rozmawiać bezpośrednio z tym portem zamiast siedzieć za NAT-em Dockera. Zobacz
+  [Instalacja](/pl/installation).
+</Accordion>
+
+<Accordion title="Na jakim porcie działa pulpit?">
+  Domyślnie 3000. Zmień go w `config.yaml` (`server.port`) lub za pomocą
+  zmiennej środowiskowej `IPMIDECK_SERVER_PORT`.
+</Accordion>
+
+<Accordion title="Jak długo przechowywana jest historia czujników?">
+  Domyślnie rok (`data.retention_days: 365`). Nadpisz ją za pomocą
+  `IPMIDECK_DATA_RETENTION_DAYS`. Starsze dane są czyszczone według harmonogramu ustawionego przez
+  `data.cleanup_interval`.
+</Accordion>
+
+<Accordion title="Czy mogę wyłączyć logowanie?">
+  Tak, ustaw `auth.enabled: false` w `config.yaml` lub `IPMIDECK_AUTH_ENABLED=false`. Rób to
+  tylko w zaufanej, odizolowanej sieci: z wyłączonym uwierzytelnianiem każdy, kto dotrze do pulpitu,
+  może sterować twoim sprzętem.
+</Accordion>
+
+<Accordion title="Czy sterowanie wentylatorami jest bezpieczne?">
+  FanPilot zawodzi bezpiecznie. Wentylatory są wymuszane na 100% na poziomie lub powyżej temperatury krytycznej, a
+  pętla sterowania działa autonomicznie w tle nawet z zamkniętym pulpitem. Zobacz
+  [Bezpieczeństwo](/pl/security), aby poznać pełne szczegóły ochrony sprzętu.
+</Accordion>
+
+<Accordion title="Jak uruchomić wiele serwerów?">
+  Dodaj każdy BMC z poziomu pulpitu. ipmideck zarządza wieloma BMC z jednej instancji i
+  pokazuje panoramiczny przegląd statusu ich wszystkich.
+</Accordion>
+
+</AccordionGroup>

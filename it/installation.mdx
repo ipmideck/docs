@@ -1,0 +1,53 @@
+---
+title: "Installazione"
+description: "Installa ipmideck con Docker o pip e comprendi il requisito --network host."
+---
+
+## Docker (consigliato)
+
+```bash
+docker run --network host ipmideck/ipmideck:latest
+```
+
+`--network host` è necessario affinché il container possa raggiungere i tuoi BMC direttamente sulla rete
+locale tramite la porta UDP 623 (la porta IPMI/RMCP+). Senza host networking, il container
+resta dietro il NAT di Docker e non può completare una sessione IPMI con il tuo hardware.
+
+Una volta avviato il container, apri `http://<your-ip>:3000` e segui la procedura guidata.
+
+<Note>
+  L'immagine pubblicata vive su Docker Hub all'indirizzo
+  [hub.docker.com/r/ipmideck/ipmideck](https://hub.docker.com/r/ipmideck/ipmideck).
+  L'immagine arriva presto, il comando qui sopra è esattamente quello che eseguirai una volta
+  che sarà pubblicata.
+</Note>
+
+## pip
+
+```bash
+pip install ipmideck
+```
+
+Il pacchetto pip richiede che `ipmitool` sia installato sull'host, ipmideck si appoggia a
+`ipmitool` per ogni operazione IPMI. Installalo prima dal gestore di pacchetti della tua distribuzione
+(per esempio `apt install ipmitool` o `dnf install ipmitool`).
+
+## Dove ipmideck archivia i dati
+
+ipmideck scrive la sua configurazione e il database in una directory dati:
+
+- **Docker:** `/data` dentro il container (l'immagine imposta `IPMIDECK_DATA_DIR=/data`;
+  rendilo persistente con un volume).
+- **pip su Linux:** `/data` per impostazione predefinita: imposta `IPMIDECK_DATA_DIR` per spostarla.
+- **pip su Windows:** `./data`, relativo alla directory da cui esegui `ipmideck`.
+
+Puoi sovrascrivere la posizione su qualsiasi piattaforma con la variabile d'ambiente
+`IPMIDECK_DATA_DIR`. Questa directory contiene `config.yaml`, il database SQLite e il file della
+chiave di cifratura usata per proteggere le credenziali BMC archiviate. Vedi [Configurazione](/it/configuration) e
+[Esecuzione di ipmideck](/it/running) per i dettagli.
+
+## Prossimi passi
+
+- [Configurazione](/it/configuration): regola porte, intervalli di polling e conservazione.
+- [Hardware supportato](/it/supported-hardware): verifica che il tuo BMC sia coperto.
+- [Risoluzione dei problemi](/it/troubleshooting): errori di connessione e IPMI.

@@ -1,0 +1,58 @@
+---
+title: "HPE iLO"
+description: "Abilita IPMI/DCMI-over-LAN su HPE iLO 4 / iLO 5 così ipmideck può connettersi al tuo server ProLiant."
+---
+
+**Si applica a:** HPE iLO 4 e iLO 5 (server ProLiant).
+
+<Note>
+  HPE iLO è un produttore **Sperimentale** per ipmideck, questi passaggi provengono dalla documentazione
+  ufficiale HPE e da un iLO 4 reale. Su **iLO 4** IPMI-over-LAN è tipicamente **abilitato per
+  impostazione predefinita**; su **iLO 5** è **disabilitato per impostazione predefinita** per sicurezza e deve essere attivato
+  (passaggi sotto).
+</Note>
+
+## iLO 5: abilita IPMI/DCMI over LAN
+
+<Steps>
+  <Step title="Apri l'interfaccia web di iLO">
+    In un browser, vai all'indirizzo IP di iLO e accedi con le credenziali di amministratore
+    di iLO.
+  </Step>
+  <Step title="Security → Access Settings → Network">
+    Nel pannello di navigazione a sinistra clicca **Security**, apri la scheda **Access Settings**, poi
+    clicca l'icona **matita / modifica** per la sezione **Network**.
+  </Step>
+  <Step title="Abilita IPMI/DCMI over LAN">
+    Spunta **IPMI/DCMI over LAN** e clicca **Apply**. IPMI-over-LAN usa la porta predefinita
+    **623**.
+  </Step>
+</Steps>
+
+## iLO 4: conferma l'indirizzo di rete
+
+Su iLO 4, IPMI-over-LAN è generalmente già abilitato; ti serve principalmente l'indirizzo IP di iLO.
+Apri **Network → iLO Dedicated Network Port** e leggi il **Network Summary**.
+
+<Frame caption="iLO 4 → Network → iLO Dedicated Network Port → Network Summary. Il blocco IPv4 Summary contiene l'indirizzo iLO, la subnet e il gateway che ti servono (l'evidenziazione rossa sulla scheda SNTP è incidentale a questa cattura).">
+  <img src="/tutorials/HPE/HP-Proliant-BL460C-Gen9-Network-info-screenshot-IPMI_web-interface.png" alt="HPE iLO 4 Network Summary page on a ProLiant BL460c Gen9" />
+</Frame>
+
+## Verifica
+
+Dall'host che eseguirà ipmideck:
+
+```bash
+ipmitool -I lanplus -H <ilo-ip> -U <user> -P <password> chassis status
+```
+
+<Note>
+  **Da rivedere:** il percorso differisce tra iLO 4 (una scheda **Network**; IPMI di solito
+  abilitato) e iLO 5 (**Security → Access Settings**; IPMI disabilitato per impostazione predefinita). Verifica
+  sulla tua versione specifica di iLO prima di affidarti a questi passaggi.
+</Note>
+
+## Fonte
+
+[CITED: support.hpe.com, HPE iLO 5 IPMI User Guide](https://support.hpe.com/hpesc/public/docDisplay?docId=a00018321en_us) ·
+[Guidelines for using iLO with IPMI or DCMI over LAN](https://support.hpe.com/hpesc/public/docDisplay?docId=a00026171en_us)

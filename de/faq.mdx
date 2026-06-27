@@ -1,0 +1,59 @@
+---
+title: "FAQ"
+description: "Häufige Fragen zum Betrieb von ipmideck in einem Homelab."
+---
+
+<AccordionGroup>
+
+<Accordion title="Ist ipmideck cloud-basiert?">
+  Nein. ipmideck ist vollständig selbst gehostet und läuft komplett in Ihrem eigenen Netzwerk. Es macht keine
+  externen Aufrufe, keine Telemetrie, keine Cloud, kein Konto. Es spricht direkt mit Ihren BMCs und
+  speichert alles lokal.
+</Accordion>
+
+<Accordion title="Mit welchen BMCs funktioniert es?">
+  Jeder Server mit einem IPMI-2.0-BMC sollte sich für Sensorüberwachung, Stromsteuerung, SEL
+  und FRU verbinden. Dell PowerEdge / iDRAC ist vollständig getestet; Supermicro, HPE iLO,
+  Lenovo XCC und IBM IMM sind experimentell. Siehe [Unterstützte Hardware](/de/supported-hardware).
+</Accordion>
+
+<Accordion title="Muss ipmitool installiert sein?">
+  Nur für die pip-Installation, bei der das Paket an Ihr System-`ipmitool` weiterreicht. Das
+  Docker-Image bündelt alles, was es braucht, sodass Sie nur Docker mit `--network host` benötigen.
+</Accordion>
+
+<Accordion title="Warum braucht Docker --network host?">
+  ipmideck erreicht BMCs über UDP-Port 623 in Ihrem lokalen Netzwerk. Host-Networking lässt den
+  Container direkt mit diesem Port sprechen, statt hinter dem NAT von Docker zu sitzen. Siehe
+  [Installation](/de/installation).
+</Accordion>
+
+<Accordion title="Auf welchem Port läuft das Dashboard?">
+  Standardmäßig 3000. Ändern Sie es in `config.yaml` (`server.port`) oder mit der
+  Umgebungsvariablen `IPMIDECK_SERVER_PORT`.
+</Accordion>
+
+<Accordion title="Wie lange wird der Sensorverlauf aufbewahrt?">
+  Standardmäßig ein Jahr (`data.retention_days: 365`). Überschreiben Sie es mit
+  `IPMIDECK_DATA_RETENTION_DAYS`. Ältere Daten werden nach dem durch `data.cleanup_interval`
+  gesetzten Zeitplan bereinigt.
+</Accordion>
+
+<Accordion title="Kann ich die Anmeldung deaktivieren?">
+  Ja, setzen Sie `auth.enabled: false` in `config.yaml` oder `IPMIDECK_AUTH_ENABLED=false`. Tun Sie das nur
+  in einem vertrauenswürdigen, isolierten Netzwerk: mit deaktivierter Auth kann jeder, der das Dashboard erreicht,
+  Ihre Hardware steuern.
+</Accordion>
+
+<Accordion title="Ist die Lüftersteuerung sicher?">
+  FanPilot fällt sicher aus. Lüfter werden bei oder über der kritischen Temperatur auf 100 % gezwungen, und die
+  Regelschleife läuft autonom im Hintergrund, auch mit geschlossenem Dashboard. Siehe
+  [Sicherheit](/de/security) für die vollständigen Details zum Hardware-Schutz.
+</Accordion>
+
+<Accordion title="Wie betreibe ich mehrere Server?">
+  Fügen Sie jeden BMC vom Dashboard aus hinzu. ipmideck verwaltet mehrere BMCs von einer einzigen Instanz aus und
+  zeigt eine Panorama-Statusübersicht aller von ihnen.
+</Accordion>
+
+</AccordionGroup>

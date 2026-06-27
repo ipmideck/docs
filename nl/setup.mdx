@@ -1,0 +1,61 @@
+---
+title: "Eerste installatie"
+description: "De eerste keer dat je ipmideck opent, draait er een korte installatiewizard: kies een inlogmodus, voeg je eerste BMC toe en open het dashboard."
+---
+
+De eerste keer dat je ipmideck opent op `http://<your-ip>:3000`, toont het een installatiewizard
+van vier stappen in plaats van het dashboard. Je kunt de taal bij elke stap wijzigen via de
+keuzelijst rechtsboven.
+
+<Steps>
+  <Step title="Welkom">
+    Een kort introscherm. Klik op **Get started** om te beginnen.
+  </Step>
+  <Step title="Kies een inlogmodus">
+    Kies hoe het dashboard wordt beveiligd:
+
+    - **Require login** (de veilige standaard): maak nu een beheerdersaccount aan. Voer een gebruikersnaam,
+      een wachtwoord en het wachtwoord nogmaals in ter bevestiging. ipmideck slaat het wachtwoord op als
+      een bcrypt-hash, nooit in platte tekst.
+    - **Open access**: helemaal geen login. Iedereen die het dashboard kan bereiken, kan je
+      hardware bedienen, kies dit dus alleen op een vertrouwd, geïsoleerd netwerk.
+
+    Je kunt dit later wijzigen, en je kunt het wachtwoord vanaf de commandoregel resetten met
+    [`ipmideck reset-password`](/nl/cli).
+  </Step>
+  <Step title="Voeg je eerste server toe">
+    Voer de verbindingsgegevens voor een BMC in:
+
+    | Veld | Opmerkingen |
+    | --- | --- |
+    | **Name** | Een label voor de server, bijvoorbeeld `R710-homelab`. |
+    | **Host** | Het IP-adres of de hostnaam van de BMC. |
+    | **Port** | De IPMI/RMCP+-poort. Standaard `623`. |
+    | **Username** | Het BMC-account. Standaard `ADMIN`. |
+    | **Password** | Het wachtwoord van het BMC-account. |
+    | **Vendor** | Supermicro, Dell, HP of Generic. |
+
+    Klik op **Test connection** om de inloggegevens te controleren vóór het opslaan (ipmideck voert een
+    voedingsstatus-query uit via `lanplus`), klik daarna op **Add server**.
+
+    <Note>
+      IPMI-over-LAN moet eerst op de BMC zijn ingeschakeld, anders mislukt de verbindingstest. Zie
+      [IPMI inschakelen op je server](/nl/enable-ipmi) voor stappen per leverancier.
+    </Note>
+  </Step>
+  <Step title="Klaar">
+    De wizard bevestigt dat de server is toegevoegd. Klik op **Go to dashboard** om te beginnen met monitoren.
+  </Step>
+</Steps>
+
+## Meer servers toevoegen
+
+Je bent niet beperkt tot één BMC. Vanuit het dashboard kun je later meer servers toevoegen, en
+ipmideck beheert ze allemaal vanuit één instantie. Zie
+[Ondersteunde hardware](/nl/supported-hardware) voor welke leveranciers getest zijn.
+
+## Volgende stappen
+
+- [IPMI inschakelen op je server](/nl/enable-ipmi): zet IPMI-over-LAN aan voordat je verbindt.
+- [Configuratie](/nl/configuration): poorten, polling-intervallen en bewaartermijn.
+- [Back-up en herstel](/nl/backup-restore): bewaar een kopie van je configuratie en historie.

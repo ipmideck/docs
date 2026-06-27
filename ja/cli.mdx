@@ -1,0 +1,231 @@
+---
+title: "CLI リファレンス"
+description: "コマンドラインから ipmideck を実行します。サブコマンド、バインドフラグ、0.0.0.0:3000 デフォルト、自己署名 HTTPS、デモモード、終了コード。"
+---
+
+ipmideck は単一のコンソールコマンド `ipmideck` を提供します。これはサーバーを起動し、管理者
+パスワードをリセットし、または自己署名証明書を生成します。`ipmilink` は同じコマンドの後方互換
+エイリアスで、下記のすべてのサブコマンドとフラグはどちらの名前でも同一に動作します。
+
+<Note>
+  CLI は ipmideck を直接実行する場合 (pip インストールまたはソースチェックアウト) にのみ適用されます。
+  Docker イメージは `uvicorn backend.main:app` を直接起動し、CLI を一切呼び出さないため、これらの
+  フラグ、バインドの優先順位、単一インスタンスガードのいずれもコンテナーには適用されません。コンテナーのバインドは独自の起動コマンドで設定されます。[インストール](/ja/installation) を参照してください。
+</Note>
+
+## サーバーの起動
+
+`start` は主要な配信コマンドです。サブコマンドなしの単独の呼び出しも同一に配信するので、これらは
+等価です。
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start
+# or, with no subcommand:
+ipmideck
+```
+
+```cmd cmd
+ipmideck start
+:: or, with no subcommand:
+ipmideck
+```
+
+```bash bash
+ipmideck start
+# or, with no subcommand:
+ipmideck
+```
+
+</CodeGroup>
+
+フラグなしでは、ipmideck はデフォルトで **`0.0.0.0:3000`** にバインドし、すべてのインターフェイスで、
+ポート `3000` で到達可能です。起動したら `http://<your-ip>:3000` を開いてください。
+
+`--host` と `--port` でバインドを上書きします。
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start --host 127.0.0.1 --port 8080
+```
+
+```cmd cmd
+ipmideck start --host 127.0.0.1 --port 8080
+```
+
+```bash bash
+ipmideck start --host 127.0.0.1 --port 8080
+```
+
+</CodeGroup>
+
+## サブコマンド
+
+| サブコマンド | 内容 |
+| --- | --- |
+| `start` | サーバーを起動します (デフォルト)。サブコマンドなしの単独の `ipmideck` も配信します。 |
+| `serve` | `start` の非推奨エイリアス。同一に動作します。既存のスクリプトが動き続けるよう保持されています。 |
+| `reset-password` | 管理者ログインを対話的に作成または更新し、配信せずに終了します。 |
+
+<Note>
+  `serve` は `start` の非推奨エイリアスです。新しいスクリプトでは `start` (または単独の `ipmideck`) を
+  優先してください。
+</Note>
+
+## フラグ
+
+これらのトップレベルフラグは配信パスに適用されます。`--demo` と `--config` はサブコマンドの分岐の
+前に読み取られるので、`reset-password` と `--gen-cert` にも影響します。
+
+| フラグ | 効果 |
+| --- | --- |
+| `--host <host>` | バインドホスト。デフォルトは `config.yaml` または `0.0.0.0` から。明示的なフラグが設定に勝ります。 |
+| `--port <port>` | バインドポート。デフォルトは `config.yaml` または `3000` から。明示的なフラグが設定に勝ります。 |
+| `--demo` | シミュレートされたデータでデモモードで実行します。 |
+| `--config <path>` | 読み込む `config.yaml` へのパス。 |
+| `--reload` | 開発用の自動リロードを有効にします。 |
+| `--gen-cert` | `data/certs/` の下に自己署名証明書 + キーを生成し、パスを `config.yaml` に書き込んで終了します。 |
+
+## バインドの優先順位
+
+ipmideck が実際にバインドするホストとポートは、この順序で解決されます。優先度の高い順:
+
+1. コマンドライン上の明示的な `--host` / `--port` フラグ。
+2. 設定。これ自体が環境変数 (`IPMIDECK_SERVER_HOST` / `IPMIDECK_SERVER_PORT`) を `config.yaml` より、
+   `config.yaml` を組み込みデフォルトより優先して解決します。
+3. ハードコードされたフォールバック **`0.0.0.0:3000`**。初期の設定読み込みが失敗した場合に使用されます。
+
+言い換えると、`config.yaml` に永続化した値は、次の起動時に **`IPMIDECK_` 環境変数または
+`--host` / `--port` フラグによって上書き** されます。環境変数と CLI が常に勝ちます。
+`config.yaml` が不正な形式の場合、ipmideck は stderr に警告を出力し、`0.0.0.0:3000` にフォールバックします。
+
+<Note>
+  `IPMIDECK_SERVER_HOST` と `IPMIDECK_SERVER_PORT` 環境変数は `IPMIDECK_` プレフィックスを使用します。
+  上書きの完全な一覧は [設定](/ja/configuration) を参照してください。
+</Note>
+
+## --gen-cert による HTTPS
+
+`--gen-cert` は自己署名証明書とキーを生成し、終了します。サーバーを起動 **せず**、
+HTTPS をそれ自体では **有効にしません**。
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck --gen-cert
+```
+
+```cmd cmd
+ipmideck --gen-cert
+```
+
+```bash bash
+ipmideck --gen-cert
+```
+
+</CodeGroup>
+
+`data/certs/` の下に証明書 + キーのペアを書き込み、それらのパスを `config.yaml` の `server` ブロックに
+記録し、3 行を出力します。
+
+```text
+Generated: <path-to-cert>
+Generated: <path-to-key>
+Wrote cert_file/key_file to config.yaml. Set server.https=true and restart to serve over HTTPS.
+```
+
+実際に HTTPS で配信するには、`config.yaml` で `server.https: true` を設定し、ipmideck を再起動します。HTTPS が自動的に有効になることはありません。
+
+## デモモード
+
+`--demo` は実際の BMC ではなくシミュレートされたハードウェアに対して ipmideck を実行します。サーバーを
+1 つも接続せずにダッシュボードを評価するのに便利です。
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start --demo
+```
+
+```cmd cmd
+ipmideck start --demo
+```
+
+```bash bash
+ipmideck start --demo
+```
+
+</CodeGroup>
+
+デモモードはサブコマンドの分岐の前、非常に早い段階で設定されるので、アプリ全体 (設定と実行中のサーバー) がそれを認識します。
+
+## 管理者パスワードのリセット
+
+`reset-password` は管理者ログインを対話的に作成または更新し、サーバーを一度も起動せずに
+終了します。
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck reset-password
+```
+
+```cmd cmd
+ipmideck reset-password
+```
+
+```bash bash
+ipmideck reset-password
+```
+
+</CodeGroup>
+
+`Username:` を尋ね、次に `New password:` (非表示入力) を尋ねます。アカウントがすでに存在する場合、
+そのユーザーのパスワードを更新し、`Password updated for <username>` を出力します。そうでなければ
+ユーザーを作成し、`User <username> created` を出力します。
+
+## 開発用の自動リロード
+
+`--reload` は開発専用の高速パスです。uvicorn 自身の自動リロードスーパーバイザーに引き渡して
+戻ります。これは意図的に、下記で説明する **単一インスタンスポートガードをスキップ** します。
+リローダーが独自のスーパーバイザープロセスを実行するためです。
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start --reload
+```
+
+```cmd cmd
+ipmideck start --reload
+```
+
+```bash bash
+ipmideck start --reload
+```
+
+</CodeGroup>
+
+<Warning>
+  `--reload` は開発専用です。単一インスタンスガードをバイパスするので、他の ipmideck インスタンスが
+  同じポートにすでにバインドされていないホストで実行してください。
+</Warning>
+
+## 終了コード
+
+| 終了コード | いつ |
+| --- | --- |
+| `0` | `Ctrl+C` / SIGTERM でのクリーンなシャットダウン。サーバーは正常に停止し、トレースバックはありません。 |
+| `1` | ターゲットホストでポートがすでに使用中 (別のインスタンスが実行中の可能性)、**または** アドレスが利用不可または許可されていないためにバインドが失敗 (例えば特権ポートや存在しないインターフェイス)。 |
+
+配信パス (`--reload` ではない) では、ipmideck はバインドの前に単一インスタンスガードを実行します。
+ポートがすでに使用中の場合、stderr にエラーを出力し、`1` で終了します。アドレスが利用不可または
+許可されていないためにバインドが失敗した場合、別個のエラーを出力し、同じく `1` で終了します。
+
+## 次のステップ
+
+- [設定](/ja/configuration): `config.yaml` のキーと `IPMIDECK_` 環境変数による上書き。
+- [インストール](/ja/installation): Docker または pip で ipmideck をインストールします。
+- [トラブルシューティング](/ja/troubleshooting): 接続、ポート、IPMI のエラー。

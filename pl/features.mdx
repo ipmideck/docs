@@ -1,0 +1,55 @@
+---
+title: "Funkcje"
+description: "Monitorowanie czujników, sterowanie wentylatorami FanPilot, zarządzanie zasilaniem, SEL, FRU i pulpit wieloserwerowy."
+---
+
+## Monitorowanie czujników
+
+- Odczyty temperatury, RPM wentylatorów, napięcia i zużycia mocy w czasie rzeczywistym.
+- Wykresy na żywo z danymi historycznymi (do roku, kontrolowane przez `data.retention_days`).
+- Konfigurowalne progi alarmowe z powiadomieniami w przeglądarce.
+
+ipmideck odpytuje każdy BMC w interwale ustawionym przez `ipmi.poll_interval` (domyślnie 30 sekund,
+nadpisywalne przez `IPMIDECK_IPMI_POLL_INTERVAL`).
+
+## FanPilot: inteligentne sterowanie wentylatorami
+
+- Wizualny edytor krzywej wentylatorów typu „przeciągnij i upuść”.
+- Wbudowane profile: Silent, Balanced, Performance, Full Speed i Custom.
+- Konfigurowalna histereza zapobiegająca oscylacji wentylatorów wokół limitu temperatury.
+- Nadpisanie bezpieczeństwa: wentylatory są wymuszane na 100% na poziomie lub powyżej temperatury krytycznej.
+- Autonomiczna pętla, która działa niezależnie od pulpitu.
+
+<Warning>
+  Nadpisanie bezpieczeństwa FanPilot zawsze wygrywa. Żadna krzywa wentylatorów nie może utrzymać wentylatorów poniżej 100%, gdy
+  zostanie osiągnięta temperatura krytyczna, limit termiczny ma pierwszeństwo przed dowolnym profilem.
+</Warning>
+
+## Sterowanie zasilaniem
+
+- Power On, Soft Off, Hard Off, Reset i Power Cycle.
+- Wskaźnik statusu zasilania w czasie rzeczywistym.
+- Okna dialogowe potwierdzenia dla destrukcyjnych akcji.
+- Pełny dziennik audytu poleceń każdej operacji zmieniającej stan.
+
+## System Event Log (SEL)
+
+- Wyświetlaj dziennik zdarzeń sprzętowych BMC z filtrowaniem według ważności.
+- Wyszukiwanie, filtry zakresu dat i eksport do CSV lub JSON.
+
+## Inwentaryzacja sprzętu (FRU)
+
+- Numery seryjne, numery części i informacje o producencie.
+- Dane płyty, obudowy i produktu na pierwszy rzut oka.
+
+## Pulpit wieloserwerowy
+
+- Zarządzaj wieloma BMC z jednej instancji ipmideck.
+- Widok panoramiczny z przeglądem statusu wszystkich serwerów.
+
+## Jak rozmawia z twoim sprzętem
+
+ipmideck steruje każdą operacją IPMI przez `ipmitool`, wywoływany przez `lanplus`
+(IPMI 2.0) dla szyfrowanych sesji. Argumenty są zawsze przekazywane jako lista, nigdy przez
+powłokę, więc nie ma powierzchni do wstrzykiwania poleceń. Zobacz [Bezpieczeństwo](/pl/security), aby poznać
+pełny obraz.

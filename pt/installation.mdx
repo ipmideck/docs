@@ -1,0 +1,53 @@
+---
+title: "Instalação"
+description: "Instale o ipmideck com Docker ou pip e compreenda o requisito --network host."
+---
+
+## Docker (recomendado)
+
+```bash
+docker run --network host ipmideck/ipmideck:latest
+```
+
+`--network host` é necessário para que o contentor possa alcançar os seus BMCs diretamente na sua rede
+local pela porta UDP 623 (a porta IPMI/RMCP+). Sem rede de host, o contentor
+fica atrás do NAT do Docker e não consegue completar uma sessão IPMI com o seu hardware.
+
+Assim que o contentor estiver a correr, abra `http://<your-ip>:3000` e siga o assistente de configuração.
+
+<Note>
+  A imagem publicada vive no Docker Hub em
+  [hub.docker.com/r/ipmideck/ipmideck](https://hub.docker.com/r/ipmideck/ipmideck).
+  A imagem chega em breve, o comando acima é exatamente o comando que executará assim que
+  for publicada.
+</Note>
+
+## pip
+
+```bash
+pip install ipmideck
+```
+
+O pacote pip requer que o `ipmitool` esteja instalado no host, o ipmideck recorre ao
+`ipmitool` para cada operação IPMI. Instale-o primeiro a partir do gestor de pacotes da sua distribuição
+(por exemplo `apt install ipmitool` ou `dnf install ipmitool`).
+
+## Onde o ipmideck guarda os dados
+
+O ipmideck escreve a sua configuração e base de dados num diretório de dados:
+
+- **Docker:** `/data` dentro do contentor (a imagem define `IPMIDECK_DATA_DIR=/data`;
+  torne-o persistente com um volume).
+- **pip no Linux:** `/data` por predefinição: defina `IPMIDECK_DATA_DIR` para o relocalizar.
+- **pip no Windows:** `./data`, relativo ao diretório a partir do qual corre o `ipmideck`.
+
+Pode substituir a localização em qualquer plataforma com a variável de ambiente `IPMIDECK_DATA_DIR`.
+Este diretório contém `config.yaml`, a base de dados SQLite e o ficheiro da chave de cifragem
+usado para proteger as credenciais BMC guardadas. Veja [Configuração](/pt/configuration) e
+[Executar o ipmideck](/pt/running) para detalhes.
+
+## Próximos passos
+
+- [Configuração](/pt/configuration): ajuste portas, intervalos de sondagem e retenção.
+- [Hardware suportado](/pt/supported-hardware): confirme que o seu BMC é coberto.
+- [Resolução de problemas](/pt/troubleshooting): erros de ligação e IPMI.

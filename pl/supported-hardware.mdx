@@ -1,0 +1,43 @@
+---
+title: "Obsługiwany sprzęt"
+description: "ipmideck mówi standardowym IPMI 2.0; obsługa jest podzielona na poziomy w zależności od tego, jak dokładnie przetestowano każdego producenta."
+---
+
+## IPMI 2.0 wszędzie
+
+ipmideck mówi standardowym IPMI 2.0, więc większość kontrolerów BMC serwerów odpowiada. Obsługa jest podzielona na poziomy w zależności od tego, jak
+dokładnie przetestowano każdego producenta. Sterowanie krzywą wentylatorów (FanPilot) opiera się obecnie na
+surowych poleceniach Dell iDRAC; sterowanie wentylatorami innych producentów jest na mapie drogowej.
+
+| Producent | Status | Włącz IPMI | Uwagi |
+|--------|--------|-------------|-------|
+| Dell PowerEdge / iDRAC | <Icon icon="circle-check" color="#16a34a" /> Obsługiwany / przetestowany | [Przewodnik Dell iDRAC](/pl/enable-ipmi/dell-idrac) | IPMI 2.0, w pełni obsługiwany i przetestowany. |
+| Supermicro | <Icon icon="flask" color="#d97706" /> Eksperymentalny | [Przewodnik Supermicro](/pl/enable-ipmi/supermicro) | IPMI 2.0, działa, jeszcze nie przetestowany wyczerpująco. |
+| HPE iLO | <Icon icon="flask" color="#d97706" /> Eksperymentalny | [Przewodnik HPE iLO](/pl/enable-ipmi/hpe-ilo) | IPMI 2.0, eksperymentalny, jeszcze nie przetestowany wyczerpująco. |
+| Lenovo XCC | <Icon icon="flask" color="#d97706" /> Eksperymentalny | [Przewodnik Lenovo XCC](/pl/enable-ipmi/lenovo-xcc) | IPMI 2.0, eksperymentalny, jeszcze nie przetestowany wyczerpująco. |
+| IBM IMM | <Icon icon="flask" color="#d97706" /> Eksperymentalny | [Przewodnik IBM IMM](/pl/enable-ipmi/ibm-imm) | IPMI 2.0, eksperymentalny, jeszcze nie przetestowany wyczerpująco. |
+
+<Note>
+  Każdy BMC, który implementuje IPMI 2.0, powinien się łączyć w celu monitorowania czujników, sterowania zasilaniem,
+  SEL i FRU. Powyższe poziomy opisują, jak wiele sterowania wentylatorami FanPilot i zachowań specyficznych
+  dla producenta zostało zwalidowanych na prawdziwym sprzęcie.
+</Note>
+
+## Włączanie IPMI na twoim BMC
+
+Większość serwerów jest dostarczana z wyłączonym IPMI-over-LAN lub z domyślnymi poświadczeniami. Zanim
+ipmideck będzie mógł się połączyć, musisz włączyć IPMI 2.0 przez LAN i ustawić konto użytkownika na
+BMC. Przewodnik **[Włączanie IPMI na twoim BMC →](/pl/enable-ipmi)** zawiera instrukcję krok po kroku
+dla każdego kontrolera:
+
+- [Dell iDRAC](/pl/enable-ipmi/dell-idrac)
+- [Supermicro](/pl/enable-ipmi/supermicro): *niska pewność; zweryfikuj na sprzęcie*
+- [HPE iLO](/pl/enable-ipmi/hpe-ilo)
+- [Lenovo XCC](/pl/enable-ipmi/lenovo-xcc)
+- [IBM IMM](/pl/enable-ipmi/ibm-imm): *niska pewność; zweryfikuj na sprzęcie*
+
+<Note>
+  Instrukcje dla Supermicro i IBM IMM2 są oznaczone jako **niska pewność**, ich ścieżki
+  nawigacyjne BMC pochodzą ze skąpej dokumentacji i wymagają walidacji na prawdziwym sprzęcie,
+  zanim na nich polegniesz. Każda strona zawiera widoczne ostrzeżenie.
+</Note>

@@ -1,0 +1,89 @@
+---
+title: "구성"
+description: "ipmideck는 data/config.yaml을 읽고 IPMIDECK_ 접두사가 붙은 환경 변수 재정의를 받아들입니다."
+---
+
+## config.yaml
+
+ipmideck는 설정을 `data/config.yaml`에서 읽으며, 이는 최초 실행 시 합리적인 기본값으로
+작성됩니다. 파일을 직접 편집하거나, 런타임에 환경 변수로 어떤 값이든 재정의할 수
+있습니다 (Docker에 유용합니다. 아래 참조).
+
+```yaml
+# data/config.yaml (auto-generated on first run)
+server:
+  host: "0.0.0.0"
+  port: 3000
+  https: false
+auth:
+  enabled: true
+  session_expiry: "24h"
+  max_login_attempts: 5
+ipmi:
+  poll_interval: 30
+  power_poll_interval: 30
+  command_timeout: 30
+data:
+  retention_days: 365
+  cleanup_interval: "24h"
+logging:
+  level: "info"
+modules:
+  sensors:
+    enabled: true
+  fanpilot:
+    enabled: true
+  power:
+    enabled: true
+  sel:
+    enabled: true
+  fru:
+    enabled: true
+```
+
+위의 키는 ipmideck가 `config.yaml`에 쓰는 실제의 접두사 없는 중첩 키입니다.
+환경 변수 재정의는 별도의 `IPMIDECK_` 접두사를 사용하며 YAML 파일 자체 안에는 결코
+나타나지 않습니다.
+
+## 환경 변수 재정의
+
+모든 설정은 런타임에 `IPMIDECK_` 접두사가 붙은 환경 변수로 재정의할 수 있습니다. 이는
+컨테이너 내부 파일을 편집하고 싶지 않은 Docker에서 ipmideck를 구성하는 가장 쉬운 방법입니다.
+
+| 환경 변수 | 설명 |
+|----------------------|-------------|
+| `IPMIDECK_SERVER_HOST` | 대시보드가 바인드하는 호스트/인터페이스 (기본값 `0.0.0.0`). |
+| `IPMIDECK_SERVER_PORT` | 대시보드가 바인드하는 HTTP 포트 (기본값 `3000`). |
+| `IPMIDECK_AUTH_ENABLED` | 내장 로그인을 활성화하거나 비활성화합니다 (기본값 `true`). |
+| `IPMIDECK_AUTH_SESSION_EXPIRY` | 로그인 세션이 유효하게 유지되는 기간 (기본값 `24h`). |
+| `IPMIDECK_IPMI_POLL_INTERVAL` | BMC 센서 폴링 사이의 초 (기본값 `30`). |
+| `IPMIDECK_IPMI_POWER_POLL_INTERVAL` | 전원 상태 폴링 사이의 초 (기본값 `30`). |
+| `IPMIDECK_DATA_RETENTION_DAYS` | 정리 전에 보관할 센서 기록 일수 (기본값 `365`). |
+| `IPMIDECK_DATA_DB_PATH` | SQLite 데이터베이스 파일에 대한 절대 경로. |
+| `IPMIDECK_LOGGING_LEVEL` | 로그 상세도: `debug`, `info`, `warning`, `error` (기본값 `info`). |
+| `IPMIDECK_DEMO` | 실제 BMC 대신 시뮬레이션된 하드웨어에 대해 실행합니다 (기본값 `false`). |
+
+두 개의 추가 변수는 `config.yaml` 값이 아니라 파일 *위치*를 제어합니다.
+`IPMIDECK_DATA_DIR` (데이터 디렉터리. 아래 참조)와 `IPMIDECK_CONFIG_PATH` (로드할
+`config.yaml`에 대한 명시적 경로)입니다.
+
+<Note>
+  환경 변수는 `config.yaml`의 값보다 우선합니다. `docker run` 명령
+  (`-e IPMIDECK_SERVER_PORT=8080`) 또는 `docker-compose.yml`에서 설정하세요.
+</Note>
+
+## 구성이 위치하는 곳
+
+ipmideck는 `IPMIDECK_DATA_DIR`이 설정되어 있으면 그것에서 데이터 디렉터리를 해석하고,
+그렇지 않으면 플랫폼 기본값으로 폴백합니다. `config.yaml`은 항상 `<data-dir>/config.yaml`에
+있습니다.
+
+- **Docker:** `/data/config.yaml`. 이미지가 `IPMIDECK_DATA_DIR=/data`를 설정합니다.
+  `/data`를 볼륨으로 영속화하세요.
+- **Linux의 pip:** 기본적으로 `/data/config.yaml`. 이동하려면 `IPMIDECK_DATA_DIR`을 설정합니다.
+- **Windows의 pip:** `./data/config.yaml`. `ipmideck`를 실행하는 디렉터리 기준 상대 경로.
+
+## 다음 단계
+
+- [보안](/ko/security): 자격 증명과 세션이 어떻게 보호되는지.
+- [기능](/ko/features): 각 모듈이 무엇을 하는지.

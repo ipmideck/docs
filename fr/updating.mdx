@@ -1,0 +1,67 @@
+---
+title: "Mettre à jour ipmideck"
+description: "Mettez ipmideck à niveau vers une nouvelle version avec Docker ou pip. Votre répertoire de données survit à la mise à niveau."
+---
+
+Mettre à niveau ipmideck remplace l'application, pas vos données. Votre `config.yaml`, votre base de données
+et votre clé de chiffrement résident dans le [répertoire de données](/fr/configuration#où-réside-la-configuration), qui
+reste en place lors d'une mise à niveau, de sorte que vos serveurs, votre historique et vos réglages sont conservés.
+
+<Note>
+  ipmideck est en pré-version. L'image Docker publiée et le paquet PyPI arrivent bientôt ;
+  les commandes ci-dessous sont celles que vous utiliserez une fois qu'elles seront disponibles.
+</Note>
+
+## Docker
+
+Récupérez la nouvelle image et recréez le conteneur avec le même volume de données :
+
+```bash
+docker pull ipmideck/ipmideck:latest
+docker stop ipmideck && docker rm ipmideck
+docker run -d --name ipmideck --network host -v ipmideck-data:/data ipmideck/ipmideck:latest
+```
+
+Le volume `-v ipmideck-data:/data` contient vos données, donc réutiliser le même nom de volume
+conserve tout. Épinglez une version au lieu de `latest` (par exemple `ipmideck/ipmideck:2.0.0`) si vous
+voulez contrôler exactement quand vous passez d'une version à l'autre.
+
+## pip
+
+Mettez le paquet à niveau sur place, puis redémarrez ipmideck :
+
+<CodeGroup>
+
+```bash bash
+pip install -U ipmideck
+ipmideck start
+```
+
+```powershell PowerShell
+pip install -U ipmideck
+ipmideck start
+```
+
+</CodeGroup>
+
+Le répertoire de données est indépendant du paquet, donc la mise à niveau ne touche pas à votre configuration
+ni à votre base de données.
+
+## Vérifier votre version
+
+La version en cours d'exécution s'affiche dans le tableau de bord, et la console l'affiche dans la ligne de crédits
+sous la bannière (par exemple `v2.0.0a1`). Vous pouvez aussi la lire depuis le point de terminaison de santé :
+
+```bash
+curl http://<your-ip>:3000/api/health
+```
+
+<Note>
+  Faites une [sauvegarde](/fr/backup-restore) avant une mise à niveau majeure. La restauration consiste alors simplement à
+  remettre le répertoire de données en place si quelque chose tourne mal.
+</Note>
+
+## Étapes suivantes
+
+- [Sauvegarde et restauration](/fr/backup-restore) : capturez vos données avant de mettre à niveau.
+- [Exécuter ipmideck](/fr/running) : démarrer, arrêter et où réside le répertoire de données par plateforme.

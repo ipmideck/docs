@@ -1,0 +1,233 @@
+---
+title: "Référence de la CLI"
+description: "Exécutez ipmideck en ligne de commande : sous-commandes, flags de liaison, le défaut 0.0.0.0:3000, HTTPS auto-signé, mode démo et codes de sortie."
+---
+
+ipmideck fournit une seule commande de console, `ipmideck`, qui démarre le serveur, réinitialise le
+mot de passe administrateur ou génère un certificat auto-signé. `ipmilink` est un alias rétrocompatible
+de la même commande, chaque sous-commande et flag ci-dessous fonctionne de façon identique sous l'un ou
+l'autre nom.
+
+<Note>
+  La CLI ne s'applique que lorsque vous exécutez ipmideck directement (installation pip ou un checkout des sources). L'
+  image Docker lance `uvicorn backend.main:app` directement et n'invoque jamais la CLI, donc aucun
+  de ces flags, ni la précedence de liaison, ni la garde d'instance unique ne s'appliquent au conteneur. La liaison du conteneur est définie par sa propre commande de démarrage. Consultez [Installation](/fr/installation).
+</Note>
+
+## Démarrer le serveur
+
+`start` est la commande principale de service. Une invocation seule sans sous-commande sert de façon identique,
+donc celles-ci sont équivalentes :
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start
+# or, with no subcommand:
+ipmideck
+```
+
+```cmd cmd
+ipmideck start
+:: or, with no subcommand:
+ipmideck
+```
+
+```bash bash
+ipmideck start
+# or, with no subcommand:
+ipmideck
+```
+
+</CodeGroup>
+
+Sans flags, ipmideck se lie à **`0.0.0.0:3000`** par défaut, joignable sur chaque interface,
+sur le port `3000`. Ouvrez `http://<your-ip>:3000` une fois qu'il est en route.
+
+Surchargez la liaison avec `--host` et `--port` :
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start --host 127.0.0.1 --port 8080
+```
+
+```cmd cmd
+ipmideck start --host 127.0.0.1 --port 8080
+```
+
+```bash bash
+ipmideck start --host 127.0.0.1 --port 8080
+```
+
+</CodeGroup>
+
+## Sous-commandes
+
+| Sous-commande | Ce qu'elle fait |
+| --- | --- |
+| `start` | Démarre le serveur (par défaut). Un `ipmideck` seul sans sous-commande sert aussi. |
+| `serve` | Alias déprécié de `start`. Se comporte de façon identique ; conservé pour que les scripts existants continuent de fonctionner. |
+| `reset-password` | Crée ou met à jour de façon interactive la connexion administrateur, puis se termine sans servir. |
+
+<Note>
+  `serve` est un alias déprécié de `start`, préférez `start` (ou un `ipmideck` seul) dans
+  les nouveaux scripts.
+</Note>
+
+## Flags
+
+Ces flags de premier niveau s'appliquent au chemin de service. `--demo` et `--config` sont lus avant toute
+ramification de sous-commande, donc ils affectent aussi `reset-password` et `--gen-cert`.
+
+| Flag | Effet |
+| --- | --- |
+| `--host <host>` | Hôte de liaison. Le défaut vient de `config.yaml` ou `0.0.0.0`. Un flag explicite l'emporte sur la configuration. |
+| `--port <port>` | Port de liaison. Le défaut vient de `config.yaml` ou `3000`. Un flag explicite l'emporte sur la configuration. |
+| `--demo` | Exécuter en mode démo avec des données simulées. |
+| `--config <path>` | Chemin vers un `config.yaml` à charger. |
+| `--reload` | Activer le rechargement automatique pour le développement. |
+| `--gen-cert` | Générer un certificat auto-signé + clé sous `data/certs/`, écrire les chemins dans `config.yaml` et se terminer. |
+
+## Précedence de liaison
+
+L'hôte et le port auxquels ipmideck se lie réellement sont résolus dans cet ordre, priorité la plus haute d'abord :
+
+1. Un flag `--host` / `--port` explicite en ligne de commande.
+2. La configuration, qui résout elle-même la variable d'environnement (`IPMIDECK_SERVER_HOST` / `IPMIDECK_SERVER_PORT`)
+   au-dessus de `config.yaml` au-dessus du défaut intégré.
+3. Le repli codé en dur **`0.0.0.0:3000`**, utilisé si le chargement précoce de la configuration échoue.
+
+Autrement dit : une valeur que vous persistez dans `config.yaml` est **surchargée par une variable d'environnement
+`IPMIDECK_` ou un flag `--host` / `--port`** au prochain démarrage, l'environnement et la CLI l'emportent toujours.
+Si `config.yaml` est mal formé, ipmideck affiche un avertissement sur stderr et revient à
+`0.0.0.0:3000`.
+
+<Note>
+  Les variables d'environnement `IPMIDECK_SERVER_HOST` et `IPMIDECK_SERVER_PORT` utilisent le
+  préfixe `IPMIDECK_`. Consultez [Configuration](/fr/configuration) pour la liste complète des surcharges.
+</Note>
+
+## HTTPS avec --gen-cert
+
+`--gen-cert` génère un certificat et une clé auto-signés, puis se termine. Il ne démarre **pas**
+le serveur et n'active **pas** HTTPS de lui-même :
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck --gen-cert
+```
+
+```cmd cmd
+ipmideck --gen-cert
+```
+
+```bash bash
+ipmideck --gen-cert
+```
+
+</CodeGroup>
+
+Il écrit une paire certificat + clé sous `data/certs/`, enregistre leurs chemins dans le bloc `server` de
+`config.yaml`, et affiche trois lignes :
+
+```text
+Generated: <path-to-cert>
+Generated: <path-to-key>
+Wrote cert_file/key_file to config.yaml. Set server.https=true and restart to serve over HTTPS.
+```
+
+Pour servir réellement en HTTPS, définissez `server.https: true` dans `config.yaml` et redémarrez ipmideck. HTTPS n'est jamais activé automatiquement.
+
+## Mode démo
+
+`--demo` exécute ipmideck contre du matériel simulé au lieu de vrais BMC, utile pour évaluer
+le tableau de bord sans aucun serveur câblé :
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start --demo
+```
+
+```cmd cmd
+ipmideck start --demo
+```
+
+```bash bash
+ipmideck start --demo
+```
+
+</CodeGroup>
+
+Le mode démo est défini très tôt, avant toute ramification de sous-commande, donc toute l'application (la configuration et le serveur en cours d'exécution) le voit.
+
+## Réinitialiser le mot de passe administrateur
+
+`reset-password` crée ou met à jour de façon interactive la connexion administrateur, puis se termine sans
+jamais démarrer le serveur :
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck reset-password
+```
+
+```cmd cmd
+ipmideck reset-password
+```
+
+```bash bash
+ipmideck reset-password
+```
+
+</CodeGroup>
+
+Il demande `Username:` puis `New password:` (saisie masquée). Si un compte existe déjà,
+il met à jour le mot de passe de cet utilisateur et affiche `Password updated for <username>` ; sinon
+il crée l'utilisateur et affiche `User <username> created`.
+
+## Rechargement automatique de développement
+
+`--reload` est une voie rapide réservée au développement : il délègue au propre superviseur de
+rechargement automatique d'uvicorn et retourne. Il **saute intentionnellement la garde de port d'instance unique** décrite
+ci-dessous, car le rechargeur exécute son propre processus superviseur.
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck start --reload
+```
+
+```cmd cmd
+ipmideck start --reload
+```
+
+```bash bash
+ipmideck start --reload
+```
+
+</CodeGroup>
+
+<Warning>
+  `--reload` est réservé au développement. Comme il contourne la garde d'instance unique, exécutez-le sur un
+  hôte où aucune autre instance d'ipmideck n'est déjà liée au même port.
+</Warning>
+
+## Codes de sortie
+
+| Code de sortie | Quand |
+| --- | --- |
+| `0` | Arrêt propre sur `Ctrl+C` / SIGTERM, le serveur s'arrête proprement, pas de trace d'erreur. |
+| `1` | Le port est déjà utilisé sur l'hôte cible (une autre instance s'exécute peut-être), **ou** la liaison échoue parce que l'adresse est indisponible ou non autorisée (par exemple un port privilégié ou une interface qui n'existe pas). |
+
+Sur le chemin de service (pas `--reload`), ipmideck exécute une garde d'instance unique avant de se lier. Si le
+port est déjà utilisé, il affiche une erreur sur stderr et se termine avec `1`. Si la liaison échoue parce que l'
+adresse est indisponible ou non autorisée, il affiche une erreur distincte et se termine également avec `1`.
+
+## Étapes suivantes
+
+- [Configuration](/fr/configuration) : les clés de `config.yaml` et les surcharges d'environnement `IPMIDECK_`.
+- [Installation](/fr/installation) : installez ipmideck avec Docker ou pip.
+- [Dépannage](/fr/troubleshooting) : erreurs de connexion, de port et IPMI.

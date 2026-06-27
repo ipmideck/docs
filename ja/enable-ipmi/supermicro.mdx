@@ -1,0 +1,114 @@
+---
+title: "Supermicro"
+description: "Supermicro IPMI 2.0 BMC (X8–X12 ボード) で Web インターフェイスまたは BIOS から IPMI over LAN を設定します。低信頼、使用前にハードウェアで検証してください。"
+---
+
+<Warning>
+  **低信頼ガイド。これらの手順に頼る前にハードウェアで検証してください。**
+  Supermicro の BMC ファームウェアは、ボードの世代 (X8 から X12) によって大きく異なります。
+  下記のスクリーンショットは古い Supermicro の BMC と BIOS のものです。ナビゲーションパスを
+  出発点として扱い、自分のボードに対して確認し、修正を報告してください。所有者によるハードウェア
+  検証は保留中です。
+</Warning>
+
+**対象:** IPMI 2.0 BMC を持つ Supermicro サーバー (X8 / X9 / X10 / X11 / X12 ボード)。
+
+<Note>
+  Supermicro は ipmideck で **実験的** です。IPMI 2.0 は動作しますが、まだ網羅的にテストされて
+  いません。ほとんどの Supermicro ボードでは **IPMI over LAN がデフォルトで有効** です。主なタスクは、
+  Web インターフェイスからまたは BIOS から、BMC に到達可能な LAN アドレスを与えることです。
+</Note>
+
+## オプション A: BMC Web インターフェイスから
+
+<Steps>
+  <Step title="BMC Web インターフェイスにログイン">
+    ブラウザーで BMC IP アドレスに移動します。デフォルト資格情報は **ADMIN** / **ADMIN** です。
+    最初のアクセス後すぐに変更してください。
+
+    <Frame caption="Supermicro BMC ログイン画面 (デフォルト ADMIN / ADMIN)。">
+      <img src="/tutorials/supermicro/IPMI-login.png" alt="Supermicro BMC web interface login screen" />
+    </Frame>
+  </Step>
+  <Step title="Configuration → Network を開く">
+    **Configuration** タブを開き、オプションリストから **Network** を選びます。(この古いファームウェアは
+    すべてを *Configuration* の下にまとめます。新しいボードはそれを *Network → Network Settings* と
+    ラベル付けする場合があります。)
+
+    <Frame caption="Configuration メニュー: BMC の LAN アドレスを設定するために Network を開きます。">
+      <img src="/tutorials/supermicro/IPMI-web-configuration.png" alt="Supermicro Configuration options menu" />
+    </Frame>
+  </Step>
+  <Step title="BMC のネットワークアドレスを設定">
+    **Obtain an IP address automatically (DHCP)** または **Use the following IP address** を選び、
+    静的 IP、サブネットマスク、ゲートウェイを入力して、**Save** をクリックします。IPMI over LAN は
+    デフォルトチャネルですでにアクティブで、これは単に BMC を到達可能にするだけです。
+
+    <Frame caption="Network Settings: DHCP または静的 IP、サブネットマスク、ゲートウェイ。">
+      <img src="/tutorials/supermicro/IPMI-network-configuration.png" alt="Supermicro Network Settings page with static IP configuration" />
+    </Frame>
+  </Step>
+</Steps>
+
+## オプション B: BIOS から
+
+BMC にまだアドレスがない場合は、BIOS から設定します。POST 中に **DEL** を押して BIOS セットアップ
+ユーティリティに入ります。
+
+<Steps>
+  <Step title="Advanced → IPMI Configuration">
+    **Advanced** タブで、**IPMI Configuration** を開きます。
+
+    <Frame caption="BIOS Advanced タブ: IPMI Configuration を選択。">
+      <img src="/tutorials/supermicro/BIOS-advanced.png" alt="Supermicro BIOS Advanced settings menu" />
+    </Frame>
+  </Step>
+  <Step title="Set LAN Configuration">
+    **Status Of BMC: Working** を確認し、**Set LAN Configuration** を開きます。
+
+    <Frame caption="IPMI Configuration: BMC ステータスと Set LAN Configuration。">
+      <img src="/tutorials/supermicro/IPMI-configuration.png" alt="Supermicro BIOS IPMI Configuration screen" />
+    </Frame>
+  </Step>
+  <Step title="LAN チャネルを開く">
+    **LAN Configuration** (Channel 01) の下で、**IP Address**、**Subnet Mask**、**Gateway Address** を
+    設定できます。
+
+    <Frame caption="LAN Configuration: IP Address、Subnet Mask、Gateway Address のサブメニュー。">
+      <img src="/tutorials/supermicro/LAN-configuration.png" alt="Supermicro BIOS LAN Configuration menu" />
+    </Frame>
+  </Step>
+  <Step title="静的 IP、サブネット、ゲートウェイを設定">
+    **IP Address Source** を **Static** に設定し、IP、サブネットマスク、ゲートウェイを入力します。
+    **F10** を押して保存して終了します。
+
+    <Frame caption="IP Address Configuration: ソースを Static に設定し、アドレスを入力します。">
+      <img src="/tutorials/supermicro/IP-configuration.png" alt="Supermicro BIOS IP Address configuration" />
+    </Frame>
+    <Frame caption="Subnet Mask の設定。">
+      <img src="/tutorials/supermicro/Subnetmask-configuration.png" alt="Supermicro BIOS Subnet Mask configuration" />
+    </Frame>
+    <Frame caption="Default Gateway の設定。">
+      <img src="/tutorials/supermicro/Gateway-configuration.png" alt="Supermicro BIOS Default Gateway configuration" />
+    </Frame>
+  </Step>
+</Steps>
+
+## 検証
+
+ipmideck を実行するホストから:
+
+```bash
+ipmitool -I lanplus -H <bmc-ip> -U ADMIN -P ADMIN chassis status
+```
+
+<Note>
+  **レビュー用にフラグ:** Supermicro の BMC ファームウェアは X8–X12 世代間で大きく異なり、これらの
+  スクリーンショットは古いボードのものです。新しいボード (X11 / X12) には再設計された Web UI が
+  あります。このガイドに頼る前に、特定のボードに対してテストしてください。
+</Note>
+
+## ソース
+
+[CITED: supermicro.com/manuals/other/IPMI_Users_Guide.pdf](https://www.supermicro.com/manuals/other/IPMI_Users_Guide.pdf) ·
+[Thomas-Krenn Wiki, Supermicro IPMI Configuration](https://www.thomas-krenn.com/en/wiki/Supermicro_IPMI_Configuration_through_BIOS_or_Web_Interface)

@@ -1,0 +1,61 @@
+---
+title: "Dépannage"
+description: "Erreurs de connexion, d'authentification et IPMI lorsqu'ipmideck dialogue avec votre BMC."
+---
+
+## ipmideck ne peut pas atteindre le BMC
+
+ipmideck communique avec les BMC via le port UDP 623 (IPMI/RMCP+). Si un serveur apparaît comme
+hors ligne :
+
+- Dans Docker, confirmez que vous avez démarré le conteneur avec `--network host`. Sans cela, le
+  conteneur ne peut pas atteindre les BMC de votre LAN.
+- Vérifiez que l'IP du BMC est joignable depuis l'hôte (`ping <bmc-ip>`).
+- Confirmez qu'IPMI sur LAN est activé sur le BMC et que l'UDP 623 n'est pas bloqué par un
+  pare-feu ou une frontière de VLAN.
+
+<Note>
+  ipmideck utilise toujours `lanplus` (IPMI 2.0) pour les sessions chiffrées. Un BMC bloqué sur
+  l'IPMI 1.5 uniquement, ou avec les suites de chiffrement RMCP+ désactivées, peut refuser la connexion.
+</Note>
+
+## Erreurs d'authentification / de privilège
+
+Si les commandes échouent avec une erreur d'authentification ou de privilège :
+
+- Revérifiez le nom d'utilisateur et le mot de passe du BMC que vous avez saisis pour le serveur.
+- Le compte du BMC a besoin d'au moins le privilège Operator pour le contrôle de l'alimentation et des ventilateurs ;
+  Administrator est requis pour les changements de configuration.
+- Certains BMC verrouillent un compte après des connexions échouées répétées, attendez ou réinitialisez le compte depuis la
+  propre interface web du BMC.
+
+## Les commandes expirent
+
+Le matériel plus ancien peut être lent à répondre. ipmideck applique un délai d'expiration par commande défini par
+`ipmi.command_timeout` (par défaut 30 secondes). Si vous voyez des expirations sur un BMC lent, augmentez
+cette valeur dans `config.yaml`. Les lectures de capteurs et de SEL sur de grands dépôts sont les plus
+susceptibles d'être lentes.
+
+## Des capteurs manquent ou lisent zéro
+
+- Confirmez que le BMC expose réellement ces capteurs (la prise en charge de `sdr elist` varie selon le fabricant).
+- Certains capteurs ne se remplissent que lorsque le serveur est sous tension.
+- Vérifiez l'intervalle d'interrogation (`ipmi.poll_interval`, par défaut 30 s / `IPMIDECK_IPMI_POLL_INTERVAL`) ;
+  des intervalles très longs retardent la première lecture.
+
+## Les ventilateurs reviennent au contrôle du BMC de façon inattendue
+
+FanPilot rend délibérément les ventilateurs à la propre gestion thermique du BMC dans deux cas :
+
+- **Forçage de sécurité** : à la température critique ou au-delà, les ventilateurs passent à 100 %.
+- **Récupération** : après un arrêt non propre, un serveur hors ligne ou une détection de capteurs périmés,
+  ipmideck restaure le mode automatique du BMC pour que le matériel ne soit jamais laissé sans gestion.
+
+C'est un comportement de sécurité prévu, pas un bug. Consultez [Sécurité](/fr/security).
+
+## Le tableau de bord ne se charge pas
+
+- Confirmez que le conteneur ou le processus s'exécute et écoute sur le port configuré
+  (`server.port` / `IPMIDECK_SERVER_PORT`, par défaut 3000).
+- Ouvrez `http://<your-ip>:3000`, pas `https`, sauf si vous avez défini `server.https: true`.
+- Vérifiez les journaux de l'application ; montez `logging.level` à `debug` pour plus de détail.

@@ -1,0 +1,54 @@
+---
+title: "功能"
+description: "传感器监控、FanPilot 风扇控制、电源管理、SEL、FRU 以及多服务器仪表板。"
+---
+
+## 传感器监控
+
+- 实时温度、风扇 RPM、电压和功耗读数。
+- 带历史数据的实时图表（最长一年，由 `data.retention_days` 控制）。
+- 可配置的告警阈值，带浏览器通知。
+
+ipmideck 以 `ipmi.poll_interval` 设置的间隔轮询每个 BMC（默认 30 秒，
+可用 `IPMIDECK_IPMI_POLL_INTERVAL` 覆盖）。
+
+## FanPilot：智能风扇控制
+
+- 可视化拖放式风扇曲线编辑器。
+- 内置配置文件：Silent、Balanced、Performance、Full Speed 和 Custom。
+- 可配置的迟滞，防止风扇在温度限值附近振荡。
+- 安全覆盖：在达到或超过临界温度时，风扇被强制设为 100%。
+- 自主回路，独立于仪表板持续工作。
+
+<Warning>
+  FanPilot 的安全覆盖始终胜出。一旦达到临界温度，没有任何风扇曲线能将风扇
+  保持在 100% 以下，热限值优先于任何配置文件。
+</Warning>
+
+## 电源控制
+
+- Power On、Soft Off、Hard Off、Reset 和 Power Cycle。
+- 实时电源状态指示器。
+- 对破坏性操作的确认对话框。
+- 每个改变状态操作的完整命令审计日志。
+
+## System Event Log (SEL)
+
+- 查看 BMC 硬件事件日志，带严重程度过滤。
+- 搜索、日期范围过滤，以及导出到 CSV 或 JSON。
+
+## 硬件清单 (FRU)
+
+- 序列号、部件号和制造商信息。
+- 一目了然的主板、机箱和产品数据。
+
+## 多服务器仪表板
+
+- 从单个 ipmideck 实例管理多个 BMC。
+- 全景视图，带所有服务器的状态概览。
+
+## 它如何与你的硬件通信
+
+ipmideck 通过 `ipmitool` 驱动每个 IPMI 操作，并通过 `lanplus`
+（IPMI 2.0）调用以建立加密会话。参数始终以列表形式传递，绝不通过
+shell，因此不存在命令注入面。完整情况请参阅 [安全](/zh-Hans/security)。

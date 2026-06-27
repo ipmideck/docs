@@ -1,0 +1,67 @@
+---
+title: "Updating ipmideck"
+description: "Upgrade ipmideck to a new release with Docker or pip. Your data directory survives the upgrade."
+---
+
+Upgrading ipmideck replaces the application, not your data. Your `config.yaml`, database,
+and encryption key live in the [data directory](/en/configuration#where-config-lives), which
+stays put across an upgrade, so your servers, history, and settings carry over.
+
+<Note>
+  ipmideck is in pre-release. The published Docker image and PyPI package are coming soon;
+  the commands below are the ones you will use once they are live.
+</Note>
+
+## Docker
+
+Pull the new image and recreate the container with the same data volume:
+
+```bash
+docker pull ipmideck/ipmideck:latest
+docker stop ipmideck && docker rm ipmideck
+docker run -d --name ipmideck --network host -v ipmideck-data:/data ipmideck/ipmideck:latest
+```
+
+The `-v ipmideck-data:/data` volume holds your data, so reusing the same volume name keeps
+everything. Pin a version instead of `latest` (for example `ipmideck/ipmideck:2.0.0`) if you
+want to control exactly when you move between releases.
+
+## pip
+
+Upgrade the package in place, then start ipmideck again:
+
+<CodeGroup>
+
+```bash bash
+pip install -U ipmideck
+ipmideck start
+```
+
+```powershell PowerShell
+pip install -U ipmideck
+ipmideck start
+```
+
+</CodeGroup>
+
+The data directory is independent of the package, so the upgrade does not touch your config
+or database.
+
+## Check your version
+
+The running version shows in the dashboard, and the console prints it in the credits line
+under the banner (for example `v2.0.0a1`). You can also read it from the health endpoint:
+
+```bash
+curl http://<your-ip>:3000/api/health
+```
+
+<Note>
+  Take a [backup](/en/backup-restore) before a major upgrade. Restoring is then a matter of
+  putting the data directory back if anything goes wrong.
+</Note>
+
+## Next steps
+
+- [Backup & restore](/en/backup-restore): snapshot your data before upgrading.
+- [Running ipmideck](/en/running): start, stop, and where the data directory lives per platform.

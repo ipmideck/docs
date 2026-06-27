@@ -1,0 +1,67 @@
+---
+title: "ipmideck aktualisieren"
+description: "Aktualisieren Sie ipmideck mit Docker oder pip auf eine neue Version. Ihr Datenverzeichnis übersteht das Upgrade."
+---
+
+Ein Upgrade von ipmideck ersetzt die Anwendung, nicht Ihre Daten. Ihre `config.yaml`, Datenbank
+und Ihr Verschlüsselungsschlüssel liegen im [Datenverzeichnis](/de/configuration#wo-die-konfiguration-liegt), das
+über ein Upgrade hinweg erhalten bleibt, sodass Ihre Server, Ihr Verlauf und Ihre Einstellungen übernommen werden.
+
+<Note>
+  ipmideck befindet sich in der Vorabversion. Das veröffentlichte Docker-Image und das PyPI-Paket kommen in Kürze;
+  die folgenden Befehle sind die, die Sie verwenden werden, sobald sie live sind.
+</Note>
+
+## Docker
+
+Ziehen Sie das neue Image und erstellen Sie den Container mit demselben Daten-Volume neu:
+
+```bash
+docker pull ipmideck/ipmideck:latest
+docker stop ipmideck && docker rm ipmideck
+docker run -d --name ipmideck --network host -v ipmideck-data:/data ipmideck/ipmideck:latest
+```
+
+Das Volume `-v ipmideck-data:/data` enthält Ihre Daten, sodass die Wiederverwendung desselben Volume-Namens
+alles erhält. Pinnen Sie eine Version statt `latest` (zum Beispiel `ipmideck/ipmideck:2.0.0`), wenn Sie
+genau steuern möchten, wann Sie zwischen Versionen wechseln.
+
+## pip
+
+Aktualisieren Sie das Paket an Ort und Stelle und starten Sie ipmideck dann erneut:
+
+<CodeGroup>
+
+```bash bash
+pip install -U ipmideck
+ipmideck start
+```
+
+```powershell PowerShell
+pip install -U ipmideck
+ipmideck start
+```
+
+</CodeGroup>
+
+Das Datenverzeichnis ist unabhängig vom Paket, das Upgrade berührt also Ihre Konfiguration oder
+Datenbank nicht.
+
+## Ihre Version prüfen
+
+Die laufende Version wird im Dashboard angezeigt, und die Konsole gibt sie in der Credits-Zeile
+unter dem Banner aus (zum Beispiel `v2.0.0a1`). Sie können sie auch über den Health-Endpunkt auslesen:
+
+```bash
+curl http://<your-ip>:3000/api/health
+```
+
+<Note>
+  Erstellen Sie vor einem größeren Upgrade eine [Sicherung](/de/backup-restore). Die Wiederherstellung
+  besteht dann nur darin, das Datenverzeichnis zurückzulegen, falls etwas schiefgeht.
+</Note>
+
+## Nächste Schritte
+
+- [Sicherung & Wiederherstellung](/de/backup-restore): Erstellen Sie vor dem Upgrade einen Snapshot Ihrer Daten.
+- [ipmideck ausführen](/de/running): Starten, stoppen und wo das Datenverzeichnis je Plattform liegt.

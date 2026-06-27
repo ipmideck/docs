@@ -1,0 +1,215 @@
+---
+title: "交互式控制台"
+description: "从你的终端驱动运行中的 ipmideck 服务器：一个固定标题的操作员控制台，提供针对详细程度、会话、服务器、仪表板 URL 和绑定地址的单键操作。"
+---
+
+当你在终端中启动 ipmideck 时，它会渲染一个交互式操作员控制台：一个固定的
+标题，带横幅和帮助栏，位于一个实时滚动日志之上。每个操作都是
+单次按键，没有菜单，没有鼠标。控制台在进程内与服务器并行运行，因此
+你看到的是你所在机器的实时状态。
+
+<Note>
+控制台仅在真实的**交互式终端**上出现，stdin 和 stdout 都必须是
+TTY。在 Docker、systemd 下，或当 stdout 被管道/重定向时，ipmideck 会完全跳过
+控制台，只写出纯文本滚动日志。请参阅 [控制台在哪里出现](#控制台在哪里出现)。
+</Note>
+
+## 它看起来是什么样
+
+控制台是一个单一的全屏视图：一个你始终能看到的固定标题，位于一个实时日志
+之上，该日志在它下面滚动。
+
+<Frame caption="The console right after start: the banner and help bar stay pinned at the top while the log tail scrolls below.">
+  <img src="/console/home.png" alt="ipmideck interactive console showing the banner, help bar, status line, and the scrolling log panel" />
+</Frame>
+
+标题从不滚动。新的日志行出现在它下方的面板中，最新的行
+始终保留在屏幕上。你按单个键来执行操作；一切都在进程内
+针对你刚启动的服务器发生。
+
+## 标题
+
+屏幕顶部是一个从不滚动的固定标题。它从上到下堆叠：
+
+- ipmideck 横幅。
+- **帮助栏**：每个操作键及其作用。
+- **状态行**：会话的实时状态。
+- 一行紧凑的致谢（作者、版本、许可证）。
+
+标题下方的主体是滚动的日志尾部。最新的行始终保留在
+屏幕上，因此刚刚浮现的 URL 或确认绝不会被从底部裁掉。
+
+### 状态行
+
+状态行显示三个实时字段，用 `|` 分隔：
+
+- **Verbosity**：当前日志级别（`INFO`、`DEBUG` 或 `WARNING`）。
+- **Clients**：当前连接的仪表板客户端数量。
+- **last**：你按下的最后一个操作键，作为即时的视觉反馈。
+
+## 操作键
+
+每个操作都是一次按键。帮助栏列出它们全部：
+
+| 键   | 操作                                                                 |
+| ----- | ---------------------------------------------------------------------- |
+| `v`   | 切换日志**详细程度**                                                    |
+| `c`   | 打开已连接**会话**子视图                                                |
+| `s`   | 打开已配置**服务器**子视图                                              |
+| `u`   | 在日志中显示仪表板 **url**                                              |
+| `g`   | **更新**检查（打印本地版本）                                            |
+| `b`   | 打开 **change-bind** 编辑器                                             |
+| `r`   | **重启**服务器                                                         |
+| `q`   | **退出**，或从子视图返回日志视图                                        |
+| `ESC` | **返回**，从子视图返回日志视图                                          |
+
+方向键、功能键和导航键被消耗并忽略，它们绝不会与
+操作冲突，也不会被计为一次按键。
+
+### v：详细程度
+
+`v` 以固定的三步循环切换运行时日志级别：
+
+```
+INFO → DEBUG → WARNING → INFO
+```
+
+`INFO` 是默认值。`DEBUG` 显示更多；`WARNING` 显示更少。更改会
+立即对会话的其余部分生效，状态行也会相应更新。
+
+<Note>
+详细程度切换仅更改**运行中**的级别。在下次启动时，来自你
+配置（或 `IPMIDECK_LOGGING_LEVEL` 环境变量）的级别会再次胜出。请参阅 [配置](/zh-Hans/configuration)。
+</Note>
+
+### c：会话
+
+`c` 打开 **Connected sessions** 子视图，这是一个当前连接的仪表板客户端的
+只读表，列为：
+
+- **IP**
+- **Connected since**
+- **User-Agent**
+
+按 `q` 或 `ESC` 返回日志视图。
+
+<Frame caption="The Connected sessions sub-view (key c), one row per attached dashboard client.">
+  <img src="/console/connections.png" alt="Connected sessions table showing IP, Connected since, and User-Agent columns" />
+</Frame>
+
+### s：服务器
+
+`s` 打开 **Configured servers** 子视图，这是一个 ipmideck 配置为要通信的
+BMC 的只读表，列为：
+
+- **Name**
+- **Host**
+- **Status**
+
+按 `q` 或 `ESC` 返回日志视图。
+
+<Frame caption="The Configured servers sub-view (key s), listing each BMC and whether it is online.">
+  <img src="/console/servers.png" alt="Configured servers table showing Name, Host, and Status columns with online and offline servers" />
+</Frame>
+
+### u：url
+
+`u` 在日志主体中显示仪表板 URL（`scheme://host:port`）。如果服务器绑定到
+通配地址（`0.0.0.0`、`::` 或为空），URL 会被重写为
+`127.0.0.1`，以便在浏览器中真正可以打开，`http://0.0.0.0:3000` 是一个监听
+地址，而不是可导航的地址。
+
+<Frame caption="Key u prints the dashboard URL at the bottom of the log, rewritten to a reachable address.">
+  <img src="/console/url.png" alt="The console log with the dashboard URL printed at the bottom after pressing u" />
+</Frame>
+
+### g：更新
+
+`g` 打印本地版本，以及一条说明在线更新检查随 pip 发布版
+一起提供的备注。它**不进行网络调用**，ipmideck 保持离线。
+
+### r：重启
+
+`r` 执行一次干净的进程内重启：ipmideck 拆除控制台，重新读取
+`config.yaml` 并重新开始。在一次 [change-bind](#bchange-bind) 编辑后使用它以应用
+新地址。
+
+### q / ESC：退出和返回
+
+- 从子视图（`sessions` 或 `servers`），`q` 和 `ESC` 都会把你带回日志视图。
+- 从日志视图，`q` 触发一次干净退出，服务器优雅关闭。
+
+## b：change-bind
+
+`b` 打开 change-bind 编辑器，这是一个内联的 `host:port` 提示，在你输入时
+替换帮助栏。标题将当前绑定显示为只读标签 `current: host:port`
+以及一个空的 `new:` 字段，因此你输入的值会立即出现，绝不会与
+现有的混淆。
+
+<Frame caption="The change-bind editor (key b): the help bar is replaced by the current bind and an empty new host:port prompt.">
+  <img src="/console/bind.png" alt="The change-bind editor showing the current bind address and an empty new field with apply, cancel, and delete key hints" />
+</Frame>
+
+编辑器内的键：
+
+- **Enter**：应用输入的 `host:port`。
+- **ESC**：取消而不更改任何内容。
+- **Backspace**：删除最后一个字符。
+- 任何可打印字符，追加到缓冲区。
+
+输入必须是 `host:port`，主机非空，端口是
+**1–65535** 范围内的整数。在有效输入时，ipmideck 会确认新绑定并提醒你需要
+重启（按 `r`）。在无效输入时，它会报告 `Invalid host/port`，
+不会有任何改变。
+
+<Warning>
+change-bind 编辑**不**是实时的，它被写入配置，仅在重启后
+才生效。按 `r` 应用它。并记住优先级：下次启动时 `IPMIDECK_SERVER_HOST` /
+`IPMIDECK_SERVER_PORT` 环境变量或显式的 `--host` / `--port` 标志会
+覆盖控制台持久化的任何内容。请参阅 [配置](/zh-Hans/configuration)。
+</Warning>
+
+## 控制台在哪里出现
+
+交互式控制台以真实 TTY 为前提：ipmideck 仅在 stdin 和 stdout **二者**
+都是交互式终端时才渲染它。当它们不是时，它会降级为横幅加
+纯文本滚动日志，并且不安装按键监听器，因此在非 TTY 上没有任何东西忙等。
+
+这意味着当你在终端中直接运行 ipmideck 时控制台会出现：
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck
+```
+
+```cmd cmd
+ipmideck
+```
+
+```bash bash
+ipmideck
+```
+
+</CodeGroup>
+
+它在以下情况**不**出现：
+
+- 在 **Docker** 下运行：容器直接启动 uvicorn，从不到达
+  控制台路径；你得到纯文本容器日志（`docker logs`）。
+- 在 **systemd** 或任何 stdout 不是终端的服务管理器下运行。
+- **管道或重定向** stdout（例如 `ipmideck > server.log`）：stdout 不再是 TTY。
+
+在每种非 TTY 情况下，服务器仍正常运行并绑定到相同的默认
+`0.0.0.0:3000`；你只是得到纯文本日志而不是实时控制台。
+
+<Note>
+`ipmilink` 是 `ipmideck` 的向后兼容别名，二者启动同一个控制台。
+</Note>
+
+## 后续步骤
+
+- [运行 ipmideck](/zh-Hans/running)：启动、提供服务以及绑定优先级规则。
+- [CLI](/zh-Hans/cli)：详细的每个子命令和标志。
+- [配置](/zh-Hans/configuration)：设置绑定地址、详细程度和轮询间隔。
+- [安装](/zh-Hans/installation)：用 Docker 或 pip 安装。

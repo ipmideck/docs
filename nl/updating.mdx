@@ -1,0 +1,67 @@
+---
+title: "ipmideck bijwerken"
+description: "Werk ipmideck bij naar een nieuwe release met Docker of pip. Je datamap overleeft de upgrade."
+---
+
+Een upgrade van ipmideck vervangt de applicatie, niet je data. Je `config.yaml`, database
+en versleutelingssleutel staan in de [datamap](/nl/configuration#waar-de-configuratie-staat), die
+bij een upgrade blijft staan, dus je servers, historie en instellingen blijven behouden.
+
+<Note>
+  ipmideck is in pre-release. De gepubliceerde Docker-image en het PyPI-pakket komen binnenkort;
+  de commando's hieronder zijn degene die je gebruikt zodra ze live zijn.
+</Note>
+
+## Docker
+
+Haal de nieuwe image op en maak de container opnieuw aan met hetzelfde datavolume:
+
+```bash
+docker pull ipmideck/ipmideck:latest
+docker stop ipmideck && docker rm ipmideck
+docker run -d --name ipmideck --network host -v ipmideck-data:/data ipmideck/ipmideck:latest
+```
+
+Het volume `-v ipmideck-data:/data` bevat je data, dus door dezelfde volumenaam te hergebruiken blijft
+alles behouden. Pin een versie in plaats van `latest` (bijvoorbeeld `ipmideck/ipmideck:2.0.0`) als je
+precies wilt bepalen wanneer je tussen releases wisselt.
+
+## pip
+
+Werk het pakket ter plekke bij en start ipmideck daarna opnieuw:
+
+<CodeGroup>
+
+```bash bash
+pip install -U ipmideck
+ipmideck start
+```
+
+```powershell PowerShell
+pip install -U ipmideck
+ipmideck start
+```
+
+</CodeGroup>
+
+De datamap staat los van het pakket, dus de upgrade raakt je configuratie
+of database niet aan.
+
+## Controleer je versie
+
+De draaiende versie staat in het dashboard, en de console print hem in de creditsregel
+onder de banner (bijvoorbeeld `v2.0.0a1`). Je kunt hem ook uitlezen via het health-endpoint:
+
+```bash
+curl http://<your-ip>:3000/api/health
+```
+
+<Note>
+  Maak een [back-up](/nl/backup-restore) vóór een grote upgrade. Herstellen is dan een kwestie van
+  de datamap terugzetten als er iets misgaat.
+</Note>
+
+## Volgende stappen
+
+- [Back-up en herstel](/nl/backup-restore): maak een snapshot van je data vóór het upgraden.
+- [ipmideck draaien](/nl/running): starten, stoppen en waar de datamap per platform staat.

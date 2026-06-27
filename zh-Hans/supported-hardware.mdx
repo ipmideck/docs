@@ -1,0 +1,43 @@
+---
+title: "支持的硬件"
+description: "ipmideck 使用标准 IPMI 2.0；支持按每个厂商的测试彻底程度分级。"
+---
+
+## 处处皆 IPMI 2.0
+
+ipmideck 使用标准 IPMI 2.0，因此大多数服务器 BMC 都会响应。支持按每个厂商的
+测试彻底程度分级。风扇曲线控制（FanPilot）目前依赖
+Dell iDRAC 的 raw 命令；其他厂商的风扇控制在路线图上。
+
+| 厂商 | 状态 | 启用 IPMI | 备注 |
+|--------|--------|-------------|-------|
+| Dell PowerEdge / iDRAC | <Icon icon="circle-check" color="#16a34a" /> 已支持 / 已测试 | [Dell iDRAC 指南](/zh-Hans/enable-ipmi/dell-idrac) | IPMI 2.0，完全支持并已测试。 |
+| Supermicro | <Icon icon="flask" color="#d97706" /> 实验性 | [Supermicro 指南](/zh-Hans/enable-ipmi/supermicro) | IPMI 2.0，可用，尚未彻底测试。 |
+| HPE iLO | <Icon icon="flask" color="#d97706" /> 实验性 | [HPE iLO 指南](/zh-Hans/enable-ipmi/hpe-ilo) | IPMI 2.0，实验性，尚未彻底测试。 |
+| Lenovo XCC | <Icon icon="flask" color="#d97706" /> 实验性 | [Lenovo XCC 指南](/zh-Hans/enable-ipmi/lenovo-xcc) | IPMI 2.0，实验性，尚未彻底测试。 |
+| IBM IMM | <Icon icon="flask" color="#d97706" /> 实验性 | [IBM IMM 指南](/zh-Hans/enable-ipmi/ibm-imm) | IPMI 2.0，实验性，尚未彻底测试。 |
+
+<Note>
+  任何实现 IPMI 2.0 的 BMC 都应能连接以进行传感器监控、电源控制、
+  SEL 和 FRU。上面的分级描述了 FanPilot 风扇控制和厂商特定行为
+  在真实硬件上经过了多少验证。
+</Note>
+
+## 在你的 BMC 上启用 IPMI
+
+大多数服务器出厂时禁用了 IPMI-over-LAN，或带有默认凭据。在
+ipmideck 能够连接之前，你需要在 BMC 上启用 IPMI 2.0 over LAN 并设置一个用户账户。
+**[在你的 BMC 上启用 IPMI →](/zh-Hans/enable-ipmi)** 指南为每个控制器提供了一份
+逐厂商的演练：
+
+- [Dell iDRAC](/zh-Hans/enable-ipmi/dell-idrac)
+- [Supermicro](/zh-Hans/enable-ipmi/supermicro)：*低置信度；请在硬件上验证*
+- [HPE iLO](/zh-Hans/enable-ipmi/hpe-ilo)
+- [Lenovo XCC](/zh-Hans/enable-ipmi/lenovo-xcc)
+- [IBM IMM](/zh-Hans/enable-ipmi/ibm-imm)：*低置信度；请在硬件上验证*
+
+<Note>
+  Supermicro 和 IBM IMM2 的演练被标记为**低置信度**，它们的 BMC
+  导航路径来自稀少的文档，需要在真实硬件上验证后
+  才能依赖。每个页面都带有醒目的警告。
+</Note>

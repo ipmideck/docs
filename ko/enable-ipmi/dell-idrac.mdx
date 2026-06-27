@@ -1,0 +1,75 @@
+---
+title: "Dell iDRAC"
+description: "Dell iDRAC (iDRAC6 / iDRAC7 / iDRAC8 / iDRAC9)에서 IPMI over LAN을 활성화하여 ipmideck가 PowerEdge 서버에 연결할 수 있도록 합니다."
+---
+
+**적용 대상:** Dell iDRAC6, iDRAC7, iDRAC8, iDRAC9 (PowerEdge 서버). 아래의 스크린샷은
+iDRAC6의 것입니다. iDRAC7과 iDRAC8은 거의 동일하며, iDRAC9는 동일한 설정을
+*iDRAC Settings → Connectivity → Network* 아래에 재구성합니다 (끝의 참고를 보세요).
+
+<Note>
+  Dell iDRAC는 ipmideck와 **지원됨 / 테스트됨**입니다. 이 단계는 공식 Dell 문서와 실제
+  iDRAC6에서 나왔습니다. 의존하기 전에 탐색 경로가 iDRAC 펌웨어와 일치하는지 확인하세요.
+</Note>
+
+## 단계
+
+<Steps>
+  <Step title="iDRAC 웹 인터페이스 열기">
+    브라우저에서 iDRAC IP 주소 (공장 기본값 `192.168.0.120`)로 이동하여 로그인합니다.
+    기본 PowerEdge 자격 증명은 **root** / **calvin**입니다. 여전히 사용 중이면 즉시
+    변경하세요.
+
+    <Frame caption="Dell iDRAC 로그인 화면 (iDRAC6: Integrated Dell Remote Access Controller 6 Enterprise).">
+      <img src="/tutorials/dell/idrac-login.png" alt="Dell iDRAC6 web interface login screen" />
+    </Frame>
+  </Step>
+  <Step title="Network/Security → Network 열기">
+    왼쪽 창에서 **iDRAC Settings**를 선택한 다음, **Network/Security** 탭과 그 **Network**
+    하위 탭을 엽니다. 이 페이지에는 IPv4 설정과, 더 아래에 **IPMI Settings**가 있습니다.
+
+    <Note>
+      **iDRAC9**에서 동등한 경로는 **iDRAC Settings → Connectivity → Network**입니다.
+    </Note>
+  </Step>
+  <Step title="IPMI Over LAN 활성화">
+    **IPMI Settings** 섹션으로 스크롤하여 **Enable IPMI Over LAN**을 체크합니다. ipmideck가
+    센서를 읽고 전원을 제어할 수 있도록 **Channel Privilege Level Limit**을
+    **Administrator** (또는 최소한 Operator)로 설정합니다.
+
+    <Frame caption="Network/Security → Network: Enable IPMI Over LAN이 체크되고 채널 권한이 Administrator로 설정된 IPMI Settings 패널.">
+      <img src="/tutorials/dell/ipmi-activation.png" alt="iDRAC IPMI Settings panel showing Enable IPMI Over LAN enabled" />
+    </Frame>
+  </Step>
+  <Step title="암호화 키 설정 (선택 사항)">
+    **Encryption Key**는 표준 `lanplus` 세션의 경우 모두 0 (기본값)으로 둘 수 있습니다.
+    보안 정책이 요구하는 경우에만 40자 16진 키를 설정하세요.
+  </Step>
+  <Step title="적용">
+    **Apply**를 클릭하여 변경 사항을 저장합니다.
+  </Step>
+  <Step title="IPMI가 활성화되었는지 검증">
+    **Properties → iDRAC Settings → iDRAC Information**으로 돌아가, **LAN Enabled: Yes**와
+    **IPMI Version: 2.0**을 확인합니다.
+
+    <Frame caption="iDRAC Information이 LAN Enabled: Yes와 IPMI Version: 2.0을 확인합니다.">
+      <img src="/tutorials/dell/ipmi-info.png" alt="iDRAC Information page showing LAN Enabled Yes and IPMI Version 2.0" />
+    </Frame>
+
+    그런 다음, ipmideck를 실행할 호스트에서 LAN 채널이 응답하는지 확인합니다.
+
+    ```bash
+    ipmitool -I lanplus -H <idrac-ip> -U root -P calvin chassis status
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  **세대에 따라 경로가 다릅니다:** iDRAC6 / iDRAC7 / iDRAC8은 *Network/Security → Network →
+  IPMI Settings* (위에 표시)를 사용하고, iDRAC9는 *iDRAC Settings → Connectivity → Network*를
+  사용합니다. 정확한 경로를 하드웨어에 대해 검증하세요.
+</Note>
+
+## 출처
+
+[CITED: dell.com/support/manuals, iDRAC9 User Guide, section "Configuring IPMI over LAN using web interface"](https://www.dell.com/support/manuals/en-us/idrac9-lifecycle-controller-v3.1-series/idrac_3.15.15.15_ug/configuring-ipmi-over-lan-using-web-interface)

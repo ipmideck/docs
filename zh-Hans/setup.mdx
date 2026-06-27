@@ -1,0 +1,60 @@
+---
+title: "首次运行设置"
+description: "首次打开 ipmideck 时，它会运行一个简短的设置向导：选择登录模式、添加你的第一个 BMC 并打开仪表板。"
+---
+
+首次在 `http://<your-ip>:3000` 打开 ipmideck 时，它会显示一个四步设置
+向导，而不是仪表板。你可以在任意步骤通过右上角的选择器更改语言。
+
+<Steps>
+  <Step title="欢迎">
+    一个简短的介绍界面。点击 **Get started** 开始。
+  </Step>
+  <Step title="选择登录模式">
+    选择仪表板的保护方式：
+
+    - **Require login**（安全的默认选项）：现在创建一个管理员账户。输入用户名、
+      密码，并再次输入密码以确认。ipmideck 将密码存储为
+      bcrypt 哈希，绝不以明文存储。
+    - **Open access**：完全不登录。任何能访问仪表板的人都可以控制你的
+      硬件，因此只在受信任的、隔离的网络上选择此项。
+
+    你可以稍后更改此设置，也可以使用
+    [`ipmideck reset-password`](/zh-Hans/cli) 从命令行重置密码。
+  </Step>
+  <Step title="添加你的第一台服务器">
+    输入 BMC 的连接详情：
+
+    | 字段 | 备注 |
+    | --- | --- |
+    | **Name** | 服务器的标签，例如 `R710-homelab`。 |
+    | **Host** | BMC 的 IP 地址或主机名。 |
+    | **Port** | IPMI/RMCP+ 端口。默认 `623`。 |
+    | **Username** | BMC 账户。默认 `ADMIN`。 |
+    | **Password** | BMC 账户密码。 |
+    | **Vendor** | Supermicro、Dell、HP 或 Generic。 |
+
+    点击 **Test connection** 在保存前检查凭据（ipmideck 通过 `lanplus` 运行
+    一次电源状态查询），然后点击 **Add server**。
+
+    <Note>
+      必须先在 BMC 上启用 IPMI-over-LAN，否则连接测试会失败。请参阅
+      [在你的服务器上启用 IPMI](/zh-Hans/enable-ipmi) 了解各厂商的步骤。
+    </Note>
+  </Step>
+  <Step title="完成">
+    向导确认服务器已添加。点击 **Go to dashboard** 开始监控。
+  </Step>
+</Steps>
+
+## 添加更多服务器
+
+你不限于一个 BMC。在仪表板中你可以稍后添加更多服务器，
+ipmideck 会从单个实例管理它们全部。请参阅
+[支持的硬件](/zh-Hans/supported-hardware) 了解哪些厂商已经过测试。
+
+## 后续步骤
+
+- [在你的服务器上启用 IPMI](/zh-Hans/enable-ipmi)：在连接前开启 IPMI-over-LAN。
+- [配置](/zh-Hans/configuration)：端口、轮询间隔和保留时间。
+- [备份与恢复](/zh-Hans/backup-restore)：保留你配置和历史记录的副本。

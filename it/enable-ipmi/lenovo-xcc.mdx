@@ -1,0 +1,59 @@
+---
+title: "Lenovo XCC"
+description: "Abilita IPMI-over-LAN sul Lenovo XClarity Controller (XCC / XCC2) così ipmideck può connettersi al tuo server ThinkSystem."
+---
+
+**Si applica a:** server Lenovo ThinkSystem con XClarity Controller (XCC) e XCC2.
+
+<Note>
+  Lenovo XCC è un produttore **Sperimentale** per ipmideck, questi passaggi provengono dalla documentazione
+  ufficiale Lenovo e da un XCC reale (ThinkSystem SR630 V2). IPMI-over-LAN è **disabilitato per
+  impostazione predefinita** su XCC per sicurezza, e Lenovo raccomanda di disabilitarlo di nuovo quando non è in
+  uso.
+</Note>
+
+## Passaggi
+
+<Steps>
+  <Step title="Apri l'interfaccia web di XCC">
+    In un browser, vai all'indirizzo IP di XCC e accedi. Le credenziali predefinite sono
+    **USERID** / **PASSW0RD** (nota lo **zero** in "PASSW0RD"). Cambiale immediatamente
+    se sono ancora in uso.
+
+    <Frame caption="La schermata di login del Lenovo XClarity Controller (default USERID / PASSW0RD).">
+      <img src="/tutorials/LENOVO/1_20221028032221331.jpg" alt="Lenovo XClarity Controller login screen on a ThinkSystem SR630 V2" />
+    </Frame>
+  </Step>
+  <Step title="Apri BMC Configuration → Network">
+    Dalla dashboard di XCC, apri **BMC Configuration → Network** nella navigazione a sinistra.
+
+    <Frame caption="Dalla dashboard di XCC, apri BMC Configuration → Network.">
+      <img src="/tutorials/LENOVO/2_20221028033229267.jpg" alt="Lenovo XCC dashboard with BMC Configuration and Network highlighted" />
+    </Frame>
+  </Step>
+  <Step title="Abilita IPMI over LAN">
+    Sotto **Service Enablement and Port Assignment**, imposta **IPMI over LAN** su **Enabled**
+    (usa la porta **623**).
+
+    <Frame caption="Service Enablement and Port Assignment: attiva IPMI over LAN (porta 623).">
+      <img src="/tutorials/LENOVO/3_20221028033746252.jpg" alt="Lenovo XCC Service Enablement showing IPMI over LAN enabled on port 623" />
+    </Frame>
+  </Step>
+  <Step title="Verifica la connettività">
+    Dall'host che eseguirà ipmideck:
+
+    ```bash
+    ipmitool -I lanplus -H <xcc-ip> -U USERID -P <password> chassis status
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  **Da rivedere:** XCC2 (la generazione più recente) usa lo stesso percorso ma con un'interfaccia
+  web ridisegnata. Verifica la navigazione sul tuo hardware effettivo.
+</Note>
+
+## Fonte
+
+[CITED: pubs.lenovo.com/xcc, Enabling or Disabling IPMI Network Access (XCC)](https://pubs.lenovo.com/xcc/NN1ia_c_configuringIPMI) ·
+[Lenovo Support HT514330, IPMI over LAN (XCC)](https://support.lenovo.com/us/en/solutions/ht514330-ipmi-over-lan-xcc)

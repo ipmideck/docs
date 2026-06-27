@@ -1,0 +1,58 @@
+---
+title: "FAQ"
+description: "ホームラボで ipmideck を実行することに関するよくある質問。"
+---
+
+<AccordionGroup>
+
+<Accordion title="ipmideck はクラウドベースですか?">
+  いいえ。ipmideck は完全にセルフホスト型で、あなた自身のネットワーク上で完全に実行されます。外部
+  呼び出しも、テレメトリも、クラウドも、アカウントもありません。BMC と直接通信し、すべてをローカルに
+  保存します。
+</Accordion>
+
+<Accordion title="どの BMC で動作しますか?">
+  IPMI 2.0 BMC を持つすべてのサーバーは、センサー監視、電源制御、SEL、FRU のために接続できるはずです。
+  Dell PowerEdge / iDRAC は完全にテスト済みです。Supermicro、HPE iLO、Lenovo XCC、IBM IMM は
+  実験的です。[対応ハードウェア](/ja/supported-hardware) を参照してください。
+</Accordion>
+
+<Accordion title="ipmitool のインストールは必要ですか?">
+  pip インストールの場合のみです。そこではパッケージがシステムの `ipmitool` を呼び出します。Docker
+  イメージは必要なものをすべて同梱しているので、`--network host` 付きの Docker だけが必要です。
+</Accordion>
+
+<Accordion title="なぜ Docker には --network host が必要ですか?">
+  ipmideck はローカルネットワーク上で UDP ポート 623 を通じて BMC に到達します。ホストネットワークに
+  より、コンテナーは Docker の NAT の背後に置かれる代わりに、そのポートと直接通信できます。
+  [インストール](/ja/installation) を参照してください。
+</Accordion>
+
+<Accordion title="ダッシュボードはどのポートで実行されますか?">
+  デフォルトで 3000 です。`config.yaml` (`server.port`) または `IPMIDECK_SERVER_PORT` 環境変数で
+  変更します。
+</Accordion>
+
+<Accordion title="センサー履歴はどのくらい保持されますか?">
+  デフォルトで 1 年 (`data.retention_days: 365`)。`IPMIDECK_DATA_RETENTION_DAYS` で上書きします。
+  古いデータは `data.cleanup_interval` で設定されたスケジュールでクリーンアップされます。
+</Accordion>
+
+<Accordion title="ログインを無効にできますか?">
+  はい、`config.yaml` で `auth.enabled: false`、または `IPMIDECK_AUTH_ENABLED=false` を設定します。
+  これは信頼できる隔離されたネットワークでのみ行ってください。auth が無効だと、ダッシュボードに
+  到達できる人は誰でもハードウェアを制御できます。
+</Accordion>
+
+<Accordion title="ファン制御は安全ですか?">
+  FanPilot はフェイルセーフです。ファンは重要温度以上で 100% に強制され、制御ループはダッシュボードを
+  閉じていてもバックグラウンドで自律的に実行されます。ハードウェア保護の完全な詳細は
+  [セキュリティ](/ja/security) を参照してください。
+</Accordion>
+
+<Accordion title="複数のサーバーをどう実行しますか?">
+  各 BMC をダッシュボードから追加します。ipmideck は単一のインスタンスから複数の BMC を管理し、
+  それらすべてのパノラマ状態概要を表示します。
+</Accordion>
+
+</AccordionGroup>

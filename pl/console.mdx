@@ -1,0 +1,215 @@
+---
+title: "Konsola interaktywna"
+description: "Steruj działającym serwerem ipmideck z terminala: konsola operatora z przypiętym nagłówkiem i akcjami jednoklawiszowymi dla szczegółowości, sesji, serwerów, adresu URL pulpitu i adresu wiązania."
+---
+
+Gdy uruchamiasz ipmideck w terminalu, renderuje on interaktywną konsolę operatora: przypięty
+nagłówek z banerem i paskiem pomocy nad działającym, przewijanym dziennikiem. Każda akcja to
+jedno naciśnięcie klawisza, bez menu, bez myszy. Konsola działa w procesie obok serwera, więc
+to, co widzisz, to stan na żywo maszyny, na której jesteś.
+
+<Note>
+Konsola pojawia się tylko na prawdziwym **interaktywnym terminalu**, zarówno stdin, jak i stdout muszą być
+TTY. Pod Dockerem, systemd lub gdy stdout jest przekierowany, ipmideck pomija konsolę
+całkowicie i po prostu zapisuje zwykłe przewijane dzienniki. Zobacz [Gdzie pojawia się konsola](#gdzie-pojawia-się-konsola).
+</Note>
+
+## Jak wygląda
+
+Konsola to jeden widok pełnoekranowy: przypięty nagłówek, który zawsze widzisz, nad działającym dziennikiem,
+który przewija się pod nim.
+
+<Frame caption="The console right after start: the banner and help bar stay pinned at the top while the log tail scrolls below.">
+  <img src="/console/home.png" alt="ipmideck interactive console showing the banner, help bar, status line, and the scrolling log panel" />
+</Frame>
+
+Nagłówek nigdy się nie przewija. Nowe wiersze dziennika pojawiają się w panelu pod nim, a najnowszy wiersz
+jest zawsze utrzymywany na ekranie. Naciskasz jeden klawisz, aby działać; wszystko dzieje się w procesie
+względem serwera, który właśnie uruchomiłeś.
+
+## Nagłówek
+
+Górna część ekranu to stały nagłówek, który nigdy się nie przewija. Układa się, od góry do dołu:
+
+- Baner ipmideck.
+- **Pasek pomocy**: każdy klawisz akcji i to, co robi.
+- **Wiersz statusu**: stan sesji na żywo.
+- Kompaktowy wiersz z podziękowaniami (autor, wersja, licencja).
+
+Treść pod nagłówkiem to przewijany ogon dziennika. Najnowszy wiersz jest zawsze utrzymywany na
+ekranie, więc świeżo wyświetlony adres URL lub potwierdzenie nigdy nie jest ucinane na dole.
+
+### Wiersz statusu
+
+Wiersz statusu pokazuje trzy pola na żywo, oddzielone `|`:
+
+- **Verbosity**: bieżący poziom dziennika (`INFO`, `DEBUG` lub `WARNING`).
+- **Clients**: liczba podłączonych w tej chwili klientów pulpitu.
+- **last**: ostatni klawisz akcji, który nacisnąłeś, jako natychmiastowa wizualna informacja zwrotna.
+
+## Klawisze akcji
+
+Każda akcja to jedno naciśnięcie klawisza. Pasek pomocy wymienia je wszystkie:
+
+| Klawisz   | Akcja                                                                 |
+| ----- | ---------------------------------------------------------------------- |
+| `v`   | Przełącz **szczegółowość** dziennika                                   |
+| `c`   | Otwórz podwidok podłączonych **sesji**                                 |
+| `s`   | Otwórz podwidok skonfigurowanych **serwerów**                          |
+| `u`   | Wyświetl **url** pulpitu w dzienniku                                   |
+| `g`   | Sprawdzenie **aktualizacji** (wypisuje lokalną wersję)                |
+| `b`   | Otwórz edytor **change-bind**                                          |
+| `r`   | **Zrestartuj** serwer                                                  |
+| `q`   | **Zakończ** lub wróć do widoku dziennika z podwidoku                   |
+| `ESC` | **Wstecz**, wróć do widoku dziennika z podwidoku                       |
+
+Klawisze strzałek, funkcyjne i nawigacyjne są pochłaniane i ignorowane, nigdy nie kolidują z
+akcją ani nie liczą się jako naciśnięcie klawisza.
+
+### v: szczegółowość
+
+`v` przełącza poziom dziennika w czasie działania w stałej trzystopniowej pętli:
+
+```
+INFO → DEBUG → WARNING → INFO
+```
+
+`INFO` jest domyślne. `DEBUG` pokazuje więcej; `WARNING` pokazuje mniej. Zmiana wchodzi w życie
+natychmiast na resztę sesji, a wiersz statusu aktualizuje się odpowiednio.
+
+<Note>
+Przełącznik szczegółowości zmienia tylko **działający** poziom. Przy następnym uruchomieniu poziom z
+twojej konfiguracji (lub zmiennej środowiskowej `IPMIDECK_LOGGING_LEVEL`) wygrywa ponownie. Zobacz [Konfiguracja](/pl/configuration).
+</Note>
+
+### c: sesje
+
+`c` otwiera podwidok **Connected sessions**, tylko do odczytu tabelę klientów pulpitu
+aktualnie podłączonych, z kolumnami:
+
+- **IP**
+- **Connected since**
+- **User-Agent**
+
+Naciśnij `q` lub `ESC`, aby wrócić do widoku dziennika.
+
+<Frame caption="The Connected sessions sub-view (key c), one row per attached dashboard client.">
+  <img src="/console/connections.png" alt="Connected sessions table showing IP, Connected since, and User-Agent columns" />
+</Frame>
+
+### s: serwery
+
+`s` otwiera podwidok **Configured servers**, tylko do odczytu tabelę BMC, z którymi ipmideck
+jest skonfigurowany do rozmowy, z kolumnami:
+
+- **Name**
+- **Host**
+- **Status**
+
+Naciśnij `q` lub `ESC`, aby wrócić do widoku dziennika.
+
+<Frame caption="The Configured servers sub-view (key s), listing each BMC and whether it is online.">
+  <img src="/console/servers.png" alt="Configured servers table showing Name, Host, and Status columns with online and offline servers" />
+</Frame>
+
+### u: url
+
+`u` wyświetla adres URL pulpitu (`scheme://host:port`) w treści dziennika. Jeśli serwer jest
+związany z adresem wieloznacznym (`0.0.0.0`, `::` lub pustym), adres URL jest przepisywany na
+`127.0.0.1`, aby był faktycznie otwieralny w przeglądarce, `http://0.0.0.0:3000` to adres
+nasłuchu, a nie taki, do którego można nawigować.
+
+<Frame caption="Key u prints the dashboard URL at the bottom of the log, rewritten to a reachable address.">
+  <img src="/console/url.png" alt="The console log with the dashboard URL printed at the bottom after pressing u" />
+</Frame>
+
+### g: aktualizacja
+
+`g` wypisuje lokalną wersję i notatkę, że internetowe sprawdzanie aktualizacji jest dostarczane z wydaniem
+pip. Nie wykonuje **żadnego wywołania sieciowego**, ipmideck pozostaje offline.
+
+### r: restart
+
+`r` wykonuje czysty restart w procesie: ipmideck rozkłada konsolę, ponownie odczytuje
+`config.yaml` i uruchamia się od nowa. Użyj go po edycji [change-bind](#b-change-bind), aby zastosować
+nowy adres.
+
+### q / ESC: zakończ i wstecz
+
+- Z podwidoku (`sessions` lub `servers`) zarówno `q`, jak i `ESC` przenoszą cię z powrotem do widoku dziennika.
+- Z widoku dziennika `q` wyzwala czyste zakończenie, serwer wyłącza się łagodnie.
+
+## b: change-bind
+
+`b` otwiera edytor change-bind, wbudowany monit `host:port`, który zastępuje pasek pomocy,
+gdy piszesz. Nagłówek pokazuje bieżące wiązanie jako tylko do odczytu etykietę `current: host:port`
+i puste pole `new:`, więc wartość, którą piszesz, pojawia się natychmiast i nigdy nie jest mylona
+z istniejącą.
+
+<Frame caption="The change-bind editor (key b): the help bar is replaced by the current bind and an empty new host:port prompt.">
+  <img src="/console/bind.png" alt="The change-bind editor showing the current bind address and an empty new field with apply, cancel, and delete key hints" />
+</Frame>
+
+Klawisze w edytorze:
+
+- **Enter**: zastosuj wpisane `host:port`.
+- **ESC**: anuluj bez zmieniania czegokolwiek.
+- **Backspace**: usuń ostatni znak.
+- Dowolny drukowalny znak, dołącz do bufora.
+
+Dane wejściowe muszą być `host:port` z niepustym hostem i portem będącym liczbą całkowitą w
+zakresie **1–65535**. Przy prawidłowym wpisie ipmideck potwierdza nowe wiązanie i przypomina ci, że restart
+jest wymagany (naciśnij `r`). Przy nieprawidłowym wpisie zgłasza `Invalid host/port` i
+nic się nie zmienia.
+
+<Warning>
+Edycja change-bind **nie** jest na żywo, jest zapisywana do konfiguracji i wchodzi w życie dopiero po
+restarcie. Naciśnij `r`, aby ją zastosować. I pamiętaj o pierwszeństwie: zmienna środowiskowa `IPMIDECK_SERVER_HOST` /
+`IPMIDECK_SERVER_PORT` lub jawna flaga `--host` / `--port` przy następnym uruchomieniu
+nadpisuje to, co konsola utrwaliła. Zobacz [Konfiguracja](/pl/configuration).
+</Warning>
+
+## Gdzie pojawia się konsola
+
+Konsola interaktywna jest uwarunkowana prawdziwym TTY: ipmideck renderuje ją tylko wtedy, gdy **zarówno**
+stdin, jak i stdout są interaktywnymi terminalami. Gdy nimi nie są, degraduje się do banera plus
+zwykłych przewijanych dzienników i nie instaluje nasłuchiwacza klawiszy, więc nic nie kręci się w pętli na non-TTY.
+
+Oznacza to, że konsola pojawia się, gdy uruchamiasz ipmideck bezpośrednio w terminalu:
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck
+```
+
+```cmd cmd
+ipmideck
+```
+
+```bash bash
+ipmideck
+```
+
+</CodeGroup>
+
+**Nie** pojawia się, gdy:
+
+- Działa pod **Dockerem**: kontener uruchamia uvicorn bezpośrednio i nigdy nie dociera do
+  ścieżki konsoli; otrzymujesz zwykłe dzienniki kontenera (`docker logs`).
+- Działa pod **systemd** lub dowolnym menedżerem usług, gdzie stdout nie jest terminalem.
+- **Przekierowywanie** stdout (np. `ipmideck > server.log`): stdout nie jest już TTY.
+
+W każdym przypadku non-TTY serwer nadal działa normalnie i wiąże się z tym samym domyślnym
+`0.0.0.0:3000`; otrzymujesz tylko zwykłe dzienniki zamiast działającej konsoli.
+
+<Note>
+`ipmilink` to wstecznie zgodny alias dla `ipmideck`, oba uruchamiają tę samą konsolę.
+</Note>
+
+## Następne kroki
+
+- [Uruchamianie ipmideck](/pl/running): start, serwowanie i reguły pierwszeństwa wiązania.
+- [CLI](/pl/cli): każde podpolecenie i flaga w szczegółach.
+- [Konfiguracja](/pl/configuration): ustaw adres wiązania, szczegółowość i interwały odpytywania.
+- [Instalacja](/pl/installation): zainstaluj za pomocą Dockera lub pip.

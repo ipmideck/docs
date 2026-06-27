@@ -1,0 +1,55 @@
+---
+title: "Funcionalidades"
+description: "Monitorização de sensores, controlo de ventoinha FanPilot, gestão de energia, SEL, FRU e o painel multi-servidor."
+---
+
+## Monitorização de sensores
+
+- Leituras em tempo real de temperatura, RPM da ventoinha, tensão e consumo de energia.
+- Gráficos ao vivo com dados históricos (até um ano, controlado por `data.retention_days`).
+- Limiares de alerta configuráveis com notificações do navegador.
+
+O ipmideck sonda cada BMC num intervalo definido por `ipmi.poll_interval` (predefinição 30 segundos,
+substituível com `IPMIDECK_IPMI_POLL_INTERVAL`).
+
+## FanPilot: controlo inteligente de ventoinha
+
+- Editor visual de curva de ventoinha de arrastar e largar.
+- Perfis integrados: Silent, Balanced, Performance, Full Speed e Custom.
+- Histerese configurável para evitar a oscilação da ventoinha em torno de um limite de temperatura.
+- Substituição de segurança: as ventoinhas são forçadas a 100% no ou acima do limite de temperatura crítica.
+- Ciclo autónomo que continua a funcionar independentemente do painel.
+
+<Warning>
+  A substituição de segurança do FanPilot vence sempre. Nenhuma curva de ventoinha pode manter as ventoinhas abaixo de 100% assim que
+  a temperatura crítica é atingida, o limite térmico tem precedência sobre qualquer perfil.
+</Warning>
+
+## Controlo de energia
+
+- Power On, Soft Off, Hard Off, Reset e Power Cycle.
+- Indicador de estado de energia em tempo real.
+- Diálogos de confirmação para ações destrutivas.
+- Registo de auditoria de comandos completo de cada operação que altera o estado.
+
+## System Event Log (SEL)
+
+- Veja o registo de eventos de hardware do BMC com filtragem por severidade.
+- Pesquisa, filtros de intervalo de datas e exportação para CSV ou JSON.
+
+## Inventário de hardware (FRU)
+
+- Números de série, números de peça e informação do fabricante.
+- Dados da placa, chassis e produto num relance.
+
+## Painel multi-servidor
+
+- Faça a gestão de múltiplos BMCs a partir de uma única instância do ipmideck.
+- Vista panorâmica com uma visão geral do estado de todos os servidores.
+
+## Como fala com o seu hardware
+
+O ipmideck conduz cada operação IPMI através do `ipmitool`, invocado por `lanplus`
+(IPMI 2.0) para sessões cifradas. Os argumentos são sempre passados como uma lista, nunca através de
+uma shell, por isso não há superfície de injeção de comandos. Veja [Segurança](/pt/security) para o
+panorama completo.

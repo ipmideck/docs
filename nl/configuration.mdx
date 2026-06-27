@@ -1,0 +1,89 @@
+---
+title: "Configuratie"
+description: "ipmideck leest data/config.yaml en accepteert overrides via omgevingsvariabelen met IPMIDECK_-prefix."
+---
+
+## config.yaml
+
+ipmideck leest zijn instellingen uit `data/config.yaml`, geschreven met verstandige standaarden bij de
+eerste start. Je kunt het bestand rechtstreeks bewerken, of elke waarde tijdens runtime overschrijven met een
+omgevingsvariabele (handig voor Docker, zie hieronder).
+
+```yaml
+# data/config.yaml (auto-generated on first run)
+server:
+  host: "0.0.0.0"
+  port: 3000
+  https: false
+auth:
+  enabled: true
+  session_expiry: "24h"
+  max_login_attempts: 5
+ipmi:
+  poll_interval: 30
+  power_poll_interval: 30
+  command_timeout: 30
+data:
+  retention_days: 365
+  cleanup_interval: "24h"
+logging:
+  level: "info"
+modules:
+  sensors:
+    enabled: true
+  fanpilot:
+    enabled: true
+  power:
+    enabled: true
+  sel:
+    enabled: true
+  fru:
+    enabled: true
+```
+
+De sleutels hierboven zijn de echte, niet-geprefixte geneste sleutels die ipmideck naar `config.yaml` schrijft.
+Overrides via omgevingsvariabelen gebruiken een aparte `IPMIDECK_`-prefix en verschijnen nooit in
+het YAML-bestand zelf.
+
+## Overrides via omgevingsvariabelen
+
+Elke instelling kan tijdens runtime worden overschreven met een omgevingsvariabele met
+`IPMIDECK_`-prefix. Dit is de eenvoudigste manier om ipmideck in Docker te configureren, waar je geen
+bestand binnen de container wilt bewerken.
+
+| Omgevingsvariabele | Beschrijving |
+|----------------------|-------------|
+| `IPMIDECK_SERVER_HOST` | Host/interface waaraan het dashboard bindt (standaard `0.0.0.0`). |
+| `IPMIDECK_SERVER_PORT` | HTTP-poort waaraan het dashboard bindt (standaard `3000`). |
+| `IPMIDECK_AUTH_ENABLED` | Schakel de ingebouwde login in of uit (standaard `true`). |
+| `IPMIDECK_AUTH_SESSION_EXPIRY` | Hoe lang een inlogsessie geldig blijft (standaard `24h`). |
+| `IPMIDECK_IPMI_POLL_INTERVAL` | Seconden tussen BMC-sensorpolls (standaard `30`). |
+| `IPMIDECK_IPMI_POWER_POLL_INTERVAL` | Seconden tussen voedingsstatus-polls (standaard `30`). |
+| `IPMIDECK_DATA_RETENTION_DAYS` | Dagen sensorhistorie om te bewaren vóór opschoning (standaard `365`). |
+| `IPMIDECK_DATA_DB_PATH` | Absoluut pad naar het SQLite-databasebestand. |
+| `IPMIDECK_LOGGING_LEVEL` | Logniveau: `debug`, `info`, `warning` of `error` (standaard `info`). |
+| `IPMIDECK_DEMO` | Draai tegen gesimuleerde hardware in plaats van echte BMC's (standaard `false`). |
+
+Twee andere variabelen besturen *locaties* van bestanden in plaats van een `config.yaml`-waarde:
+`IPMIDECK_DATA_DIR` (de datamap, zie hieronder) en `IPMIDECK_CONFIG_PATH` (een
+expliciet pad naar een te laden `config.yaml`).
+
+<Note>
+  Omgevingsvariabelen hebben voorrang op waarden in `config.yaml`. Stel ze in in je
+  `docker run`-commando (`-e IPMIDECK_SERVER_PORT=8080`) of in je `docker-compose.yml`.
+</Note>
+
+## Waar de configuratie staat
+
+ipmideck bepaalt zijn datamap uit `IPMIDECK_DATA_DIR` indien ingesteld, anders valt het
+terug op een platformstandaard. `config.yaml` staat altijd op `<data-dir>/config.yaml`:
+
+- **Docker:** `/data/config.yaml`: de image stelt `IPMIDECK_DATA_DIR=/data` in; maak
+  `/data` persistent met een volume.
+- **pip op Linux:** standaard `/data/config.yaml`: stel `IPMIDECK_DATA_DIR` in om het te verplaatsen.
+- **pip op Windows:** `./data/config.yaml`, relatief aan de map waaruit je `ipmideck` uitvoert.
+
+## Volgende stappen
+
+- [Beveiliging](/nl/security): hoe inloggegevens en sessies worden beschermd.
+- [Functies](/nl/features): wat elke module doet.

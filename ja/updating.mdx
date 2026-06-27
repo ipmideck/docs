@@ -1,0 +1,67 @@
+---
+title: "ipmideck の更新"
+description: "Docker または pip で ipmideck を新しいリリースにアップグレードします。データディレクトリーはアップグレードを生き延びます。"
+---
+
+ipmideck のアップグレードはアプリケーションを置き換えますが、データは置き換えません。`config.yaml`、
+データベース、暗号化キーは [データディレクトリー](/ja/configuration#設定の場所) にあり、
+アップグレードをまたいでそのまま残るので、サーバー、履歴、設定は引き継がれます。
+
+<Note>
+  ipmideck はプレリリース中です。公開される Docker イメージと PyPI パッケージは近日公開です。
+  下記のコマンドは、それらが利用可能になったときに使用するものです。
+</Note>
+
+## Docker
+
+新しいイメージをプルし、同じデータボリュームでコンテナーを再作成します。
+
+```bash
+docker pull ipmideck/ipmideck:latest
+docker stop ipmideck && docker rm ipmideck
+docker run -d --name ipmideck --network host -v ipmideck-data:/data ipmideck/ipmideck:latest
+```
+
+`-v ipmideck-data:/data` ボリュームにはデータが含まれるので、同じボリューム名を再利用すれば
+すべてが保持されます。リリース間の移動タイミングを正確に制御したい場合は、`latest` の代わりに
+バージョンを固定してください (例: `ipmideck/ipmideck:2.0.0`)。
+
+## pip
+
+パッケージをその場でアップグレードし、再度 ipmideck を起動します。
+
+<CodeGroup>
+
+```bash bash
+pip install -U ipmideck
+ipmideck start
+```
+
+```powershell PowerShell
+pip install -U ipmideck
+ipmideck start
+```
+
+</CodeGroup>
+
+データディレクトリーはパッケージから独立しているので、アップグレードは設定やデータベースに
+触れません。
+
+## バージョンの確認
+
+実行中のバージョンはダッシュボードに表示され、コンソールはバナーの下のクレジット行に
+それを出力します (例: `v2.0.0a1`)。ヘルスエンドポイントから読むこともできます。
+
+```bash
+curl http://<your-ip>:3000/api/health
+```
+
+<Note>
+  メジャーアップグレードの前に [バックアップ](/ja/backup-restore) を取ってください。何か問題が起きたときの
+  復元は、データディレクトリーを戻すだけです。
+</Note>
+
+## 次のステップ
+
+- [バックアップと復元](/ja/backup-restore): アップグレード前にデータのスナップショットを取ります。
+- [ipmideck の実行](/ja/running): 起動、停止、プラットフォームごとのデータディレクトリーの場所。

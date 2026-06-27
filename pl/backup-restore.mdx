@@ -1,0 +1,72 @@
+---
+title: "Kopia zapasowa i przywracanie"
+description: "Wykonaj kopię zapasową katalogu danych ipmideck (konfiguracja, baza danych i klucz szyfrujący) i przywróć go po przeniesieniu lub odbudowie."
+---
+
+Wszystko, co ipmideck zapamiętuje, znajduje się w jednym katalogu danych: twoje `config.yaml`, baza danych SQLite
+(`ipmideck.db`) z twoimi serwerami i historią czujników oraz plik `encryption.key`,
+który odszyfrowuje twoje przechowywane poświadczenia BMC. Wykonaj ich kopię zapasową, a będziesz mógł odbudować ipmideck
+w dowolnym miejscu.
+
+<Warning>
+  `encryption.key` jest częścią kopii zapasowej nie bez powodu: bez niego przywrócone nazwy
+  użytkowników i hasła BMC nie mogą zostać odszyfrowane. Kopia zapasowa samej bazy danych pozostawia twoje
+  zapisane poświadczenia nieczytelnymi, więc przechowuj plik klucza tak samo bezpiecznie jak bazę danych.
+</Warning>
+
+## Co znajduje się w kopii zapasowej
+
+| Plik | Co zawiera |
+| --- | --- |
+| `ipmideck.db` | Serwery, użytkownicy, historia czujników, dziennik poleceń i ustawienia. |
+| `config.yaml` | Ustawienia wiązania serwera, uwierzytelniania, IPMI, logowania i modułów. |
+| `encryption.key` | 32-bajtowy klucz, który odszyfrowuje twoje przechowywane poświadczenia BMC. |
+
+Wszystkie one znajdują się w [katalogu danych](/pl/configuration#gdzie-znajduje-się-konfiguracja): `/data` na Dockerze
+i Linuksie, `./data` na Windowsie lub gdziekolwiek wskazuje `IPMIDECK_DATA_DIR`.
+
+## Opcja A: kopia zapasowa w aplikacji
+
+ipmideck może podać ci gotową kopię zapasową. W interfejsie WWW otwórz **Settings** i użyj
+akcji kopii zapasowej: pobiera `ipmideck-backup-<timestamp>.zip` zawierający trzy pliki
+powyżej. Baza danych jest najpierw poddawana checkpointowi, więc migawka zawiera twoje najnowsze
+odczyty.
+
+Aby przywrócić, prześlij ten plik zip z tego samego ekranu **Settings**. ipmideck go waliduje,
+przygotowuje pliki i stosuje je przy następnym uruchomieniu, więc **uruchom ipmideck ponownie, aby zakończyć
+przywracanie**.
+
+## Opcja B: skopiuj katalog danych
+
+Ponieważ cały stan to po prostu pliki, możesz również wykonać kopię zapasową, kopiując katalog danych,
+gdy ipmideck jest zatrzymany:
+
+<CodeGroup>
+
+```bash bash
+# stop ipmideck first, then:
+cp -r /data /data-backup-$(date +%Y%m%d)
+```
+
+```powershell PowerShell
+# stop ipmideck first, then:
+Copy-Item -Recurse .\data ".\data-backup-$(Get-Date -Format yyyyMMdd)"
+```
+
+</CodeGroup>
+
+W Dockerze dane znajdują się w wolumenie, który zamontowałeś na `/data`, więc wykonaj kopię zapasową tego wolumenu.
+Przywracanie jest odwrotnością: zatrzymaj ipmideck, umieść pliki z powrotem w katalogu danych i
+uruchom go ponownie.
+
+<Note>
+  Zatrzymaj ipmideck przed kopiowaniem na poziomie plików. Baza danych działa w trybie WAL, więc kopiowanie jej,
+  gdy aplikacja zapisuje, może uchwycić niespójną migawkę. Kopia zapasowa w aplikacji unika
+  tego, wykonując najpierw checkpoint.
+</Note>
+
+## Następne kroki
+
+- [Konfiguracja](/pl/configuration): gdzie znajduje się katalog danych i co zawiera `config.yaml`.
+- [Aktualizacja ipmideck](/pl/updating): twoje dane przetrwają aktualizację.
+- [Bezpieczeństwo](/pl/security): jak poświadczenia są szyfrowane w spoczynku.

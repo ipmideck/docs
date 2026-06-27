@@ -1,0 +1,62 @@
+---
+title: "Enable IPMI on your server"
+description: "Before ipmideck can connect, IPMI-over-LAN must be enabled in your server's BMC. Per-vendor walkthroughs for Dell, Supermicro, HPE, Lenovo, and IBM."
+---
+
+ipmideck talks to your servers over **IPMI 2.0 over LAN**. On most servers this LAN
+channel is disabled by default (or shipped with default credentials), so before ipmideck
+can reach a BMC you need to enable IPMI-over-LAN and configure a user account on the
+controller itself.
+
+IPMI-over-LAN uses **UDP port 623** (the IPMI/RMCP+ port). Make sure that port is
+reachable from the host running ipmideck and that any firewall between the host and your
+BMCs allows it.
+
+<Warning>
+  The steps in these guides come from each vendor's **official documentation**, but BMC
+  web-interface paths vary between firmware generations and models. **Verify each path
+  against your own hardware** before relying on it. Where a vendor's documentation is
+  sparse, the page says so explicitly.
+</Warning>
+
+## Pick your BMC
+
+Each guide walks through enabling IPMI-over-LAN in that vendor's BMC web interface,
+including default credentials, the enable toggle, and a verification command.
+
+<CardGroup cols={2}>
+  <Card title="Dell iDRAC" href="/en/enable-ipmi/dell-idrac">
+    iDRAC7 / iDRAC8 / iDRAC9, PowerEdge servers.
+  </Card>
+  <Card title="Supermicro" href="/en/enable-ipmi/supermicro">
+    Supermicro IPMI 2.0 BMC (X8–X12 boards). <b>Low-confidence, verify on hardware.</b>
+  </Card>
+  <Card title="HPE iLO" href="/en/enable-ipmi/hpe-ilo">
+    HPE iLO 4 / iLO 5, ProLiant servers.
+  </Card>
+  <Card title="Lenovo XCC" href="/en/enable-ipmi/lenovo-xcc">
+    Lenovo XClarity Controller (XCC / XCC2), ThinkSystem servers.
+  </Card>
+  <Card title="IBM IMM" href="/en/enable-ipmi/ibm-imm">
+    IBM IMM2, System x servers. <b>Low-confidence, verify on hardware.</b>
+  </Card>
+</CardGroup>
+
+## After you enable it
+
+Once IPMI-over-LAN is on and you have a BMC user account, verify connectivity from the
+host that will run ipmideck:
+
+```bash
+ipmitool -I lanplus -H <bmc-ip> -U <user> -P <password> chassis status
+```
+
+A successful response confirms the LAN channel is live. Then add the server in ipmideck's
+setup wizard, see [Getting Started](/en/getting-started) and
+[Supported Hardware](/en/supported-hardware).
+
+<Note>
+  Many vendors recommend **disabling IPMI-over-LAN again when it is not in use**, since
+  the protocol's authentication is weaker than the BMC's HTTPS interface. Keep your BMCs
+  on a trusted management network and use strong, non-default credentials.
+</Note>

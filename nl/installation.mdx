@@ -1,0 +1,53 @@
+---
+title: "Installatie"
+description: "Installeer ipmideck met Docker of pip en begrijp het --network host-vereiste."
+---
+
+## Docker (aanbevolen)
+
+```bash
+docker run --network host ipmideck/ipmideck:latest
+```
+
+`--network host` is vereist zodat de container je BMC's rechtstreeks op je lokale
+netwerk kan bereiken via UDP-poort 623 (de IPMI/RMCP+-poort). Zonder host networking
+zit de container achter de NAT van Docker en kan hij geen IPMI-sessie met je hardware voltooien.
+
+Zodra de container draait, open je `http://<your-ip>:3000` en volg je de installatiewizard.
+
+<Note>
+  De gepubliceerde image staat op Docker Hub op
+  [hub.docker.com/r/ipmideck/ipmideck](https://hub.docker.com/r/ipmideck/ipmideck).
+  De image komt binnenkort, het commando hierboven is precies het commando dat je uitvoert zodra
+  het gepubliceerd is.
+</Note>
+
+## pip
+
+```bash
+pip install ipmideck
+```
+
+Het pip-pakket vereist dat `ipmitool` op de host is geïnstalleerd, ipmideck roept
+`ipmitool` aan voor elke IPMI-bewerking. Installeer het eerst via de pakketbeheerder van je
+distributie (bijvoorbeeld `apt install ipmitool` of `dnf install ipmitool`).
+
+## Waar ipmideck gegevens opslaat
+
+ipmideck schrijft zijn configuratie en database naar een datamap:
+
+- **Docker:** `/data` binnen de container (de image stelt `IPMIDECK_DATA_DIR=/data` in;
+  maak het persistent met een volume).
+- **pip op Linux:** standaard `/data`: stel `IPMIDECK_DATA_DIR` in om het te verplaatsen.
+- **pip op Windows:** `./data`, relatief aan de map waaruit je `ipmideck` uitvoert.
+
+Je kunt de locatie op elk platform overschrijven met de omgevingsvariabele `IPMIDECK_DATA_DIR`.
+Deze map bevat `config.yaml`, de SQLite-database en het bestand met de versleutelingssleutel
+dat je opgeslagen BMC-inloggegevens beschermt. Zie [Configuratie](/nl/configuration) en
+[ipmideck draaien](/nl/running) voor details.
+
+## Volgende stappen
+
+- [Configuratie](/nl/configuration): stel poorten, polling-intervallen en bewaartermijn af.
+- [Ondersteunde hardware](/nl/supported-hardware): bevestig dat je BMC wordt gedekt.
+- [Probleemoplossing](/nl/troubleshooting): verbindings- en IPMI-fouten.

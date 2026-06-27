@@ -1,0 +1,43 @@
+---
+title: "Ondersteunde hardware"
+description: "ipmideck spreekt standaard IPMI 2.0; ondersteuning is gelaagd op basis van hoe grondig elke leverancier getest is."
+---
+
+## IPMI 2.0 overal
+
+ipmideck spreekt standaard IPMI 2.0, dus de meeste server-BMC's reageren. Ondersteuning is gelaagd op basis van hoe
+grondig elke leverancier getest is. Regeling van fan-curves (FanPilot) leunt momenteel op
+raw-commando's van Dell iDRAC; fanregeling van andere leveranciers staat op de roadmap.
+
+| Leverancier | Status | IPMI inschakelen | Opmerkingen |
+|--------|--------|-------------|-------|
+| Dell PowerEdge / iDRAC | <Icon icon="circle-check" color="#16a34a" /> Ondersteund / getest | [Dell iDRAC-gids](/nl/enable-ipmi/dell-idrac) | IPMI 2.0, volledig ondersteund en getest. |
+| Supermicro | <Icon icon="flask" color="#d97706" /> Experimenteel | [Supermicro-gids](/nl/enable-ipmi/supermicro) | IPMI 2.0, werkt, nog niet uitputtend getest. |
+| HPE iLO | <Icon icon="flask" color="#d97706" /> Experimenteel | [HPE iLO-gids](/nl/enable-ipmi/hpe-ilo) | IPMI 2.0, experimenteel, nog niet uitputtend getest. |
+| Lenovo XCC | <Icon icon="flask" color="#d97706" /> Experimenteel | [Lenovo XCC-gids](/nl/enable-ipmi/lenovo-xcc) | IPMI 2.0, experimenteel, nog niet uitputtend getest. |
+| IBM IMM | <Icon icon="flask" color="#d97706" /> Experimenteel | [IBM IMM-gids](/nl/enable-ipmi/ibm-imm) | IPMI 2.0, experimenteel, nog niet uitputtend getest. |
+
+<Note>
+  Elke BMC die IPMI 2.0 implementeert, zou moeten verbinden voor sensormonitoring, voedingsbeheer,
+  SEL en FRU. De lagen hierboven beschrijven hoeveel FanPilot-fanregeling en leverancierspecifiek
+  gedrag op echte hardware is gevalideerd.
+</Note>
+
+## IPMI inschakelen op je BMC
+
+De meeste servers worden geleverd met IPMI-over-LAN uitgeschakeld of met standaard inloggegevens. Voordat
+ipmideck kan verbinden, moet je IPMI 2.0 over LAN inschakelen en een gebruikersaccount op de
+BMC instellen. De gids **[IPMI inschakelen op je BMC →](/nl/enable-ipmi)** bevat een doorloop
+per leverancier voor elke controller:
+
+- [Dell iDRAC](/nl/enable-ipmi/dell-idrac)
+- [Supermicro](/nl/enable-ipmi/supermicro): *lage zekerheid; verifieer op hardware*
+- [HPE iLO](/nl/enable-ipmi/hpe-ilo)
+- [Lenovo XCC](/nl/enable-ipmi/lenovo-xcc)
+- [IBM IMM](/nl/enable-ipmi/ibm-imm): *lage zekerheid; verifieer op hardware*
+
+<Note>
+  De doorlopen voor Supermicro en IBM IMM2 zijn gemarkeerd als **lage zekerheid**, hun BMC-
+  navigatiepaden komen uit schaarse documentatie en moeten op echte hardware worden gevalideerd
+  voordat je erop vertrouwt. Elke pagina draagt een prominente waarschuwing.
+</Note>

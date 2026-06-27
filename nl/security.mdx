@@ -1,0 +1,62 @@
+---
+title: "Beveiliging"
+description: "Elke beveiligingsclaim hier is gegrond in ipmideck's eigen backendcode, niet in marketing."
+---
+
+ipmideck is gebouwd voor mensen die de broncode lezen in plaats van een leverancier te vertrouwen. De claims
+hieronder zijn gegrond in de backendcode van het product.
+
+## Data- en accountbeveiliging
+
+Inloggegevens worden in rust versleuteld, logins worden gehasht en sessies worden ondertekend, de
+database alleen is nooit genoeg om binnen te komen.
+
+### AES-256-CBC-versleuteling van inloggegevens
+
+BMC-inloggegevens worden in rust versleuteld met AES-256-CBC en een willekeurige IV per geheim. De
+versleutelingssleutel staat in een apart sleutelbestand (`data/encryption.key`, 32 willekeurige bytes,
+alleen-eigenaar-rechten), nooit in de database, dus een gestolen database alleen kan
+niets ontsleutelen.
+
+### bcrypt-logins + met HMAC-SHA256 ondertekende sessies
+
+Inlogwachtwoorden worden gehasht met bcrypt (salt per wachtwoord, constante-tijd-verificatie). Sessie-
+tokens worden ondertekend met HMAC-SHA256, bij elke aanvraag opnieuw gevalideerd, en ongeldig gemaakt wanneer een
+gebruikersnaam verandert. Cookies zijn HttpOnly en SameSite=Lax.
+
+### Brute-force-lockout
+
+Lockout per gebruikersnaam met exponentiële backoff na vijf mislukte pogingen (tot een uur),
+plus tegen timing-leaks bestendige generieke fouten zodat een aanvaller niets leert van hoe een login mislukt.
+
+### Shell-loze ipmitool, volledig offline
+
+ipmitool wordt aangeroepen via een argumentenlijst (`create_subprocess_exec`), nooit via een shell,
+dus er is geen command-injection-oppervlak. Het hele systeem draait volledig offline: geen
+telemetrie, geen cloud, geen externe oproepen.
+
+## Hardwarebescherming
+
+FanPilot is gebouwd om veilig te falen: thermische limieten winnen van elke curve, en de regellus
+blijft draaien zelfs wanneer je niet kijkt.
+
+### Veiligheidsoverride bij de kritieke temperatuur
+
+Fans worden op 100% gezet op of boven de kritieke temperatuur (standaard 85°C, configureerbaar).
+Geen enkele fan-curve kan de override overschrijven, de thermische limiet wint altijd.
+
+### Hysterese om oscillatie te stoppen
+
+Een configureerbare hysteresemarge (standaard 3°C) voorkomt dat fans snel op en neer
+oscilleren rond een temperatuurlimiet, en houdt snelheidsveranderingen soepel en voorspelbaar.
+
+### Autonome achtergrondlus
+
+Fanregeling draait in een achtergrondtaak (~30s poll) die blijft werken met het dashboard
+gesloten, bescherming hangt niet af van een open browsertabblad.
+
+### Herstel na onnette afsluiting + nette afsluiting
+
+Na een onnette stop (stroomuitval of `kill -9`) herstelt ipmideck de eigen automodus van de BMC,
+en het herstelt automatisch bij detectie van server-offline en verouderde sensoren. Een nette afsluiting geeft
+fans terug aan het thermisch beheer van de BMC.

@@ -1,0 +1,69 @@
+---
+title: "はじめに"
+description: "ipmideck とは何か、そして 1 つのコマンドでサーバーの BMC に対するダッシュボードを起動する方法。"
+---
+
+## ipmideck とは
+
+ipmideck はセルフホスト型の Web ベース IPMI 管理プラットフォームです。サーバーの
+BMC (Baseboard Management Controller) に IPMI 2.0 で接続し、リアルタイムの
+センサー監視、インテリジェントなファンカーブ制御 (FanPilot)、リモート電源管理、
+ハードウェアイベントログを、すべてブラウザーから、CLI なしで提供します。
+
+ipmideck は完全にあなた自身のネットワーク上で動作します。クラウドも、テレメトリも、
+外部依存もありません。BMC と直接通信し、すべてをローカルに保存します。
+
+<Note>
+  ipmideck はネットワーク経由で UDP ポート 623 (IPMI/RMCP+ ポート) を通じて BMC に到達する必要があります。
+  Docker で実行する場合は、コンテナーが LAN 上の BMC に直接到達できるよう `--network host` を使用してください。
+</Note>
+
+## クイックスタート
+
+ipmideck を試す最も速い方法は Docker です。
+
+```bash
+docker run --network host ipmideck/ipmideck:latest
+```
+
+その後、ブラウザーで `http://<your-ip>:3000` を開き、セットアップウィザードに従って
+最初のサーバーを追加します。
+
+Python パッケージを好みますか? 代わりに PyPI からインストールしてください。
+
+```bash
+pip install ipmideck
+```
+
+pip パッケージはホストに `ipmitool` がインストールされている必要があります。
+
+<Note>
+  ipmideck はプレリリース中です。公開される Docker イメージと PyPI パッケージは近日公開です。
+  上記のコマンドは、それらが利用可能になったときに実行する正確なコマンドです。
+</Note>
+
+## 得られるもの
+
+- **センサー監視**: 温度、ファン RPM、電圧、電力のライブ表示。最大 1 年分の履歴付き。
+- **FanPilot**: 安全な自律制御ループを備えたドラッグ＆ドロップのファンカーブエディター。
+- **電源制御**: On、Soft Off、Hard Off、Reset、Power Cycle を完全な監査ログ付きで。
+- **System Event Log (SEL)**: BMC のハードウェアイベントログを参照・エクスポート。
+- **ハードウェアインベントリ (FRU)**: シリアル番号、部品番号、製造元データ。
+- **マルチサーバーダッシュボード**: 単一のインスタンスから多数の BMC を管理。
+
+## 次のステップ
+
+<CardGroup cols={2}>
+  <Card title="ipmideck をインストール" icon="download" href="/ja/installation">
+    Docker と pip、`--network host` 要件の説明付き。
+  </Card>
+  <Card title="初回セットアップ" icon="wand-magic-sparkles" href="/ja/setup">
+    セットアップウィザード: ログインモードを選び、最初の BMC を追加します。
+  </Card>
+  <Card title="IPMI を有効化" icon="server" href="/ja/enable-ipmi">
+    BMC で IPMI over LAN を有効にするベンダー別の手順。
+  </Card>
+  <Card title="設定" icon="sliders" href="/ja/configuration">
+    ポート、ポーリング間隔、保持期間、環境変数による上書き。
+  </Card>
+</CardGroup>

@@ -1,0 +1,62 @@
+---
+title: "Segurança"
+description: "Cada afirmação de segurança aqui está fundamentada no próprio código de backend do ipmideck, não em marketing."
+---
+
+O ipmideck é construído para pessoas que leem o código fonte em vez de confiar num fabricante. As afirmações
+abaixo estão fundamentadas no código de backend do produto.
+
+## Segurança de dados e contas
+
+As credenciais são cifradas em repouso, os inícios de sessão são submetidos a hash e as sessões são assinadas, a
+base de dados por si só nunca é suficiente para entrar.
+
+### Cifragem de credenciais AES-256-CBC
+
+As credenciais BMC são cifradas em repouso com AES-256-CBC e um IV aleatório por segredo. A
+chave de cifragem vive num ficheiro de chave separado (`data/encryption.key`, 32 bytes aleatórios,
+permissões só de proprietário), nunca na base de dados, por isso uma base de dados roubada por si só não consegue
+decifrar nada.
+
+### Inícios de sessão bcrypt + sessões assinadas com HMAC-SHA256
+
+As palavras-passe de início de sessão são submetidas a hash com bcrypt (salt por palavra-passe, verificação em tempo constante). Os tokens
+de sessão são assinados com HMAC-SHA256, revalidados em cada pedido e invalidados quando um
+nome de utilizador muda. Os cookies são HttpOnly e SameSite=Lax.
+
+### Bloqueio contra força bruta
+
+Bloqueio por nome de utilizador com recuo exponencial após cinco tentativas falhadas (até uma hora),
+mais erros genéricos seguros contra fugas de tempo, para que um atacante não aprenda nada com a forma como um início de sessão falha.
+
+### ipmitool sem shell, totalmente offline
+
+O ipmitool é invocado através de uma lista de argumentos (`create_subprocess_exec`), nunca uma shell,
+por isso não há superfície de injeção de comandos. Todo o sistema corre totalmente offline: sem
+telemetria, sem nuvem, sem chamadas externas.
+
+## Proteção de hardware
+
+O FanPilot é construído para falhar em segurança: os limites térmicos vencem qualquer curva, e o ciclo de controlo
+continua a correr mesmo quando não está a observar.
+
+### Substituição de segurança na temperatura crítica
+
+As ventoinhas são forçadas a 100% no ou acima da temperatura crítica (predefinição 85°C, configurável).
+Nenhuma curva de ventoinha pode substituir a substituição, o limite térmico vence sempre.
+
+### Histerese para parar a oscilação
+
+Uma margem de histerese configurável (predefinição 3°C) evita que as ventoinhas oscilem rapidamente para cima
+e para baixo em torno de um limite de temperatura, mantendo as mudanças de velocidade suaves e previsíveis.
+
+### Ciclo autónomo em segundo plano
+
+O controlo de ventoinha corre numa tarefa em segundo plano (sondagem ~30s) que continua a funcionar com o painel
+fechado, a proteção não depende de um separador do navegador estar aberto.
+
+### Recuperação de encerramento sujo + encerramento gracioso
+
+Após uma paragem suja (perda de energia ou `kill -9`) o ipmideck restaura o próprio modo auto do BMC,
+e recupera automaticamente na deteção de servidor offline e sensor obsoleto. Um encerramento limpo devolve
+as ventoinhas à gestão térmica do BMC.

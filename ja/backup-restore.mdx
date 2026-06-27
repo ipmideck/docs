@@ -1,0 +1,70 @@
+---
+title: "バックアップと復元"
+description: "ipmideck のデータディレクトリー (設定、データベース、暗号化キー) をバックアップし、移動や再構築の後に復元します。"
+---
+
+ipmideck が記憶するすべては 1 つのデータディレクトリーにあります。`config.yaml`、サーバーと
+センサー履歴を含む SQLite データベース (`ipmideck.db`)、そして保存された BMC 資格情報を復号する
+`encryption.key` ファイルです。これらをバックアップすれば、どこでも ipmideck を再構築できます。
+
+<Warning>
+  `encryption.key` がバックアップの一部であるのには理由があります。これがないと、復元された BMC の
+  ユーザー名とパスワードを復号できません。データベースだけのバックアップでは、保存された資格情報が
+  読めなくなるので、キーファイルをデータベースと同じくらい安全に保管してください。
+</Warning>
+
+## バックアップに含まれるもの
+
+| ファイル | 内容 |
+| --- | --- |
+| `ipmideck.db` | サーバー、ユーザー、センサー履歴、コマンドログ、設定。 |
+| `config.yaml` | サーバーバインド、auth、IPMI、ロギング、モジュール設定。 |
+| `encryption.key` | 保存された BMC 資格情報を復号する 32 バイトのキー。 |
+
+これらはすべて [データディレクトリー](/ja/configuration#設定の場所) にあります。Docker と Linux では
+`/data`、Windows では `./data`、または `IPMIDECK_DATA_DIR` が指す場所です。
+
+## オプション A: アプリ内バックアップ
+
+ipmideck は既製のバックアップを渡せます。Web UI から **Settings** を開き、バックアップアクションを
+使用します。上記の 3 つのファイルを含む `ipmideck-backup-<timestamp>.zip` をダウンロードします。
+データベースは最初にチェックポイントされるので、スナップショットには最新の読み取り値が含まれます。
+
+復元するには、同じ **Settings** 画面からその zip をアップロードします。ipmideck はそれを検証し、
+ファイルをステージングし、次の起動時に適用するので、**復元を完了するには ipmideck を再起動して**
+ください。
+
+## オプション B: データディレクトリーをコピーする
+
+状態全体が単なるファイルなので、ipmideck を停止している間にデータディレクトリーをコピーして
+バックアップすることもできます。
+
+<CodeGroup>
+
+```bash bash
+# stop ipmideck first, then:
+cp -r /data /data-backup-$(date +%Y%m%d)
+```
+
+```powershell PowerShell
+# stop ipmideck first, then:
+Copy-Item -Recurse .\data ".\data-backup-$(Get-Date -Format yyyyMMdd)"
+```
+
+</CodeGroup>
+
+Docker では、データは `/data` にマウントしたボリュームにあるので、そのボリュームをバックアップ
+します。復元は逆の手順です。ipmideck を停止し、ファイルをデータディレクトリーに戻し、
+再度起動します。
+
+<Note>
+  ファイルレベルのコピーの前に ipmideck を停止してください。データベースは WAL モードで実行されるので、
+  アプリが書き込んでいる間にコピーすると、一貫性のないスナップショットを取得する可能性があります。
+  アプリ内バックアップは最初にチェックポイントを取ることでこれを回避します。
+</Note>
+
+## 次のステップ
+
+- [設定](/ja/configuration): データディレクトリーの場所と `config.yaml` の内容。
+- [ipmideck の更新](/ja/updating): データはアップグレードを生き延びます。
+- [セキュリティ](/ja/security): 資格情報が保存時にどのように暗号化されるか。

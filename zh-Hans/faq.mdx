@@ -1,0 +1,59 @@
+---
+title: "常见问题"
+description: "关于在 homelab 中运行 ipmideck 的常见问题。"
+---
+
+<AccordionGroup>
+
+<Accordion title="ipmideck 是基于云的吗？">
+  不是。ipmideck 完全自托管，完全运行在你自己的网络上。它不进行
+  外部调用，没有遥测、没有云、没有账户。它直接与你的 BMC 通信，并
+  将一切存储在本地。
+</Accordion>
+
+<Accordion title="它能与哪些 BMC 配合使用？">
+  任何带 IPMI 2.0 BMC 的服务器都应能连接以进行传感器监控、电源控制、SEL
+  和 FRU。Dell PowerEdge / iDRAC 已完全测试；Supermicro、HPE iLO、
+  Lenovo XCC 和 IBM IMM 为实验性。请参阅 [支持的硬件](/zh-Hans/supported-hardware)。
+</Accordion>
+
+<Accordion title="我需要安装 ipmitool 吗？">
+  仅 pip 安装需要，那时包会调用你系统的 `ipmitool`。Docker
+  镜像捆绑了它所需的一切，因此你只需要带 `--network host` 的 Docker。
+</Accordion>
+
+<Accordion title="为什么 Docker 需要 --network host？">
+  ipmideck 通过你本地网络上的 UDP 端口 623 访问 BMC。主机网络让
+  容器直接与该端口通信，而不是处于 Docker 的 NAT 之后。请参阅
+  [安装](/zh-Hans/installation)。
+</Accordion>
+
+<Accordion title="仪表板运行在哪个端口上？">
+  默认 3000。在 `config.yaml`（`server.port`）中或用
+  `IPMIDECK_SERVER_PORT` 环境变量更改它。
+</Accordion>
+
+<Accordion title="传感器历史保留多久？">
+  默认一年（`data.retention_days: 365`）。用
+  `IPMIDECK_DATA_RETENTION_DAYS` 覆盖它。较旧的数据按
+  `data.cleanup_interval` 设置的计划清理。
+</Accordion>
+
+<Accordion title="我可以禁用登录吗？">
+  可以，在 `config.yaml` 中设置 `auth.enabled: false`，或 `IPMIDECK_AUTH_ENABLED=false`。仅
+  在受信任的、隔离的网络上这样做：关闭 auth 后，任何能访问仪表板的人
+  都可以控制你的硬件。
+</Accordion>
+
+<Accordion title="风扇控制安全吗？">
+  FanPilot 故障安全。在达到或超过临界温度时风扇被强制设为 100%，并且
+  控制回路即使在仪表板关闭时也在后台自主运行。请参阅
+  [安全](/zh-Hans/security) 了解完整的硬件保护细节。
+</Accordion>
+
+<Accordion title="我如何运行多台服务器？">
+  从仪表板添加每个 BMC。ipmideck 从单个实例管理多个 BMC，并
+  显示它们全部的全景状态概览。
+</Accordion>
+
+</AccordionGroup>

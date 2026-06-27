@@ -1,0 +1,89 @@
+---
+title: "Configurazione"
+description: "ipmideck legge data/config.yaml e accetta override tramite variabili d'ambiente con prefisso IPMIDECK_."
+---
+
+## config.yaml
+
+ipmideck legge le sue impostazioni da `data/config.yaml`, scritto con valori predefiniti sensati al
+primo avvio. Puoi modificare il file direttamente, oppure sovrascrivere qualsiasi valore a runtime con una
+variabile d'ambiente (comodo per Docker, vedi sotto).
+
+```yaml
+# data/config.yaml (auto-generated on first run)
+server:
+  host: "0.0.0.0"
+  port: 3000
+  https: false
+auth:
+  enabled: true
+  session_expiry: "24h"
+  max_login_attempts: 5
+ipmi:
+  poll_interval: 30
+  power_poll_interval: 30
+  command_timeout: 30
+data:
+  retention_days: 365
+  cleanup_interval: "24h"
+logging:
+  level: "info"
+modules:
+  sensors:
+    enabled: true
+  fanpilot:
+    enabled: true
+  power:
+    enabled: true
+  sel:
+    enabled: true
+  fru:
+    enabled: true
+```
+
+Le chiavi qui sopra sono le chiavi annidate reali e senza prefisso che ipmideck scrive in `config.yaml`.
+Gli override tramite variabili d'ambiente usano un prefisso `IPMIDECK_` separato e non compaiono mai dentro
+il file YAML stesso.
+
+## Override tramite variabili d'ambiente
+
+Ogni impostazione può essere sovrascritta a runtime con una variabile d'ambiente con prefisso
+`IPMIDECK_`. Questo è il modo più facile di configurare ipmideck in Docker, dove non vuoi
+modificare un file dentro il container.
+
+| Variabile d'ambiente | Descrizione |
+|----------------------|-------------|
+| `IPMIDECK_SERVER_HOST` | Host/interfaccia a cui si lega la dashboard (predefinito `0.0.0.0`). |
+| `IPMIDECK_SERVER_PORT` | Porta HTTP a cui si lega la dashboard (predefinita `3000`). |
+| `IPMIDECK_AUTH_ENABLED` | Abilita o disabilita il login integrato (predefinito `true`). |
+| `IPMIDECK_AUTH_SESSION_EXPIRY` | Per quanto tempo una sessione di login resta valida (predefinito `24h`). |
+| `IPMIDECK_IPMI_POLL_INTERVAL` | Secondi tra un polling dei sensori del BMC e l'altro (predefinito `30`). |
+| `IPMIDECK_IPMI_POWER_POLL_INTERVAL` | Secondi tra un polling dello stato dell'alimentazione e l'altro (predefinito `30`). |
+| `IPMIDECK_DATA_RETENTION_DAYS` | Giorni di storico dei sensori da conservare prima della pulizia (predefinito `365`). |
+| `IPMIDECK_DATA_DB_PATH` | Percorso assoluto al file del database SQLite. |
+| `IPMIDECK_LOGGING_LEVEL` | Verbosità dei log: `debug`, `info`, `warning` o `error` (predefinito `info`). |
+| `IPMIDECK_DEMO` | Gira su hardware simulato invece che su BMC reali (predefinito `false`). |
+
+Altre due variabili controllano le *posizioni* dei file invece di un valore di `config.yaml`:
+`IPMIDECK_DATA_DIR` (la directory dati, vedi sotto) e `IPMIDECK_CONFIG_PATH` (un
+percorso esplicito a un `config.yaml` da caricare).
+
+<Note>
+  Le variabili d'ambiente hanno la precedenza sui valori in `config.yaml`. Impostale nel tuo
+  comando `docker run` (`-e IPMIDECK_SERVER_PORT=8080`) o nel tuo `docker-compose.yml`.
+</Note>
+
+## Dove vive la configurazione
+
+ipmideck risolve la sua directory dati da `IPMIDECK_DATA_DIR` se impostata, altrimenti ripiega
+su un valore predefinito per piattaforma. `config.yaml` vive sempre in `<data-dir>/config.yaml`:
+
+- **Docker:** `/data/config.yaml`: l'immagine imposta `IPMIDECK_DATA_DIR=/data`; rendi persistente
+  `/data` con un volume.
+- **pip su Linux:** `/data/config.yaml` per impostazione predefinita: imposta `IPMIDECK_DATA_DIR` per spostarlo.
+- **pip su Windows:** `./data/config.yaml`, relativo alla directory da cui esegui `ipmideck`.
+
+## Prossimi passi
+
+- [Sicurezza](/it/security): come sono protette le credenziali e le sessioni.
+- [Funzionalità](/it/features): cosa fa ciascun modulo.

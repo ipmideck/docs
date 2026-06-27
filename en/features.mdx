@@ -1,0 +1,55 @@
+---
+title: "Features"
+description: "Sensor monitoring, FanPilot fan control, power management, SEL, FRU, and the multi-server dashboard."
+---
+
+## Sensor Monitoring
+
+- Real-time temperature, fan RPM, voltage, and power-consumption readings.
+- Live charts with historical data (up to one year, controlled by `data.retention_days`).
+- Configurable alert thresholds with browser notifications.
+
+ipmideck polls each BMC on an interval set by `ipmi.poll_interval` (default 30 seconds,
+overridable with `IPMIDECK_IPMI_POLL_INTERVAL`).
+
+## FanPilot: Intelligent Fan Control
+
+- Visual drag-and-drop fan-curve editor.
+- Built-in profiles: Silent, Balanced, Performance, Full Speed, and Custom.
+- Configurable hysteresis to prevent fan oscillation around a temperature limit.
+- Safety override: fans are forced to 100% at or above the critical temperature.
+- Autonomous loop that keeps working independently of the dashboard.
+
+<Warning>
+  FanPilot's safety override always wins. No fan curve can hold fans below 100% once the
+  critical temperature is reached, the thermal limit takes precedence over any profile.
+</Warning>
+
+## Power Control
+
+- Power On, Soft Off, Hard Off, Reset, and Power Cycle.
+- Real-time power-status indicator.
+- Confirmation dialogs for destructive actions.
+- Full command audit log of every state-changing operation.
+
+## System Event Log (SEL)
+
+- View the BMC hardware event log with severity filtering.
+- Search, date-range filters, and export to CSV or JSON.
+
+## Hardware Inventory (FRU)
+
+- Serial numbers, part numbers, and manufacturer info.
+- Board, chassis, and product data at a glance.
+
+## Multi-Server Dashboard
+
+- Manage multiple BMCs from a single ipmideck instance.
+- Panoramic view with a status overview of all servers.
+
+## How it talks to your hardware
+
+ipmideck drives every IPMI operation through `ipmitool`, invoked over `lanplus`
+(IPMI 2.0) for encrypted sessions. Arguments are always passed as a list, never through
+a shell, so there is no command-injection surface. See [Security](/en/security) for the
+full picture.

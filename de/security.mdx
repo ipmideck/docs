@@ -1,0 +1,62 @@
+---
+title: "Sicherheit"
+description: "Jede Sicherheitsaussage hier ist im eigenen Backend-Code von ipmideck verankert, nicht im Marketing."
+---
+
+ipmideck ist für Menschen gebaut, die den Quellcode lesen, statt einem Hersteller zu vertrauen. Die Aussagen
+unten sind im Backend-Code des Produkts verankert.
+
+## Daten- und Kontosicherheit
+
+Zugangsdaten werden im Ruhezustand verschlüsselt, Anmeldungen werden gehasht und Sitzungen signiert, die
+Datenbank allein reicht nie aus, um hineinzukommen.
+
+### AES-256-CBC-Verschlüsselung der Zugangsdaten
+
+BMC-Zugangsdaten werden im Ruhezustand mit AES-256-CBC und einem zufälligen IV pro Geheimnis verschlüsselt. Der
+Verschlüsselungsschlüssel liegt in einer separaten Schlüsseldatei (`data/encryption.key`, 32 zufällige Bytes,
+nur für den Eigentümer zugängliche Berechtigungen), nie in der Datenbank, sodass eine gestohlene Datenbank allein nichts
+entschlüsseln kann.
+
+### bcrypt-Anmeldungen + HMAC-SHA256-signierte Sitzungen
+
+Anmeldepasswörter werden mit bcrypt gehasht (Salt pro Passwort, konstante Verifikationszeit). Sitzungs-
+Token werden mit HMAC-SHA256 signiert, bei jeder Anfrage neu validiert und ungültig gemacht, wenn sich ein
+Benutzername ändert. Cookies sind HttpOnly und SameSite=Lax.
+
+### Brute-Force-Sperre
+
+Sperre pro Benutzername mit exponentiellem Backoff nach fünf fehlgeschlagenen Versuchen (bis zu einer Stunde),
+plus zeitleck-sichere generische Fehler, sodass ein Angreifer nichts daraus lernt, wie eine Anmeldung fehlschlägt.
+
+### Shell-loses ipmitool, vollständig offline
+
+ipmitool wird über eine Argumentliste aufgerufen (`create_subprocess_exec`), nie über eine Shell,
+sodass es keine Command-Injection-Angriffsfläche gibt. Das gesamte System läuft vollständig offline: keine
+Telemetrie, keine Cloud, keine externen Aufrufe.
+
+## Hardware-Schutz
+
+FanPilot ist auf Ausfallsicherheit gebaut: thermische Grenzen gewinnen über jede Kurve, und die Regelschleife
+läuft auch dann weiter, wenn Sie nicht zusehen.
+
+### Sicherheits-Override bei der kritischen Temperatur
+
+Lüfter werden bei oder über der kritischen Temperatur auf 100 % gezwungen (Standard 85 °C, konfigurierbar).
+Keine Lüfterkurve kann den Override überschreiben, die thermische Grenze gewinnt immer.
+
+### Hysterese gegen Schwingungen
+
+Eine konfigurierbare Hysterese-Marge (Standard 3 °C) verhindert, dass Lüfter schnell auf und ab um
+eine Temperaturgrenze schwingen, und hält Drehzahländerungen gleichmäßig und vorhersehbar.
+
+### Autonome Hintergrundschleife
+
+Die Lüftersteuerung läuft in einer Hintergrundaufgabe (~30 s Abfrage), die mit geschlossenem Dashboard
+weiterarbeitet, der Schutz hängt nicht davon ab, dass ein Browser-Tab geöffnet ist.
+
+### Wiederherstellung nach unsauberem Herunterfahren + sauberes Herunterfahren
+
+Nach einem unsauberen Stopp (Stromausfall oder `kill -9`) stellt ipmideck den eigenen Auto-Modus des BMC wieder her,
+und es erholt sich automatisch bei Server-Offline- und veralteter-Sensor-Erkennung. Ein sauberes Herunterfahren gibt die
+Lüfter an das thermische Management des BMC zurück.

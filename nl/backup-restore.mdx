@@ -1,0 +1,72 @@
+---
+title: "Back-up en herstel"
+description: "Maak een back-up van ipmideck's datamap (configuratie, database en versleutelingssleutel) en herstel deze na een verhuizing of een herbouw."
+---
+
+Alles wat ipmideck onthoudt, staat in één datamap: je `config.yaml`, de SQLite-database
+(`ipmideck.db`) met je servers en sensorhistorie, en het bestand `encryption.key`
+dat je opgeslagen BMC-inloggegevens ontsleutelt. Maak daar een back-up van en je kunt ipmideck
+overal opnieuw opbouwen.
+
+<Warning>
+  `encryption.key` maakt om een reden deel uit van de back-up: zonder dit kunnen de herstelde BMC-
+  gebruikersnamen en wachtwoorden niet worden ontsleuteld. Een back-up van alleen de database laat je
+  opgeslagen inloggegevens onleesbaar, bewaar het sleutelbestand dus net zo veilig als de database.
+</Warning>
+
+## Wat er in een back-up zit
+
+| Bestand | Wat het bevat |
+| --- | --- |
+| `ipmideck.db` | Servers, gebruikers, sensorhistorie, commandolog en instellingen. |
+| `config.yaml` | Server-bind, auth, IPMI, logging en module-instellingen. |
+| `encryption.key` | De 32-byte sleutel die je opgeslagen BMC-inloggegevens ontsleutelt. |
+
+Deze staan allemaal in de [datamap](/nl/configuration#waar-de-configuratie-staat): `/data` op Docker
+en Linux, `./data` op Windows, of waar `IPMIDECK_DATA_DIR` ook naar wijst.
+
+## Optie A: back-up in de app
+
+ipmideck kan je een kant-en-klare back-up geven. Open in de web-UI **Settings** en gebruik de
+back-upactie: het downloadt `ipmideck-backup-<timestamp>.zip` met de drie bestanden
+hierboven. De database wordt eerst gecheckpoint, zodat de snapshot je meest recente
+metingen bevat.
+
+Om te herstellen, upload je die zip vanuit hetzelfde **Settings**-scherm. ipmideck valideert het,
+zet de bestanden klaar en past ze toe bij de volgende start, dus **herstart ipmideck om de
+herstelactie te voltooien**.
+
+## Optie B: kopieer de datamap
+
+Omdat de hele staat gewoon bestanden zijn, kun je ook een back-up maken door de datamap te kopiëren
+terwijl ipmideck gestopt is:
+
+<CodeGroup>
+
+```bash bash
+# stop ipmideck first, then:
+cp -r /data /data-backup-$(date +%Y%m%d)
+```
+
+```powershell PowerShell
+# stop ipmideck first, then:
+Copy-Item -Recurse .\data ".\data-backup-$(Get-Date -Format yyyyMMdd)"
+```
+
+</CodeGroup>
+
+In Docker staat de data in het volume dat je op `/data` hebt gemount, maak dus een back-up van dat volume.
+Herstellen is het omgekeerde: stop ipmideck, zet de bestanden terug in de datamap en
+start het opnieuw.
+
+<Note>
+  Stop ipmideck vóór een kopie op bestandsniveau. De database draait in WAL-modus, dus deze kopiëren
+  terwijl de app schrijft kan een inconsistente snapshot opleveren. De back-up in de app voorkomt
+  dit door eerst te checkpointen.
+</Note>
+
+## Volgende stappen
+
+- [Configuratie](/nl/configuration): waar de datamap staat en wat `config.yaml` bevat.
+- [ipmideck bijwerken](/nl/updating): je data overleeft een upgrade.
+- [Beveiliging](/nl/security): hoe inloggegevens in rust worden versleuteld.

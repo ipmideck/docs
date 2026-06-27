@@ -1,0 +1,71 @@
+---
+title: "Pierwsze kroki"
+description: "Czym jest ipmideck i jak jednym poleceniem uruchomić pulpit działający na kontrolerach BMC twoich serwerów."
+---
+
+## Czym jest ipmideck?
+
+ipmideck to samodzielnie hostowana, działająca w przeglądarce platforma zarządzania IPMI. Łączy się z
+kontrolerem BMC (Baseboard Management Controller) twoich serwerów przez IPMI 2.0 i daje monitorowanie
+czujników w czasie rzeczywistym, inteligentne sterowanie krzywą wentylatorów (FanPilot), zdalne zarządzanie zasilaniem
+oraz dzienniki zdarzeń sprzętowych, wszystko z poziomu przeglądarki, bez potrzeby CLI.
+
+ipmideck działa w całości w twojej własnej sieci. Nie ma chmury, telemetrii ani żadnej
+zewnętrznej zależności: rozmawia bezpośrednio z twoimi BMC i wszystko przechowuje lokalnie.
+
+<Note>
+  ipmideck musi docierać do twoich BMC przez sieć na porcie UDP 623 (port IPMI/RMCP+).
+  Gdy uruchamiasz go w Dockerze, użyj `--network host`, aby kontener mógł docierać do
+  BMC w twojej sieci LAN bezpośrednio.
+</Note>
+
+## Szybki start
+
+Najszybszym sposobem wypróbowania ipmideck jest Docker:
+
+```bash
+docker run --network host ipmideck/ipmideck:latest
+```
+
+Następnie otwórz `http://<your-ip>:3000` w przeglądarce i postępuj zgodnie z kreatorem konfiguracji, aby dodać
+swój pierwszy serwer.
+
+Wolisz pakiety Pythona? Zainstaluj zamiast tego z PyPI:
+
+```bash
+pip install ipmideck
+```
+
+Pakiet pip wymaga, aby `ipmitool` był zainstalowany na hoście.
+
+<Note>
+  ipmideck jest w fazie przedpremierowej: opublikowany obraz Docker i pakiet PyPI pojawią się
+  wkrótce. Polecenia powyżej to dokładnie te polecenia, które uruchomisz, gdy będą już dostępne.
+</Note>
+
+## Co otrzymujesz
+
+- **Monitorowanie czujników**: na żywo temperatura, RPM wentylatorów, napięcie i moc, z historią
+  do roku.
+- **FanPilot**: edytor krzywej wentylatorów typu „przeciągnij i upuść” z bezpieczną autonomiczną pętlą sterowania.
+- **Sterowanie zasilaniem**: On, Soft Off, Hard Off, Reset i Power Cycle z pełnym dziennikiem audytu.
+- **System Event Log (SEL)**: przeglądaj i eksportuj dziennik zdarzeń sprzętowych twojego BMC.
+- **Inwentaryzacja sprzętu (FRU)**: numery seryjne, numery części i dane producenta.
+- **Pulpit wieloserwerowy**: zarządzaj wieloma BMC z jednej instancji.
+
+## Następne kroki
+
+<CardGroup cols={2}>
+  <Card title="Zainstaluj ipmideck" icon="download" href="/pl/installation">
+    Docker i pip, z wyjaśnieniem wymogu `--network host`.
+  </Card>
+  <Card title="Konfiguracja przy pierwszym uruchomieniu" icon="wand-magic-sparkles" href="/pl/setup">
+    Kreator konfiguracji: wybierz tryb logowania i dodaj swój pierwszy BMC.
+  </Card>
+  <Card title="Włącz IPMI" icon="server" href="/pl/enable-ipmi">
+    Kroki dla poszczególnych producentów, aby włączyć IPMI-over-LAN w twoim BMC.
+  </Card>
+  <Card title="Konfiguracja" icon="sliders" href="/pl/configuration">
+    Porty, interwały odpytywania, retencja i nadpisania środowiskowe.
+  </Card>
+</CardGroup>

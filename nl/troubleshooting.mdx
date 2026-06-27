@@ -1,0 +1,61 @@
+---
+title: "Probleemoplossing"
+description: "Verbindings-, authenticatie- en IPMI-fouten wanneer ipmideck met je BMC praat."
+---
+
+## ipmideck kan de BMC niet bereiken
+
+ipmideck communiceert met BMC's via UDP-poort 623 (IPMI/RMCP+). Als een server als
+offline wordt getoond:
+
+- Bevestig in Docker dat je de container met `--network host` hebt gestart. Zonder dit kan de
+  container BMC's op je LAN niet bereiken.
+- Verifieer dat het BMC-IP bereikbaar is vanaf de host (`ping <bmc-ip>`).
+- Bevestig dat IPMI-over-LAN op de BMC is ingeschakeld en dat UDP 623 niet wordt geblokkeerd door een
+  firewall of VLAN-grens.
+
+<Note>
+  ipmideck gebruikt altijd `lanplus` (IPMI 2.0) voor versleutelde sessies. Een BMC die vastzit op
+  alleen IPMI 1.5, of met uitgeschakelde RMCP+-ciphersuites, kan de verbinding weigeren.
+</Note>
+
+## Authenticatie- / privilegefouten
+
+Als commando's mislukken met een authenticatie- of privilegefout:
+
+- Controleer nogmaals de BMC-gebruikersnaam en het wachtwoord die je voor de server hebt ingevoerd.
+- Het BMC-account heeft minstens Operator-privilege nodig voor voedings- en fanregeling;
+  Administrator is vereist voor configuratiewijzigingen.
+- Sommige BMC's vergrendelen een account na herhaalde mislukte logins, wacht, of reset het account vanuit
+  de eigen web-UI van de BMC.
+
+## Commando's lopen af in een time-out
+
+Oudere hardware kan traag zijn met antwoorden. ipmideck past een time-out per commando toe ingesteld door
+`ipmi.command_timeout` (standaard 30 seconden). Als je time-outs ziet op een trage BMC, verhoog
+die waarde in `config.yaml`. Sensor- en SEL-uitlezingen op grote repository's zijn het meest
+geneigd traag te zijn.
+
+## Sensoren ontbreken of lezen nul
+
+- Bevestig dat de BMC die sensoren daadwerkelijk blootstelt (`sdr elist`-ondersteuning verschilt per leverancier).
+- Sommige sensoren worden alleen gevuld terwijl de server is ingeschakeld.
+- Controleer het polling-interval (`ipmi.poll_interval`, standaard 30s / `IPMIDECK_IPMI_POLL_INTERVAL`);
+  zeer lange intervallen vertragen de eerste uitlezing.
+
+## Fans keren onverwacht terug naar BMC-regeling
+
+FanPilot geeft fans opzettelijk terug aan het eigen thermisch beheer van de BMC in twee gevallen:
+
+- **Veiligheidsoverride**: op of boven de kritieke temperatuur gaan fans naar 100%.
+- **Herstel**: na een onnette afsluiting, server-offline of detectie van verouderde sensoren,
+  herstelt ipmideck de automodus van de BMC zodat hardware nooit onbeheerd blijft.
+
+Dit is bedoeld fail-safe-gedrag, geen bug. Zie [Beveiliging](/nl/security).
+
+## Het dashboard laadt niet
+
+- Bevestig dat de container of het proces draait en luistert op de geconfigureerde poort
+  (`server.port` / `IPMIDECK_SERVER_PORT`, standaard 3000).
+- Open `http://<your-ip>:3000`, niet `https`, tenzij je `server.https: true` hebt ingesteld.
+- Controleer de applicatielogs; verhoog `logging.level` naar `debug` voor meer detail.

@@ -1,0 +1,215 @@
+---
+title: "Interaktive Konsole"
+description: "Steuern Sie einen laufenden ipmideck-Server von Ihrem Terminal aus: eine Operator-Konsole mit angepinntem Header und Einzeltasten-Aktionen für Ausführlichkeit, Sitzungen, Server, die Dashboard-URL und die Bind-Adresse."
+---
+
+Wenn Sie ipmideck in einem Terminal starten, rendert es eine interaktive Operator-Konsole: einen
+angepinnten Header mit dem Banner und einer Hilfeleiste über einem live scrollenden Log. Jede Aktion ist ein
+einzelner Tastendruck, keine Menüs, keine Maus. Die Konsole läuft prozessintern neben dem Server, sodass
+das, was Sie sehen, der Live-Zustand des Rechners ist, auf dem Sie sich befinden.
+
+<Note>
+Die Konsole erscheint nur auf einem echten **interaktiven Terminal**, sowohl stdin als auch stdout müssen
+TTYs sein. Unter Docker, systemd oder wenn stdout weitergeleitet/umgeleitet wird, überspringt ipmideck die Konsole
+vollständig und schreibt nur einfache scrollende Logs. Siehe [Wo die Konsole erscheint](#wo-die-konsole-erscheint).
+</Note>
+
+## Wie es aussieht
+
+Die Konsole ist eine einzige Vollbildansicht: ein angepinnter Header, den Sie immer sehen, über einem
+live scrollenden Log, das darunter läuft.
+
+<Frame caption="Die Konsole direkt nach dem Start: das Banner und die Hilfeleiste bleiben oben angepinnt, während der Log-Tail darunter scrollt.">
+  <img src="/console/home.png" alt="ipmideck interactive console showing the banner, help bar, status line, and the scrolling log panel" />
+</Frame>
+
+Der Header scrollt nie. Neue Log-Zeilen erscheinen im Panel darunter, und die neueste Zeile
+wird immer auf dem Bildschirm gehalten. Sie drücken eine einzelne Taste, um zu handeln; alles geschieht prozessintern
+gegen den Server, den Sie gerade gestartet haben.
+
+## Der Header
+
+Der obere Teil des Bildschirms ist ein fester Header, der nie scrollt. Er stapelt sich von oben nach unten:
+
+- Das ipmideck-Banner.
+- Die **Hilfeleiste**: jede Aktionstaste und was sie tut.
+- Die **Statuszeile**: der Live-Zustand der Sitzung.
+- Eine kompakte Credits-Zeile (Autor, Version, Lizenz).
+
+Der Körper unter dem Header ist der scrollende Log-Tail. Die neueste Zeile wird immer auf dem
+Bildschirm gehalten, sodass eine frisch erscheinende URL oder Bestätigung nie unten abgeschnitten wird.
+
+### Statuszeile
+
+Die Statuszeile zeigt drei Live-Felder, getrennt durch `|`:
+
+- **Verbosity**: die aktuelle Log-Stufe (`INFO`, `DEBUG` oder `WARNING`).
+- **Clients**: die Anzahl der gerade verbundenen Dashboard-Clients.
+- **last**: die letzte Aktionstaste, die Sie gedrückt haben, als unmittelbares visuelles Feedback.
+
+## Aktionstasten
+
+Jede Aktion ist ein Tastendruck. Die Hilfeleiste listet sie alle auf:
+
+| Taste   | Aktion                                                                 |
+| ----- | ---------------------------------------------------------------------- |
+| `v`   | Log-**Ausführlichkeit** durchschalten                                  |
+| `c`   | Die Unteransicht der verbundenen **Sitzungen** öffnen                  |
+| `s`   | Die Unteransicht der konfigurierten **Server** öffnen                  |
+| `u`   | Die Dashboard-**URL** im Log einblenden                                |
+| `g`   | **Update**-Prüfung (gibt die lokale Version aus)                       |
+| `b`   | Den **Bind-ändern**-Editor öffnen                                      |
+| `r`   | Den Server **neu starten**                                             |
+| `q`   | **Beenden** oder aus einer Unteransicht zur Log-Ansicht zurückkehren   |
+| `ESC` | **Zurück**, aus einer Unteransicht zur Log-Ansicht zurückkehren        |
+
+Pfeil-, Funktions- und Navigationstasten werden verbraucht und ignoriert, sie kollidieren nie mit einer
+Aktion und zählen nicht als Tastendruck.
+
+### v: Ausführlichkeit
+
+`v` schaltet die Laufzeit-Log-Stufe durch eine feste dreistufige Schleife:
+
+```
+INFO → DEBUG → WARNING → INFO
+```
+
+`INFO` ist die Voreinstellung. `DEBUG` zeigt mehr; `WARNING` zeigt weniger. Die Änderung wirkt
+sofort für den Rest der Sitzung und die Statuszeile aktualisiert sich entsprechend.
+
+<Note>
+Der Ausführlichkeits-Umschalter ändert nur die **laufende** Stufe. Beim nächsten Start gewinnt die Stufe aus
+Ihrer Konfiguration (oder die Umgebungsvariable `IPMIDECK_LOGGING_LEVEL`) wieder. Siehe [Konfiguration](/de/configuration).
+</Note>
+
+### c: Sitzungen
+
+`c` öffnet die Unteransicht **Connected sessions**, eine schreibgeschützte Tabelle der gerade
+angehängten Dashboard-Clients, mit Spalten:
+
+- **IP**
+- **Connected since**
+- **User-Agent**
+
+Drücken Sie `q` oder `ESC`, um zur Log-Ansicht zurückzukehren.
+
+<Frame caption="Die Unteransicht Connected sessions (Taste c), eine Zeile pro angehängtem Dashboard-Client.">
+  <img src="/console/connections.png" alt="Connected sessions table showing IP, Connected since, and User-Agent columns" />
+</Frame>
+
+### s: Server
+
+`s` öffnet die Unteransicht **Configured servers**, eine schreibgeschützte Tabelle der BMCs, mit denen ipmideck
+zu sprechen konfiguriert ist, mit Spalten:
+
+- **Name**
+- **Host**
+- **Status**
+
+Drücken Sie `q` oder `ESC`, um zur Log-Ansicht zurückzukehren.
+
+<Frame caption="Die Unteransicht Configured servers (Taste s), die jeden BMC und ob er online ist auflistet.">
+  <img src="/console/servers.png" alt="Configured servers table showing Name, Host, and Status columns with online and offline servers" />
+</Frame>
+
+### u: URL
+
+`u` blendet die Dashboard-URL (`scheme://host:port`) im Log-Körper ein. Wenn der Server an eine
+Wildcard-Adresse gebunden ist (`0.0.0.0`, `::` oder leer), wird die URL in
+`127.0.0.1` umgeschrieben, sodass sie tatsächlich in einem Browser geöffnet werden kann, `http://0.0.0.0:3000` ist eine Listen-
+Adresse, keine navigierbare.
+
+<Frame caption="Taste u gibt die Dashboard-URL unten im Log aus, in eine erreichbare Adresse umgeschrieben.">
+  <img src="/console/url.png" alt="The console log with the dashboard URL printed at the bottom after pressing u" />
+</Frame>
+
+### g: Update
+
+`g` gibt die lokale Version aus und einen Hinweis, dass die Online-Update-Prüfung mit der pip-Version
+ausgeliefert wird. Es macht **keinen Netzwerkaufruf**, ipmideck bleibt offline.
+
+### r: Neustart
+
+`r` führt einen sauberen prozessinternen Neustart aus: ipmideck baut die Konsole ab, liest
+`config.yaml` neu ein und startet frisch. Verwenden Sie es nach einer [Bind-ändern](#b-bind-ändern)-Bearbeitung, um
+die neue Adresse anzuwenden.
+
+### q / ESC: Beenden und Zurück
+
+- Aus einer Unteransicht (`sessions` oder `servers`) bringen `q` und `ESC` Sie beide zur Log-Ansicht zurück.
+- Aus der Log-Ansicht löst `q` einen sauberen Exit aus, der Server fährt geordnet herunter.
+
+## b: Bind ändern
+
+`b` öffnet den Bind-ändern-Editor, eine Inline-`host:port`-Eingabe, die die Hilfeleiste ersetzt,
+während Sie tippen. Der Header zeigt den aktuellen Bind als schreibgeschütztes `current: host:port`-Label
+und ein leeres `new:`-Feld, sodass der Wert, den Sie tippen, sofort erscheint und nie mit dem bestehenden
+verwechselt wird.
+
+<Frame caption="Der Bind-ändern-Editor (Taste b): die Hilfeleiste wird durch den aktuellen Bind und eine leere neue host:port-Eingabe ersetzt.">
+  <img src="/console/bind.png" alt="The change-bind editor showing the current bind address and an empty new field with apply, cancel, and delete key hints" />
+</Frame>
+
+Tasten innerhalb des Editors:
+
+- **Enter**: das getippte `host:port` anwenden.
+- **ESC**: abbrechen, ohne etwas zu ändern.
+- **Backspace**: das letzte Zeichen löschen.
+- Jedes druckbare Zeichen, an den Puffer anhängen.
+
+Die Eingabe muss `host:port` sein, mit einem nicht-leeren Host und einem Port, der eine Ganzzahl im
+Bereich **1–65535** ist. Bei einer gültigen Eingabe bestätigt ipmideck den neuen Bind und erinnert Sie, dass ein Neustart
+erforderlich ist (drücken Sie `r`). Bei einer ungültigen Eingabe meldet es `Invalid host/port` und
+nichts ändert sich.
+
+<Warning>
+Eine Bind-ändern-Bearbeitung ist **nicht** live, sie wird in die Konfiguration geschrieben und wirkt erst nach einem
+Neustart. Drücken Sie `r`, um sie anzuwenden. Und denken Sie an die Priorität: eine `IPMIDECK_SERVER_HOST`- /
+`IPMIDECK_SERVER_PORT`-Umgebungsvariable oder ein explizites `--host`- / `--port`-Flag beim nächsten Start
+überschreibt, was die Konsole persistiert hat. Siehe [Konfiguration](/de/configuration).
+</Warning>
+
+## Wo die Konsole erscheint
+
+Die interaktive Konsole ist an ein echtes TTY gebunden: ipmideck rendert sie nur, wenn **sowohl**
+stdin als auch stdout interaktive Terminals sind. Wenn sie es nicht sind, degradiert es zu einem Banner plus
+einfachen scrollenden Logs und installiert keinen Tasten-Listener, sodass nichts auf einem Non-TTY busy-spinnt.
+
+Das bedeutet, die Konsole erscheint, wenn Sie ipmideck direkt in einem Terminal ausführen:
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck
+```
+
+```cmd cmd
+ipmideck
+```
+
+```bash bash
+ipmideck
+```
+
+</CodeGroup>
+
+Sie erscheint **nicht**, wenn:
+
+- Unter **Docker** läuft: der Container startet uvicorn direkt und erreicht nie den
+  Konsolenpfad; Sie erhalten einfache Container-Logs (`docker logs`).
+- Unter **systemd** oder einem anderen Service-Manager läuft, bei dem stdout kein Terminal ist.
+- **Weiterleiten oder Umleiten** von stdout (z. B. `ipmideck > server.log`): stdout ist kein TTY mehr.
+
+In jedem Non-TTY-Fall läuft der Server weiterhin normal und bindet an dieselbe Voreinstellung
+`0.0.0.0:3000`; Sie erhalten nur einfache Logs statt der Live-Konsole.
+
+<Note>
+`ipmilink` ist ein rückwärtskompatibler Alias für `ipmideck`, beide starten dieselbe Konsole.
+</Note>
+
+## Nächste Schritte
+
+- [ipmideck ausführen](/de/running): Starten, serve und die Bind-Priorität-Regeln.
+- [Das CLI](/de/cli): jeder Unterbefehl und jedes Flag im Detail.
+- [Konfiguration](/de/configuration): Bind-Adresse, Ausführlichkeit und Abfrageintervalle setzen.
+- [Installation](/de/installation): mit Docker oder pip installieren.

@@ -1,0 +1,215 @@
+---
+title: "Consola interactiva"
+description: "Controla un servidor ipmideck en ejecución desde tu terminal: una consola de operador con cabecera fija y acciones de una sola tecla para verbosidad, sesiones, servidores, la URL del panel y la dirección de enlace."
+---
+
+Cuando inicias ipmideck en una terminal, dibuja una consola de operador interactiva: una
+cabecera fija con el banner y una barra de ayuda sobre un registro que se desplaza en vivo. Cada acción es una
+sola pulsación de tecla, sin menús, sin ratón. La consola se ejecuta dentro del proceso junto al servidor, así que
+lo que ves es el estado en vivo de la máquina en la que estás.
+
+<Note>
+La consola solo aparece en una **terminal interactiva** real, tanto stdin como stdout deben ser
+TTY. Bajo Docker, systemd, o cuando stdout se redirige, ipmideck omite la consola
+por completo y solo escribe registros simples que se desplazan. Consulta [Dónde aparece la consola](#dónde-aparece-la-consola).
+</Note>
+
+## Qué aspecto tiene
+
+La consola es una única vista a pantalla completa: una cabecera fija que siempre ves, sobre un
+registro en vivo que se desplaza por debajo.
+
+<Frame caption="La consola justo después del arranque: el banner y la barra de ayuda quedan fijos arriba mientras la cola del registro se desplaza abajo.">
+  <img src="/console/home.png" alt="ipmideck interactive console showing the banner, help bar, status line, and the scrolling log panel" />
+</Frame>
+
+La cabecera nunca se desplaza. Las nuevas líneas de registro aparecen en el panel de debajo, y la línea más
+reciente se mantiene siempre en pantalla. Pulsas una sola tecla para actuar; todo ocurre dentro del proceso
+contra el servidor que acabas de iniciar.
+
+## La cabecera
+
+La parte superior de la pantalla es una cabecera fija que nunca se desplaza. Se apila, de arriba abajo:
+
+- El banner de ipmideck.
+- La **barra de ayuda**: cada tecla de acción y lo que hace.
+- La **línea de estado**: el estado en vivo de la sesión.
+- Una línea de créditos compacta (autor, versión, licencia).
+
+El cuerpo bajo la cabecera es la cola del registro que se desplaza. La línea más reciente se mantiene siempre en
+pantalla, así que una URL o confirmación recién aparecida nunca queda recortada por abajo.
+
+### Línea de estado
+
+La línea de estado muestra tres campos en vivo, separados por `|`:
+
+- **Verbosity**: el nivel de registro actual (`INFO`, `DEBUG` o `WARNING`).
+- **Clients**: el número de clientes del panel conectados ahora mismo.
+- **last**: la última tecla de acción que pulsaste, como retroalimentación visual inmediata.
+
+## Teclas de acción
+
+Cada acción es una pulsación de tecla. La barra de ayuda las lista todas:
+
+| Tecla   | Acción                                                                 |
+| ----- | ---------------------------------------------------------------------- |
+| `v`   | Alternar la **verbosidad** del registro                                |
+| `c`   | Abrir la subvista de **sesiones** conectadas                           |
+| `s`   | Abrir la subvista de **servidores** configurados                       |
+| `u`   | Mostrar la **url** del panel en el registro                            |
+| `g`   | Comprobación de **actualización** (imprime la versión local)           |
+| `b`   | Abrir el editor de **cambio de enlace**                                |
+| `r`   | **Reiniciar** el servidor                                              |
+| `q`   | **Salir**, o volver a la vista de registro desde una subvista          |
+| `ESC` | **Atrás**, volver a la vista de registro desde una subvista            |
+
+Las teclas de flecha, de función y de navegación se consumen y se ignoran, nunca colisionan con una
+acción ni cuentan como una pulsación.
+
+### v: verbosidad
+
+`v` alterna el nivel de registro en tiempo de ejecución por un bucle fijo de tres pasos:
+
+```
+INFO → DEBUG → WARNING → INFO
+```
+
+`INFO` es el predeterminado. `DEBUG` muestra más; `WARNING` muestra menos. El cambio surte efecto
+de inmediato durante el resto de la sesión y la línea de estado se actualiza en consecuencia.
+
+<Note>
+El interruptor de verbosidad cambia solo el nivel en **ejecución**. En el siguiente arranque, el nivel de
+tu configuración (o la variable de entorno `IPMIDECK_LOGGING_LEVEL`) vuelve a ganar. Consulta [Configuración](/es/configuration).
+</Note>
+
+### c: sesiones
+
+`c` abre la subvista **Connected sessions**, una tabla de solo lectura de los clientes del panel
+conectados actualmente, con columnas:
+
+- **IP**
+- **Connected since**
+- **User-Agent**
+
+Pulsa `q` o `ESC` para volver a la vista de registro.
+
+<Frame caption="La subvista Connected sessions (tecla c), una fila por cliente del panel conectado.">
+  <img src="/console/connections.png" alt="Connected sessions table showing IP, Connected since, and User-Agent columns" />
+</Frame>
+
+### s: servidores
+
+`s` abre la subvista **Configured servers**, una tabla de solo lectura de los BMC con los que ipmideck
+está configurado para hablar, con columnas:
+
+- **Name**
+- **Host**
+- **Status**
+
+Pulsa `q` o `ESC` para volver a la vista de registro.
+
+<Frame caption="La subvista Configured servers (tecla s), que lista cada BMC y si está en línea.">
+  <img src="/console/servers.png" alt="Configured servers table showing Name, Host, and Status columns with online and offline servers" />
+</Frame>
+
+### u: url
+
+`u` muestra la URL del panel (`scheme://host:port`) en el cuerpo del registro. Si el servidor está
+enlazado a una dirección comodín (`0.0.0.0`, `::` o vacía), la URL se reescribe a
+`127.0.0.1` para que sea realmente abrible en un navegador, `http://0.0.0.0:3000` es una dirección de
+escucha, no una navegable.
+
+<Frame caption="La tecla u imprime la URL del panel al final del registro, reescrita a una dirección alcanzable.">
+  <img src="/console/url.png" alt="The console log with the dashboard URL printed at the bottom after pressing u" />
+</Frame>
+
+### g: actualización
+
+`g` imprime la versión local y una nota de que la comprobación de actualización en línea se incluye con la
+versión de pip. **No hace ninguna llamada de red**, ipmideck permanece sin conexión.
+
+### r: reinicio
+
+`r` realiza un reinicio limpio dentro del proceso: ipmideck desmonta la consola, vuelve a leer
+`config.yaml` e inicia de nuevo. Úsalo tras una edición de [cambio de enlace](#b-cambio-de-enlace) para aplicar
+la nueva dirección.
+
+### q / ESC: salir y atrás
+
+- Desde una subvista (`sessions` o `servers`), `q` y `ESC` te devuelven ambos a la vista de registro.
+- Desde la vista de registro, `q` activa una salida limpia, el servidor se apaga de forma controlada.
+
+## b: cambio de enlace
+
+`b` abre el editor de cambio de enlace, una solicitud `host:port` en línea que reemplaza la barra de ayuda
+mientras escribes. La cabecera muestra el enlace actual como una etiqueta de solo lectura `current: host:port`
+y un campo `new:` vacío, así que el valor que escribes aparece de inmediato y nunca se confunde
+con el existente.
+
+<Frame caption="El editor de cambio de enlace (tecla b): la barra de ayuda se reemplaza por el enlace actual y una solicitud nueva de host:port vacía.">
+  <img src="/console/bind.png" alt="The change-bind editor showing the current bind address and an empty new field with apply, cancel, and delete key hints" />
+</Frame>
+
+Teclas dentro del editor:
+
+- **Enter**: aplicar el `host:port` escrito.
+- **ESC**: cancelar sin cambiar nada.
+- **Backspace**: borrar el último carácter.
+- Cualquier carácter imprimible, añadir al búfer.
+
+La entrada debe ser `host:port` con un host no vacío y un puerto que sea un entero en el
+rango **1–65535**. Con una entrada válida, ipmideck confirma el nuevo enlace y te recuerda que se requiere un reinicio
+(pulsa `r`). Con una entrada inválida, informa `Invalid host/port` y
+nada cambia.
+
+<Warning>
+Una edición de cambio de enlace **no** es en vivo, se escribe en la configuración y solo surte efecto tras un
+reinicio. Pulsa `r` para aplicarla. Y recuerda la precedencia: una variable de entorno `IPMIDECK_SERVER_HOST` /
+`IPMIDECK_SERVER_PORT` o un flag `--host` / `--port` explícito en el siguiente arranque
+sobrescribe lo que la consola haya persistido. Consulta [Configuración](/es/configuration).
+</Warning>
+
+## Dónde aparece la consola
+
+La consola interactiva está condicionada a un TTY real: ipmideck la dibuja solo cuando **tanto**
+stdin como stdout son terminales interactivas. Cuando no lo son, degrada a un banner más
+registros simples que se desplazan y no instala ningún escuchador de teclas, así que nada gira ocupado en un no-TTY.
+
+Esto significa que la consola aparece cuando ejecutas ipmideck directamente en una terminal:
+
+<CodeGroup>
+
+```powershell PowerShell
+ipmideck
+```
+
+```cmd cmd
+ipmideck
+```
+
+```bash bash
+ipmideck
+```
+
+</CodeGroup>
+
+**No** aparece cuando:
+
+- Se ejecuta bajo **Docker**: el contenedor lanza uvicorn directamente y nunca alcanza la
+  ruta de la consola; obtienes registros simples del contenedor (`docker logs`).
+- Se ejecuta bajo **systemd** o cualquier gestor de servicios donde stdout no sea una terminal.
+- **Redirigir** stdout (p. ej. `ipmideck > server.log`): stdout ya no es un TTY.
+
+En cada caso sin TTY el servidor sigue ejecutándose con normalidad y se enlaza al mismo predeterminado
+`0.0.0.0:3000`; solo obtienes registros simples en lugar de la consola en vivo.
+
+<Note>
+`ipmilink` es un alias retrocompatible de `ipmideck`, ambos lanzan la misma consola.
+</Note>
+
+## Próximos pasos
+
+- [Ejecutar ipmideck](/es/running): iniciar, servir y las reglas de precedencia de enlace.
+- [La CLI](/es/cli): cada subcomando y flag en detalle.
+- [Configuración](/es/configuration): define la dirección de enlace, la verbosidad y los intervalos de sondeo.
+- [Instalación](/es/installation): instalar con Docker o pip.

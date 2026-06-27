@@ -1,0 +1,58 @@
+---
+title: "자주 묻는 질문"
+description: "홈랩에서 ipmideck를 실행하는 것에 관한 일반적인 질문."
+---
+
+<AccordionGroup>
+
+<Accordion title="ipmideck는 클라우드 기반인가요?">
+  아니요. ipmideck는 완전히 셀프 호스팅 방식이며 전적으로 사용자 자신의 네트워크에서 실행됩니다.
+  외부 호출도, 텔레메트리도, 클라우드도, 계정도 없습니다. BMC와 직접 통신하고 모든 것을 로컬에
+  저장합니다.
+</Accordion>
+
+<Accordion title="어떤 BMC와 작동하나요?">
+  IPMI 2.0 BMC가 있는 모든 서버는 센서 모니터링, 전원 제어, SEL, FRU를 위해 연결되어야 합니다.
+  Dell PowerEdge / iDRAC는 완전히 테스트되었습니다. Supermicro, HPE iLO, Lenovo XCC, IBM IMM은
+  실험적입니다. [지원 하드웨어](/ko/supported-hardware)를 참조하세요.
+</Accordion>
+
+<Accordion title="ipmitool 설치가 필요한가요?">
+  pip 설치의 경우에만 그렇습니다. 거기서는 패키지가 시스템의 `ipmitool`을 호출합니다. Docker
+  이미지는 필요한 모든 것을 번들로 제공하므로, `--network host`가 있는 Docker만 필요합니다.
+</Accordion>
+
+<Accordion title="왜 Docker에는 --network host가 필요한가요?">
+  ipmideck는 로컬 네트워크에서 UDP 포트 623을 통해 BMC에 도달합니다. 호스트 네트워킹은
+  컨테이너가 Docker의 NAT 뒤에 있는 대신 그 포트와 직접 통신하게 합니다.
+  [설치](/ko/installation)를 참조하세요.
+</Accordion>
+
+<Accordion title="대시보드는 어떤 포트에서 실행되나요?">
+  기본적으로 3000입니다. `config.yaml` (`server.port`) 또는 `IPMIDECK_SERVER_PORT` 환경
+  변수에서 변경하세요.
+</Accordion>
+
+<Accordion title="센서 기록은 얼마나 오래 보관되나요?">
+  기본적으로 1년 (`data.retention_days: 365`). `IPMIDECK_DATA_RETENTION_DAYS`로 재정의하세요.
+  오래된 데이터는 `data.cleanup_interval`로 설정된 일정에 따라 정리됩니다.
+</Accordion>
+
+<Accordion title="로그인을 비활성화할 수 있나요?">
+  예, `config.yaml`에서 `auth.enabled: false`, 또는 `IPMIDECK_AUTH_ENABLED=false`를 설정하세요.
+  이는 신뢰할 수 있는 격리된 네트워크에서만 하세요. auth가 꺼져 있으면 대시보드에 도달할 수
+  있는 사람은 누구나 하드웨어를 제어할 수 있습니다.
+</Accordion>
+
+<Accordion title="팬 제어는 안전한가요?">
+  FanPilot는 안전하게 실패합니다. 팬은 임계 온도 이상에서 100%로 강제되며, 제어 루프는
+  대시보드가 닫혀 있어도 백그라운드에서 자율적으로 실행됩니다. 전체 하드웨어 보호 세부 정보는
+  [보안](/ko/security)을 참조하세요.
+</Accordion>
+
+<Accordion title="여러 서버를 어떻게 실행하나요?">
+  각 BMC를 대시보드에서 추가하세요. ipmideck는 단일 인스턴스에서 여러 BMC를 관리하고,
+  그것들 모두의 파노라마 상태 개요를 표시합니다.
+</Accordion>
+
+</AccordionGroup>

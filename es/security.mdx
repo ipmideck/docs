@@ -1,0 +1,62 @@
+---
+title: "Seguridad"
+description: "Cada afirmación de seguridad aquí está fundamentada en el propio código de backend de ipmideck, no en el marketing."
+---
+
+ipmideck está hecho para personas que leen el código fuente en lugar de confiar en un fabricante. Las afirmaciones
+de abajo están fundamentadas en el código de backend del producto.
+
+## Seguridad de datos y cuentas
+
+Las credenciales se cifran en reposo, los inicios de sesión se hashean y las sesiones se firman, la
+base de datos por sí sola nunca basta para entrar.
+
+### Cifrado de credenciales AES-256-CBC
+
+Las credenciales de BMC se cifran en reposo con AES-256-CBC y un IV aleatorio por secreto. La
+clave de cifrado reside en un archivo de clave aparte (`data/encryption.key`, 32 bytes aleatorios,
+permisos solo del propietario), nunca en la base de datos, así que una base de datos robada por sí sola no puede
+descifrar nada.
+
+### Inicios de sesión bcrypt + sesiones firmadas con HMAC-SHA256
+
+Las contraseñas de inicio de sesión se hashean con bcrypt (salt por contraseña, verificación en tiempo constante). Los tokens
+de sesión se firman con HMAC-SHA256, se revalidan en cada petición y se invalidan cuando cambia un
+nombre de usuario. Las cookies son HttpOnly y SameSite=Lax.
+
+### Bloqueo contra fuerza bruta
+
+Bloqueo por nombre de usuario con retroceso exponencial tras cinco intentos fallidos (hasta una hora),
+más errores genéricos a prueba de fugas de tiempo para que un atacante no aprenda nada de cómo falla un inicio de sesión.
+
+### ipmitool sin shell, totalmente sin conexión
+
+ipmitool se invoca a través de una lista de argumentos (`create_subprocess_exec`), nunca una shell,
+así que no hay superficie de inyección de comandos. Todo el sistema se ejecuta totalmente sin conexión: sin
+telemetría, sin nube, sin llamadas externas.
+
+## Protección de hardware
+
+FanPilot está hecho para fallar de forma segura: los límites térmicos ganan sobre cualquier curva, y el bucle de control
+sigue funcionando incluso cuando no estás mirando.
+
+### Anulación de seguridad en la temperatura crítica
+
+Los ventiladores se fuerzan al 100 % en o por encima de la temperatura crítica (predeterminado 85 °C, configurable).
+Ninguna curva de ventilador puede anular la anulación, el límite térmico siempre gana.
+
+### Histéresis para detener la oscilación
+
+Un margen de histéresis configurable (predeterminado 3 °C) evita que los ventiladores oscilen rápidamente arriba
+y abajo en torno a un límite de temperatura, manteniendo los cambios de velocidad suaves y predecibles.
+
+### Bucle autónomo en segundo plano
+
+El control del ventilador se ejecuta en una tarea en segundo plano (~30 s de sondeo) que sigue funcionando con el panel
+cerrado, la protección no depende de que haya una pestaña del navegador abierta.
+
+### Recuperación de apagado no limpio + apagado controlado
+
+Tras una parada no limpia (corte de energía o `kill -9`) ipmideck restaura el propio modo automático del BMC,
+y se autorrecupera ante la detección de servidor sin conexión y de sensores obsoletos. Un apagado limpio devuelve los
+ventiladores a la gestión térmica del BMC.

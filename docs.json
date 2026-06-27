@@ -5,60 +5,573 @@
   "colors": {
     "primary": "#1E3A8A"
   },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
   "favicon": "/favicon.svg",
   "navigation": {
-    "tabs": [
+    "languages": [
       {
-        "tab": "Docs",
+        "language": "en",
         "groups": [
           {
             "group": "Getting Started",
-            "pages": ["getting-started", "setup"]
+            "pages": ["en/getting-started", "en/setup"]
           },
           {
             "group": "Installation",
-            "pages": ["installation"]
+            "pages": ["en/installation"]
           },
           {
             "group": "Running",
-            "pages": ["running", "updating"]
+            "pages": ["en/running", "en/updating"]
           },
           {
             "group": "Configuration",
-            "pages": ["configuration", "backup-restore"]
+            "pages": ["en/configuration", "en/backup-restore"]
           },
           {
             "group": "CLI & Console",
-            "pages": ["cli", "console"]
+            "pages": ["en/cli", "en/console"]
           },
           {
             "group": "Features",
-            "pages": ["features"]
+            "pages": ["en/features"]
           },
           {
             "group": "Supported Hardware",
             "pages": [
-              "supported-hardware",
-              "enable-ipmi/index",
-              "enable-ipmi/dell-idrac",
-              "enable-ipmi/supermicro",
-              "enable-ipmi/hpe-ilo",
-              "enable-ipmi/lenovo-xcc",
-              "enable-ipmi/ibm-imm"
+              "en/supported-hardware",
+              "en/enable-ipmi/index",
+              "en/enable-ipmi/dell-idrac",
+              "en/enable-ipmi/supermicro",
+              "en/enable-ipmi/hpe-ilo",
+              "en/enable-ipmi/lenovo-xcc",
+              "en/enable-ipmi/ibm-imm"
             ]
           },
           {
             "group": "Reference",
-            "pages": ["security", "faq", "troubleshooting"]
+            "pages": ["en/security", "en/faq", "en/troubleshooting"]
+          }
+        ]
+      },
+      {
+        "language": "it",
+        "groups": [
+          {
+            "group": "Per iniziare",
+            "pages": ["it/getting-started", "it/setup"]
+          },
+          {
+            "group": "Installazione",
+            "pages": ["it/installation"]
+          },
+          {
+            "group": "Esecuzione",
+            "pages": ["it/running", "it/updating"]
+          },
+          {
+            "group": "Configurazione",
+            "pages": ["it/configuration", "it/backup-restore"]
+          },
+          {
+            "group": "CLI e console",
+            "pages": ["it/cli", "it/console"]
+          },
+          {
+            "group": "Funzionalità",
+            "pages": ["it/features"]
+          },
+          {
+            "group": "Hardware supportato",
+            "pages": [
+              "it/supported-hardware",
+              "it/enable-ipmi/index",
+              "it/enable-ipmi/dell-idrac",
+              "it/enable-ipmi/supermicro",
+              "it/enable-ipmi/hpe-ilo",
+              "it/enable-ipmi/lenovo-xcc",
+              "it/enable-ipmi/ibm-imm"
+            ]
+          },
+          {
+            "group": "Riferimento",
+            "pages": ["it/security", "it/faq", "it/troubleshooting"]
+          }
+        ]
+      },
+      {
+        "language": "de",
+        "groups": [
+          {
+            "group": "Erste Schritte",
+            "pages": ["de/getting-started", "de/setup"]
+          },
+          {
+            "group": "Installation",
+            "pages": ["de/installation"]
+          },
+          {
+            "group": "Ausführen",
+            "pages": ["de/running", "de/updating"]
+          },
+          {
+            "group": "Konfiguration",
+            "pages": ["de/configuration", "de/backup-restore"]
+          },
+          {
+            "group": "CLI & Konsole",
+            "pages": ["de/cli", "de/console"]
+          },
+          {
+            "group": "Funktionen",
+            "pages": ["de/features"]
+          },
+          {
+            "group": "Unterstützte Hardware",
+            "pages": [
+              "de/supported-hardware",
+              "de/enable-ipmi/index",
+              "de/enable-ipmi/dell-idrac",
+              "de/enable-ipmi/supermicro",
+              "de/enable-ipmi/hpe-ilo",
+              "de/enable-ipmi/lenovo-xcc",
+              "de/enable-ipmi/ibm-imm"
+            ]
+          },
+          {
+            "group": "Referenz",
+            "pages": ["de/security", "de/faq", "de/troubleshooting"]
+          }
+        ]
+      },
+      {
+        "language": "es",
+        "groups": [
+          {
+            "group": "Primeros pasos",
+            "pages": ["es/getting-started", "es/setup"]
+          },
+          {
+            "group": "Instalación",
+            "pages": ["es/installation"]
+          },
+          {
+            "group": "Ejecución",
+            "pages": ["es/running", "es/updating"]
+          },
+          {
+            "group": "Configuración",
+            "pages": ["es/configuration", "es/backup-restore"]
+          },
+          {
+            "group": "CLI y consola",
+            "pages": ["es/cli", "es/console"]
+          },
+          {
+            "group": "Características",
+            "pages": ["es/features"]
+          },
+          {
+            "group": "Hardware compatible",
+            "pages": [
+              "es/supported-hardware",
+              "es/enable-ipmi/index",
+              "es/enable-ipmi/dell-idrac",
+              "es/enable-ipmi/supermicro",
+              "es/enable-ipmi/hpe-ilo",
+              "es/enable-ipmi/lenovo-xcc",
+              "es/enable-ipmi/ibm-imm"
+            ]
+          },
+          {
+            "group": "Referencia",
+            "pages": ["es/security", "es/faq", "es/troubleshooting"]
+          }
+        ]
+      },
+      {
+        "language": "fr",
+        "groups": [
+          {
+            "group": "Premiers pas",
+            "pages": ["fr/getting-started", "fr/setup"]
+          },
+          {
+            "group": "Installation",
+            "pages": ["fr/installation"]
+          },
+          {
+            "group": "Exécution",
+            "pages": ["fr/running", "fr/updating"]
+          },
+          {
+            "group": "Configuration",
+            "pages": ["fr/configuration", "fr/backup-restore"]
+          },
+          {
+            "group": "CLI et console",
+            "pages": ["fr/cli", "fr/console"]
+          },
+          {
+            "group": "Fonctionnalités",
+            "pages": ["fr/features"]
+          },
+          {
+            "group": "Matériel pris en charge",
+            "pages": [
+              "fr/supported-hardware",
+              "fr/enable-ipmi/index",
+              "fr/enable-ipmi/dell-idrac",
+              "fr/enable-ipmi/supermicro",
+              "fr/enable-ipmi/hpe-ilo",
+              "fr/enable-ipmi/lenovo-xcc",
+              "fr/enable-ipmi/ibm-imm"
+            ]
+          },
+          {
+            "group": "Référence",
+            "pages": ["fr/security", "fr/faq", "fr/troubleshooting"]
+          }
+        ]
+      },
+      {
+        "language": "ja",
+        "groups": [
+          {
+            "group": "はじめに",
+            "pages": ["ja/getting-started", "ja/setup"]
+          },
+          {
+            "group": "インストール",
+            "pages": ["ja/installation"]
+          },
+          {
+            "group": "実行",
+            "pages": ["ja/running", "ja/updating"]
+          },
+          {
+            "group": "設定",
+            "pages": ["ja/configuration", "ja/backup-restore"]
+          },
+          {
+            "group": "CLI とコンソール",
+            "pages": ["ja/cli", "ja/console"]
+          },
+          {
+            "group": "機能",
+            "pages": ["ja/features"]
+          },
+          {
+            "group": "対応ハードウェア",
+            "pages": [
+              "ja/supported-hardware",
+              "ja/enable-ipmi/index",
+              "ja/enable-ipmi/dell-idrac",
+              "ja/enable-ipmi/supermicro",
+              "ja/enable-ipmi/hpe-ilo",
+              "ja/enable-ipmi/lenovo-xcc",
+              "ja/enable-ipmi/ibm-imm"
+            ]
+          },
+          {
+            "group": "リファレンス",
+            "pages": ["ja/security", "ja/faq", "ja/troubleshooting"]
+          }
+        ]
+      },
+      {
+        "language": "ko",
+        "groups": [
+          {
+            "group": "시작하기",
+            "pages": ["ko/getting-started", "ko/setup"]
+          },
+          {
+            "group": "설치",
+            "pages": ["ko/installation"]
+          },
+          {
+            "group": "실행",
+            "pages": ["ko/running", "ko/updating"]
+          },
+          {
+            "group": "구성",
+            "pages": ["ko/configuration", "ko/backup-restore"]
+          },
+          {
+            "group": "CLI 및 콘솔",
+            "pages": ["ko/cli", "ko/console"]
+          },
+          {
+            "group": "기능",
+            "pages": ["ko/features"]
+          },
+          {
+            "group": "지원 하드웨어",
+            "pages": [
+              "ko/supported-hardware",
+              "ko/enable-ipmi/index",
+              "ko/enable-ipmi/dell-idrac",
+              "ko/enable-ipmi/supermicro",
+              "ko/enable-ipmi/hpe-ilo",
+              "ko/enable-ipmi/lenovo-xcc",
+              "ko/enable-ipmi/ibm-imm"
+            ]
+          },
+          {
+            "group": "레퍼런스",
+            "pages": ["ko/security", "ko/faq", "ko/troubleshooting"]
+          }
+        ]
+      },
+      {
+        "language": "nl",
+        "groups": [
+          {
+            "group": "Aan de slag",
+            "pages": ["nl/getting-started", "nl/setup"]
+          },
+          {
+            "group": "Installatie",
+            "pages": ["nl/installation"]
+          },
+          {
+            "group": "Draaien",
+            "pages": ["nl/running", "nl/updating"]
+          },
+          {
+            "group": "Configuratie",
+            "pages": ["nl/configuration", "nl/backup-restore"]
+          },
+          {
+            "group": "CLI en console",
+            "pages": ["nl/cli", "nl/console"]
+          },
+          {
+            "group": "Functies",
+            "pages": ["nl/features"]
+          },
+          {
+            "group": "Ondersteunde hardware",
+            "pages": [
+              "nl/supported-hardware",
+              "nl/enable-ipmi/index",
+              "nl/enable-ipmi/dell-idrac",
+              "nl/enable-ipmi/supermicro",
+              "nl/enable-ipmi/hpe-ilo",
+              "nl/enable-ipmi/lenovo-xcc",
+              "nl/enable-ipmi/ibm-imm"
+            ]
+          },
+          {
+            "group": "Referentie",
+            "pages": ["nl/security", "nl/faq", "nl/troubleshooting"]
+          }
+        ]
+      },
+      {
+        "language": "pl",
+        "groups": [
+          {
+            "group": "Pierwsze kroki",
+            "pages": ["pl/getting-started", "pl/setup"]
+          },
+          {
+            "group": "Instalacja",
+            "pages": ["pl/installation"]
+          },
+          {
+            "group": "Uruchamianie",
+            "pages": ["pl/running", "pl/updating"]
+          },
+          {
+            "group": "Konfiguracja",
+            "pages": ["pl/configuration", "pl/backup-restore"]
+          },
+          {
+            "group": "CLI i konsola",
+            "pages": ["pl/cli", "pl/console"]
+          },
+          {
+            "group": "Funkcje",
+            "pages": ["pl/features"]
+          },
+          {
+            "group": "Obsługiwany sprzęt",
+            "pages": [
+              "pl/supported-hardware",
+              "pl/enable-ipmi/index",
+              "pl/enable-ipmi/dell-idrac",
+              "pl/enable-ipmi/supermicro",
+              "pl/enable-ipmi/hpe-ilo",
+              "pl/enable-ipmi/lenovo-xcc",
+              "pl/enable-ipmi/ibm-imm"
+            ]
+          },
+          {
+            "group": "Dokumentacja",
+            "pages": ["pl/security", "pl/faq", "pl/troubleshooting"]
+          }
+        ]
+      },
+      {
+        "language": "pt",
+        "groups": [
+          {
+            "group": "Primeiros passos",
+            "pages": ["pt/getting-started", "pt/setup"]
+          },
+          {
+            "group": "Instalação",
+            "pages": ["pt/installation"]
+          },
+          {
+            "group": "Execução",
+            "pages": ["pt/running", "pt/updating"]
+          },
+          {
+            "group": "Configuração",
+            "pages": ["pt/configuration", "pt/backup-restore"]
+          },
+          {
+            "group": "CLI e consola",
+            "pages": ["pt/cli", "pt/console"]
+          },
+          {
+            "group": "Funcionalidades",
+            "pages": ["pt/features"]
+          },
+          {
+            "group": "Hardware suportado",
+            "pages": [
+              "pt/supported-hardware",
+              "pt/enable-ipmi/index",
+              "pt/enable-ipmi/dell-idrac",
+              "pt/enable-ipmi/supermicro",
+              "pt/enable-ipmi/hpe-ilo",
+              "pt/enable-ipmi/lenovo-xcc",
+              "pt/enable-ipmi/ibm-imm"
+            ]
+          },
+          {
+            "group": "Referência",
+            "pages": ["pt/security", "pt/faq", "pt/troubleshooting"]
+          }
+        ]
+      },
+      {
+        "language": "ru",
+        "groups": [
+          {
+            "group": "Начало работы",
+            "pages": ["ru/getting-started", "ru/setup"]
+          },
+          {
+            "group": "Установка",
+            "pages": ["ru/installation"]
+          },
+          {
+            "group": "Запуск",
+            "pages": ["ru/running", "ru/updating"]
+          },
+          {
+            "group": "Конфигурация",
+            "pages": ["ru/configuration", "ru/backup-restore"]
+          },
+          {
+            "group": "CLI и консоль",
+            "pages": ["ru/cli", "ru/console"]
+          },
+          {
+            "group": "Возможности",
+            "pages": ["ru/features"]
+          },
+          {
+            "group": "Поддерживаемое оборудование",
+            "pages": [
+              "ru/supported-hardware",
+              "ru/enable-ipmi/index",
+              "ru/enable-ipmi/dell-idrac",
+              "ru/enable-ipmi/supermicro",
+              "ru/enable-ipmi/hpe-ilo",
+              "ru/enable-ipmi/lenovo-xcc",
+              "ru/enable-ipmi/ibm-imm"
+            ]
+          },
+          {
+            "group": "Справочник",
+            "pages": ["ru/security", "ru/faq", "ru/troubleshooting"]
+          }
+        ]
+      },
+      {
+        "language": "zh-Hans",
+        "groups": [
+          {
+            "group": "快速开始",
+            "pages": ["zh-Hans/getting-started", "zh-Hans/setup"]
+          },
+          {
+            "group": "安装",
+            "pages": ["zh-Hans/installation"]
+          },
+          {
+            "group": "运行",
+            "pages": ["zh-Hans/running", "zh-Hans/updating"]
+          },
+          {
+            "group": "配置",
+            "pages": ["zh-Hans/configuration", "zh-Hans/backup-restore"]
+          },
+          {
+            "group": "CLI 与控制台",
+            "pages": ["zh-Hans/cli", "zh-Hans/console"]
+          },
+          {
+            "group": "功能",
+            "pages": ["zh-Hans/features"]
+          },
+          {
+            "group": "支持的硬件",
+            "pages": [
+              "zh-Hans/supported-hardware",
+              "zh-Hans/enable-ipmi/index",
+              "zh-Hans/enable-ipmi/dell-idrac",
+              "zh-Hans/enable-ipmi/supermicro",
+              "zh-Hans/enable-ipmi/hpe-ilo",
+              "zh-Hans/enable-ipmi/lenovo-xcc",
+              "zh-Hans/enable-ipmi/ibm-imm"
+            ]
+          },
+          {
+            "group": "参考",
+            "pages": ["zh-Hans/security", "zh-Hans/faq", "zh-Hans/troubleshooting"]
           }
         ]
       }
     ]
   },
+  "redirects": [
+    { "source": "/getting-started", "destination": "/en/getting-started", "permanent": true },
+    { "source": "/setup", "destination": "/en/setup", "permanent": true },
+    { "source": "/installation", "destination": "/en/installation", "permanent": true },
+    { "source": "/running", "destination": "/en/running", "permanent": true },
+    { "source": "/updating", "destination": "/en/updating", "permanent": true },
+    { "source": "/configuration", "destination": "/en/configuration", "permanent": true },
+    { "source": "/backup-restore", "destination": "/en/backup-restore", "permanent": true },
+    { "source": "/cli", "destination": "/en/cli", "permanent": true },
+    { "source": "/console", "destination": "/en/console", "permanent": true },
+    { "source": "/features", "destination": "/en/features", "permanent": true },
+    { "source": "/supported-hardware", "destination": "/en/supported-hardware", "permanent": true },
+    { "source": "/security", "destination": "/en/security", "permanent": true },
+    { "source": "/faq", "destination": "/en/faq", "permanent": true },
+    { "source": "/troubleshooting", "destination": "/en/troubleshooting", "permanent": true },
+    { "source": "/enable-ipmi", "destination": "/en/enable-ipmi", "permanent": true },
+    { "source": "/enable-ipmi/dell-idrac", "destination": "/en/enable-ipmi/dell-idrac", "permanent": true },
+    { "source": "/enable-ipmi/supermicro", "destination": "/en/enable-ipmi/supermicro", "permanent": true },
+    { "source": "/enable-ipmi/hpe-ilo", "destination": "/en/enable-ipmi/hpe-ilo", "permanent": true },
+    { "source": "/enable-ipmi/lenovo-xcc", "destination": "/en/enable-ipmi/lenovo-xcc", "permanent": true },
+    { "source": "/enable-ipmi/ibm-imm", "destination": "/en/enable-ipmi/ibm-imm", "permanent": true }
+  ],
   "metadata": {
     "canonical": "https://ipmideck.com/docs"
   }
