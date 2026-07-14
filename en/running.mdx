@@ -51,11 +51,6 @@ ipmideck
 By default the server binds to `0.0.0.0:3000`, so open `http://<your-ip>:3000` in a
 browser once it is up.
 
-<Note>
-  `ipmilink` is a backward-compatible alias for the same command, `ipmilink start`
-  behaves exactly like `ipmideck start`. Use `ipmideck` for everything new.
-</Note>
-
 On a real terminal (a TTY), `ipmideck start` opens an interactive operator console. When
 the same command runs without a terminal, for example piped to a file or under a
 process supervisor, it skips the console and serves with plain logs instead. See
@@ -67,7 +62,9 @@ The Docker container does **not** run the `ipmideck` command. Its image launches
 server (uvicorn) directly:
 
 ```bash
-docker run --network host ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host \
+  -v ipmideck-data:/data \
+  devluigi06/ipmideck:latest
 ```
 
 Because the container never invokes the `ipmideck` CLI, none of the subcommands, flags, or
@@ -78,8 +75,7 @@ logs** to stdout, exactly like the headless host mode. The container binds to
 
 <Note>
   Configure the container with `IPMIDECK_`-prefixed environment variables and a volume on
-  `/data` rather than CLI flags, see [Configuration](/en/configuration). The published image
-  is coming soon; the command above is the exact command you will run once it is live.
+  `/data` rather than CLI flags, see [Configuration](/en/configuration).
 </Note>
 
 ## The data directory
@@ -89,6 +85,13 @@ a single data directory. Where that lives depends on the platform:
 
 - **Linux / Docker:** `/data`
 - **Windows:** `./data` (relative to the directory you run `ipmideck` from)
+
+<Warning>
+  On Linux, `/data` is not writable by a normal user, so a pip install started as a non-root
+  user fails at startup with `PermissionError: [Errno 13] Permission denied: '/data'`. Set
+  `IPMIDECK_DATA_DIR` to a directory you own (see below), or run ipmideck
+  [as a service](/en/installation#running-as-a-service-linux).
+</Warning>
 
 You can override the location on any platform with the `IPMIDECK_DATA_DIR` environment
 variable:
