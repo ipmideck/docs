@@ -23,8 +23,14 @@ ipmideck는 전적으로 사용자 자신의 네트워크에서 실행됩니다.
 ipmideck를 시도하는 가장 빠른 방법은 Docker입니다.
 
 ```bash
-docker run --network host ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host \
+  -v ipmideck-data:/data \
+  devluigi06/ipmideck:latest
 ```
+
+`-v ipmideck-data:/data` 볼륨은 컨테이너 재시작과 업그레이드에 걸쳐 구성, 데이터베이스,
+자격 증명 키를 유지합니다. Windows나 macOS에서는 `--network host`를 `-p 3000:3000`으로
+대체하세요. [설치](/ko/installation)를 참조하세요.
 
 그런 다음 브라우저에서 `http://<your-ip>:3000`을 열고 설정 마법사를 따라 첫 번째
 서버를 추가합니다.
@@ -38,8 +44,9 @@ pip install ipmideck
 pip 패키지는 호스트에 `ipmitool`이 설치되어 있어야 합니다.
 
 <Note>
-  ipmideck는 사전 릴리스 중입니다. 게시될 Docker 이미지와 PyPI 패키지는 곧 제공됩니다.
-  위 명령은 그것들이 활성화되면 실행할 정확한 명령입니다.
+  Debian 12+ 및 Ubuntu 23.04+에서는 `pip install`이 `error: externally-managed-environment`
+  (PEP 668)로 실패합니다. 대신 pipx를 사용하세요.
+  [Debian 및 Ubuntu에 설치](/ko/installation#debian-및-ubuntu에-설치-pep-668)를 참조하세요.
 </Note>
 
 ## 얻는 것

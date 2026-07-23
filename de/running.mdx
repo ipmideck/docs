@@ -50,11 +50,6 @@ ipmideck
 Standardmäßig bindet der Server an `0.0.0.0:3000`, öffnen Sie also `http://<your-ip>:3000` in einem
 Browser, sobald er läuft.
 
-<Note>
-  `ipmilink` ist ein rückwärtskompatibler Alias für denselben Befehl, `ipmilink start`
-  verhält sich genau wie `ipmideck start`. Verwenden Sie `ipmideck` für alles Neue.
-</Note>
-
 Auf einem echten Terminal (einem TTY) öffnet `ipmideck start` eine interaktive Operator-Konsole. Wenn
 derselbe Befehl ohne Terminal läuft, zum Beispiel in eine Datei umgeleitet oder unter einem
 Prozess-Supervisor, überspringt er die Konsole und gibt stattdessen einfache Logs aus. Siehe
@@ -66,7 +61,9 @@ Der Docker-Container führt **nicht** den Befehl `ipmideck` aus. Sein Image star
 (uvicorn) direkt:
 
 ```bash
-docker run --network host ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host \
+  -v ipmideck-data:/data \
+  devluigi06/ipmideck:latest
 ```
 
 Da der Container das `ipmideck`-CLI nie aufruft, gelten keine Unterbefehle, Flags oder die
@@ -77,8 +74,7 @@ erforderlich, damit er Ihre BMCs über UDP-Port `623` erreichen kann. Siehe
 
 <Note>
   Konfigurieren Sie den Container mit `IPMIDECK_`-präfixierten Umgebungsvariablen und einem Volume auf
-  `/data` statt mit CLI-Flags, siehe [Konfiguration](/de/configuration). Das veröffentlichte Image
-  kommt in Kürze; der obige Befehl ist genau der Befehl, den Sie ausführen werden, sobald es live ist.
+  `/data` statt mit CLI-Flags, siehe [Konfiguration](/de/configuration).
 </Note>
 
 ## Das Datenverzeichnis
@@ -88,6 +84,13 @@ Zugangsdaten in ein einzelnes Datenverzeichnis. Wo das liegt, hängt von der Pla
 
 - **Linux / Docker:** `/data`
 - **Windows:** `./data` (relativ zu dem Verzeichnis, aus dem Sie `ipmideck` ausführen)
+
+<Warning>
+  Unter Linux ist `/data` für einen normalen Benutzer nicht beschreibbar, sodass eine pip-Installation, die als
+  Nicht-Root-Benutzer gestartet wird, beim Start mit `PermissionError: [Errno 13] Permission denied: '/data'`
+  fehlschlägt. Setzen Sie `IPMIDECK_DATA_DIR` auf ein Verzeichnis, das Ihnen gehört (siehe unten), oder führen Sie
+  ipmideck [als Dienst](/de/installation#als-dienst-ausführen-linux) aus.
+</Warning>
 
 Sie können den Speicherort auf jeder Plattform mit der Umgebungsvariablen `IPMIDECK_DATA_DIR`
 überschreiben:

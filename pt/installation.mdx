@@ -1,25 +1,39 @@
 ---
 title: "Instalação"
-description: "Instale o ipmideck com Docker ou pip e compreenda o requisito --network host."
+description: "Instale o ipmideck com Docker ou pip, lide com a restrição externally-managed-environment do Debian/Ubuntu e execute-o como serviço."
 ---
 
 ## Docker (recomendado)
 
+**Linux.** `--network host` é necessário para que o contentor possa alcançar os seus BMCs
+diretamente na sua rede local pela porta UDP 623 (a porta IPMI/RMCP+). Sem rede de host, o
+contentor fica atrás do NAT do Docker e não consegue completar uma sessão IPMI com o seu hardware.
+
 ```bash
-docker run --network host ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host \
+  -v ipmideck-data:/data \
+  devluigi06/ipmideck:latest
 ```
 
-`--network host` é necessário para que o contentor possa alcançar os seus BMCs diretamente na sua rede
-local pela porta UDP 623 (a porta IPMI/RMCP+). Sem rede de host, o contentor
-fica atrás do NAT do Docker e não consegue completar uma sessão IPMI com o seu hardware.
+**Windows / macOS.** O Docker Desktop não suporta rede de host, por isso mapeie antes a
+porta:
+
+```bash
+docker run -d --name ipmideck -p 3000:3000 \
+  -v ipmideck-data:/data \
+  devluigi06/ipmideck:latest
+```
+
+Ambos os comandos montam um volume nomeado (`ipmideck-data`) em `/data`. Esse volume contém o
+seu `config.yaml`, a base de dados SQLite e a chave de cifragem que protege as credenciais BMC
+guardadas, por isso sobrevivem a um reinício, a uma atualização ou a um `docker rm`. Sem `-v`,
+obtém uma instalação nova e vazia sempre que o contentor é recriado.
 
 Assim que o contentor estiver a correr, abra `http://<your-ip>:3000` e siga o assistente de configuração.
 
 <Note>
   A imagem publicada vive no Docker Hub em
-  [hub.docker.com/r/ipmideck/ipmideck](https://hub.docker.com/r/ipmideck/ipmideck).
-  A imagem chega em breve, o comando acima é exatamente o comando que executará assim que
-  for publicada.
+  [hub.docker.com/r/devluigi06/ipmideck](https://hub.docker.com/r/devluigi06/ipmideck).
 </Note>
 
 ## pip
@@ -32,22 +46,166 @@ O pacote pip requer que o `ipmitool` esteja instalado no host, o ipmideck recorr
 `ipmitool` para cada operação IPMI. Instale-o primeiro a partir do gestor de pacotes da sua distribuição
 (por exemplo `apt install ipmitool` ou `dnf install ipmitool`).
 
+<Warning>
+  Em Debian 12+ e Ubuntu 23.04+, um `pip install` simples recusa-se a correr e falha com
+  `error: externally-managed-environment`. Isto é esperado, veja
+  [Instalar em Debian e Ubuntu](#instalar-em-debian-e-ubuntu-pep-668) abaixo.
+</Warning>
+
+## Instalar em Debian e Ubuntu (PEP 668)
+
+Num sistema Debian 12+ ou Ubuntu 23.04+ de origem, `pip install ipmideck` para com:
+
+```text
+error: externally-managed-environment
+
+× This environment is externally managed
+╰─> To install Python packages system-wide, try apt install
+    python3-xyz, where xyz is the package you are trying to
+    install.
+    ...
+note: If you believe this is a mistake, please contact your Python installation or OS distribution provider. You can override this, at the risk of breaking your Python installation or OS, by passing --break-system-packages.
+hint: See PEP 668 for the detailed specification.
+```
+
+Isto não é um bug do ipmideck. A distribuição reserva o Python do sistema para o seu próprio
+gestor de pacotes, o `apt` depende dele, e bloqueia o pip de escrever nele. Há duas formas
+suportadas de instalar o ipmideck mesmo assim.
+
+### pipx (recomendado)
+
+O [pipx](https://pipx.pypa.io) instala uma aplicação Python de linha de comandos no seu próprio
+ambiente virtual isolado e expõe o comando resultante globalmente, sem nunca tocar no Python do
+sistema. É exatamente essa a forma do ipmideck, por isso é este o caminho que recomendamos:
+
+```bash
+sudo apt install pipx ipmitool
+pipx install ipmideck
+```
+
+O pipx coloca o executável em `~/.local/bin`. O Debian e o Ubuntu adicionam esse diretório ao seu
+`PATH` automaticamente assim que ele existir, mas apenas para sessões de shell **novas**, por isso a
+primeira instalação imprime um aviso e o `ipmideck` ainda não é encontrado na shell a partir da qual
+o executou:
+
+```text
+⚠️  Note: '/home/you/.local/bin' is not on your PATH environment variable.
+```
+
+Abra um novo terminal (ou volte a ligar-se por SSH) e o comando funciona. Se a sua shell ainda
+não o encontrar, adicione o diretório explicitamente e depois inicie uma nova shell:
+
+```bash
+pipx ensurepath
+```
+
+Verifique a instalação com o modo demo, que não precisa de hardware real:
+
+```bash
+ipmideck --demo
+```
+
+### venv
+
+Um ambiente virtual contorna o PEP 668 da mesma forma, e é a escolha certa se estiver a trabalhar
+a partir de um checkout de código:
+
+```bash
+python3 -m venv ~/ipmideck-venv
+source ~/ipmideck-venv/bin/activate
+pip install ipmideck
+```
+
+O comando `ipmideck` está disponível sempre que esse ambiente estiver ativado.
+
+<Note>
+  `pip install --break-system-packages ipmideck` também funciona, mas escreve diretamente no
+  Python do sistema e pode partir o `apt` se uma versão de dependência colidir. Prefira o pipx ou
+  um venv.
+</Note>
+
 ## Onde o ipmideck guarda os dados
 
 O ipmideck escreve a sua configuração e base de dados num diretório de dados:
 
 - **Docker:** `/data` dentro do contentor (a imagem define `IPMIDECK_DATA_DIR=/data`;
   torne-o persistente com um volume).
-- **pip no Linux:** `/data` por predefinição: defina `IPMIDECK_DATA_DIR` para o relocalizar.
+- **pip no Linux:** `/data` por predefinição, no qual um utilizador não-root normalmente não consegue escrever.
 - **pip no Windows:** `./data`, relativo ao diretório a partir do qual corre o `ipmideck`.
+
+<Warning>
+  No Linux, executar o ipmideck como utilizador normal sem substituir o diretório de dados falha no
+  arranque com `PermissionError: [Errno 13] Permission denied: '/data'`. Aponte
+  `IPMIDECK_DATA_DIR` para um diretório que lhe pertença, como mostrado abaixo.
+</Warning>
+
+Aponte o diretório de dados para um local onde possa escrever:
+
+```bash
+export IPMIDECK_DATA_DIR=$HOME/ipmideck-data
+ipmideck start
+```
 
 Pode substituir a localização em qualquer plataforma com a variável de ambiente `IPMIDECK_DATA_DIR`.
 Este diretório contém `config.yaml`, a base de dados SQLite e o ficheiro da chave de cifragem
 usado para proteger as credenciais BMC guardadas. Veja [Configuração](/pt/configuration) e
 [Executar o ipmideck](/pt/running) para detalhes.
 
+## Executar como serviço (Linux)
+
+`ipmideck start` num terminal abre a [consola interativa](/pt/console) e para quando fecha a
+sessão. Para manter o ipmideck a correr em segundo plano e iniciá-lo no arranque, execute-o antes
+sob systemd.
+
+Crie um utilizador dedicado, instale o ipmideck para ele com pipx, e dê-lhe um diretório de dados
+que lhe pertença:
+
+```bash
+sudo useradd -r -m -d /home/ipmideck -s /bin/bash ipmideck
+sudo -u ipmideck pipx install ipmideck
+sudo mkdir -p /opt/ipmideck/data && sudo chown -R ipmideck:ipmideck /opt/ipmideck
+```
+
+Depois escreva a unit:
+
+```ini
+# /etc/systemd/system/ipmideck.service
+[Unit]
+Description=IPMIDeck — IPMI management dashboard
+After=network.target
+
+[Service]
+Type=simple
+User=ipmideck
+Group=ipmideck
+Environment=IPMIDECK_DATA_DIR=/opt/ipmideck/data
+ExecStart=/home/ipmideck/.local/bin/ipmideck start
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Ative-a e inicie-a:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now ipmideck
+sudo systemctl status ipmideck
+```
+
+Sob systemd não há terminal anexado, por isso o ipmideck salta a consola interativa e transmite
+registos simples para o journal (`journalctl -u ipmideck -f`), exatamente como o contentor Docker.
+`systemctl stop` envia `SIGTERM`, que aciona o mesmo encerramento gracioso que devolve o controlo
+das ventoinhas aos seus BMCs. Veja
+[Modo headless / non-TTY](/pt/running#modo-headless--non-tty).
+
 ## Próximos passos
 
+- [Configuração inicial](/pt/setup): o assistente de configuração, o modo de início de sessão e o seu primeiro BMC.
 - [Configuração](/pt/configuration): ajuste portas, intervalos de sondagem e retenção.
 - [Hardware suportado](/pt/supported-hardware): confirme que o seu BMC é coberto.
 - [Resolução de problemas](/pt/troubleshooting): erros de ligação e IPMI.

@@ -51,11 +51,6 @@ ipmideck
 Per impostazione predefinita il server si lega a `0.0.0.0:3000`, quindi apri `http://<your-ip>:3000` in un
 browser una volta che è attivo.
 
-<Note>
-  `ipmilink` è un alias retrocompatibile dello stesso comando, `ipmilink start`
-  si comporta esattamente come `ipmideck start`. Usa `ipmideck` per tutto il nuovo.
-</Note>
-
 Su un terminale reale (una TTY), `ipmideck start` apre una console operatore interattiva. Quando
 lo stesso comando gira senza un terminale, per esempio piped su un file o sotto un
 supervisore di processi, salta la console e serve con log in chiaro invece. Vedi
@@ -67,7 +62,9 @@ Il container Docker **non** esegue il comando `ipmideck`. La sua immagine avvia 
 server (uvicorn) direttamente:
 
 ```bash
-docker run --network host ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host \
+  -v ipmideck-data:/data \
+  devluigi06/ipmideck:latest
 ```
 
 Poiché il container non invoca mai la CLI `ipmideck`, nessuno dei sottocomandi, dei flag o
@@ -78,8 +75,7 @@ in chiaro** su stdout, esattamente come la modalità headless sull'host. Il cont
 
 <Note>
   Configura il container con variabili d'ambiente con prefisso `IPMIDECK_` e un volume su
-  `/data` invece dei flag CLI, vedi [Configurazione](/it/configuration). L'immagine pubblicata
-  arriva presto; il comando qui sopra è esattamente quello che eseguirai una volta che sarà disponibile.
+  `/data` invece dei flag CLI, vedi [Configurazione](/it/configuration).
 </Note>
 
 ## La directory dati
@@ -89,6 +85,13 @@ una singola directory dati. Dove vive dipende dalla piattaforma:
 
 - **Linux / Docker:** `/data`
 - **Windows:** `./data` (relativo alla directory da cui esegui `ipmideck`)
+
+<Warning>
+  Su Linux, `/data` non è scrivibile da un utente normale, quindi un'installazione pip avviata come
+  utente non-root fallisce all'avvio con `PermissionError: [Errno 13] Permission denied: '/data'`.
+  Imposta `IPMIDECK_DATA_DIR` a una directory di tua proprietà (vedi sotto), oppure esegui ipmideck
+  [come servizio](/it/installation#esecuzione-come-servizio-linux).
+</Warning>
 
 Puoi sovrascrivere la posizione su qualsiasi piattaforma con la variabile d'ambiente
 `IPMIDECK_DATA_DIR`:

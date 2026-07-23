@@ -7,24 +7,29 @@ Een upgrade van ipmideck vervangt de applicatie, niet je data. Je `config.yaml`,
 en versleutelingssleutel staan in de [datamap](/nl/configuration#waar-de-configuratie-staat), die
 bij een upgrade blijft staan, dus je servers, historie en instellingen blijven behouden.
 
-<Note>
-  ipmideck is in pre-release. De gepubliceerde Docker-image en het PyPI-pakket komen binnenkort;
-  de commando's hieronder zijn degene die je gebruikt zodra ze live zijn.
-</Note>
-
 ## Docker
 
 Haal de nieuwe image op en maak de container opnieuw aan met hetzelfde datavolume:
 
 ```bash
-docker pull ipmideck/ipmideck:latest
+docker pull devluigi06/ipmideck:latest
 docker stop ipmideck && docker rm ipmideck
-docker run -d --name ipmideck --network host -v ipmideck-data:/data ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host -v ipmideck-data:/data devluigi06/ipmideck:latest
 ```
 
 Het volume `-v ipmideck-data:/data` bevat je data, dus door dezelfde volumenaam te hergebruiken blijft
-alles behouden. Pin een versie in plaats van `latest` (bijvoorbeeld `ipmideck/ipmideck:2.0.0`) als je
+alles behouden. Pin een versie in plaats van `latest` (bijvoorbeeld `devluigi06/ipmideck:2.0.0`) als je
 precies wilt bepalen wanneer je tussen releases wisselt.
+
+## pipx
+
+Als je met [pipx](/nl/installation#pipx-aanbevolen) hebt geïnstalleerd, wat het aanbevolen
+pad is op Debian en Ubuntu, werk je bij met:
+
+```bash
+pipx upgrade ipmideck
+ipmideck start
+```
 
 ## pip
 
@@ -44,13 +49,18 @@ ipmideck start
 
 </CodeGroup>
 
+<Note>
+  De `-U`-vlag is belangrijk, een gewone `pip install ipmideck` doet niets wanneer het pakket
+  al geïnstalleerd is en laat je op de oude versie staan.
+</Note>
+
 De datamap staat los van het pakket, dus de upgrade raakt je configuratie
 of database niet aan.
 
 ## Controleer je versie
 
 De draaiende versie staat in het dashboard, en de console print hem in de creditsregel
-onder de banner (bijvoorbeeld `v2.0.0a1`). Je kunt hem ook uitlezen via het health-endpoint:
+onder de banner (bijvoorbeeld `v2.0.0`). Je kunt hem ook uitlezen via het health-endpoint:
 
 ```bash
 curl http://<your-ip>:3000/api/health

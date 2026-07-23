@@ -7,24 +7,29 @@ Ein Upgrade von ipmideck ersetzt die Anwendung, nicht Ihre Daten. Ihre `config.y
 und Ihr Verschlüsselungsschlüssel liegen im [Datenverzeichnis](/de/configuration#wo-die-konfiguration-liegt), das
 über ein Upgrade hinweg erhalten bleibt, sodass Ihre Server, Ihr Verlauf und Ihre Einstellungen übernommen werden.
 
-<Note>
-  ipmideck befindet sich in der Vorabversion. Das veröffentlichte Docker-Image und das PyPI-Paket kommen in Kürze;
-  die folgenden Befehle sind die, die Sie verwenden werden, sobald sie live sind.
-</Note>
-
 ## Docker
 
 Ziehen Sie das neue Image und erstellen Sie den Container mit demselben Daten-Volume neu:
 
 ```bash
-docker pull ipmideck/ipmideck:latest
+docker pull devluigi06/ipmideck:latest
 docker stop ipmideck && docker rm ipmideck
-docker run -d --name ipmideck --network host -v ipmideck-data:/data ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host -v ipmideck-data:/data devluigi06/ipmideck:latest
 ```
 
 Das Volume `-v ipmideck-data:/data` enthält Ihre Daten, sodass die Wiederverwendung desselben Volume-Namens
-alles erhält. Pinnen Sie eine Version statt `latest` (zum Beispiel `ipmideck/ipmideck:2.0.0`), wenn Sie
+alles erhält. Pinnen Sie eine Version statt `latest` (zum Beispiel `devluigi06/ipmideck:2.0.0`), wenn Sie
 genau steuern möchten, wann Sie zwischen Versionen wechseln.
+
+## pipx
+
+Wenn Sie mit [pipx](/de/installation#pipx-empfohlen) installiert haben, dem empfohlenen Weg unter
+Debian und Ubuntu, aktualisieren Sie mit:
+
+```bash
+pipx upgrade ipmideck
+ipmideck start
+```
 
 ## pip
 
@@ -44,13 +49,18 @@ ipmideck start
 
 </CodeGroup>
 
+<Note>
+  Das Flag `-U` ist wichtig, ein einfaches `pip install ipmideck` tut nichts, wenn das Paket bereits
+  installiert ist, und lässt Sie auf der alten Version zurück.
+</Note>
+
 Das Datenverzeichnis ist unabhängig vom Paket, das Upgrade berührt also Ihre Konfiguration oder
 Datenbank nicht.
 
 ## Ihre Version prüfen
 
 Die laufende Version wird im Dashboard angezeigt, und die Konsole gibt sie in der Credits-Zeile
-unter dem Banner aus (zum Beispiel `v2.0.0a1`). Sie können sie auch über den Health-Endpunkt auslesen:
+unter dem Banner aus (zum Beispiel `v2.0.0`). Sie können sie auch über den Health-Endpunkt auslesen:
 
 ```bash
 curl http://<your-ip>:3000/api/health

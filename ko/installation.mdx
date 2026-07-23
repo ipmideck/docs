@@ -1,24 +1,39 @@
 ---
 title: "설치"
-description: "Docker 또는 pip로 ipmideck를 설치하고 --network host 요구 사항을 이해합니다."
+description: "Docker 또는 pip로 ipmideck를 설치하고, Debian/Ubuntu의 externally-managed-environment 제한을 처리하고, 서비스로 실행합니다."
 ---
 
 ## Docker (권장)
 
+**Linux.** `--network host`는 컨테이너가 로컬 네트워크에서 UDP 포트 623 (IPMI/RMCP+ 포트)을
+통해 BMC에 직접 도달할 수 있도록 하기 위해 필요합니다. 호스트 네트워킹이 없으면 컨테이너는
+Docker의 NAT 뒤에 위치하여 하드웨어와 IPMI 세션을 완료할 수 없습니다.
+
 ```bash
-docker run --network host ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host \
+  -v ipmideck-data:/data \
+  devluigi06/ipmideck:latest
 ```
 
-`--network host`는 컨테이너가 로컬 네트워크에서 UDP 포트 623 (IPMI/RMCP+ 포트)을 통해 BMC에
-직접 도달할 수 있도록 하기 위해 필요합니다. 호스트 네트워킹이 없으면 컨테이너는 Docker의
-NAT 뒤에 위치하여 하드웨어와 IPMI 세션을 완료할 수 없습니다.
+**Windows / macOS.** Docker Desktop은 호스트 네트워킹을 지원하지 않으므로, 대신 포트를
+매핑하세요.
+
+```bash
+docker run -d --name ipmideck -p 3000:3000 \
+  -v ipmideck-data:/data \
+  devluigi06/ipmideck:latest
+```
+
+두 명령 모두 명명된 볼륨 (`ipmideck-data`)을 `/data`에 마운트합니다. 그 볼륨에는
+`config.yaml`, SQLite 데이터베이스, 그리고 저장된 BMC 자격 증명을 보호하는 암호화 키가 들어
+있으므로, 재시작, 업그레이드, `docker rm`에도 살아남습니다. `-v`가 없으면 컨테이너가 다시
+생성될 때마다 새로운 빈 설치를 얻게 됩니다.
 
 컨테이너가 가동되면 `http://<your-ip>:3000`을 열고 설정 마법사를 따릅니다.
 
 <Note>
   게시된 이미지는 Docker Hub의
-  [hub.docker.com/r/ipmideck/ipmideck](https://hub.docker.com/r/ipmideck/ipmideck)에 있습니다.
-  이미지는 곧 제공됩니다. 위 명령은 게시되면 실행할 정확한 명령입니다.
+  [hub.docker.com/r/devluigi06/ipmideck](https://hub.docker.com/r/devluigi06/ipmideck)에 있습니다.
 </Note>
 
 ## pip
@@ -31,22 +46,164 @@ pip 패키지는 호스트에 `ipmitool`이 설치되어 있어야 합니다. ip
 `ipmitool`을 호출합니다. 먼저 배포판의 패키지 관리자에서 설치하세요
 (예: `apt install ipmitool` 또는 `dnf install ipmitool`).
 
+<Warning>
+  Debian 12+ 및 Ubuntu 23.04+에서는 단순한 `pip install`이 실행을 거부하고
+  `error: externally-managed-environment`로 실패합니다. 이는 예상된 동작이며, 아래의
+  [Debian 및 Ubuntu에 설치](#debian-및-ubuntu에-설치-pep-668)를 참조하세요.
+</Warning>
+
+## Debian 및 Ubuntu에 설치 (PEP 668)
+
+기본 상태의 Debian 12+ 또는 Ubuntu 23.04+ 시스템에서 `pip install ipmideck`는 다음과 함께
+멈춥니다.
+
+```text
+error: externally-managed-environment
+
+× This environment is externally managed
+╰─> To install Python packages system-wide, try apt install
+    python3-xyz, where xyz is the package you are trying to
+    install.
+    ...
+note: If you believe this is a mistake, please contact your Python installation or OS distribution provider. You can override this, at the risk of breaking your Python installation or OS, by passing --break-system-packages.
+hint: See PEP 668 for the detailed specification.
+```
+
+이는 ipmideck의 버그가 아닙니다. 배포판은 시스템 Python을 자체 패키지 관리자용으로 예약하며
+(`apt`가 그것에 의존합니다), pip가 거기에 쓰는 것을 차단합니다. 그래도 ipmideck를 설치하는
+지원되는 방법은 두 가지가 있습니다.
+
+### pipx (권장)
+
+[pipx](https://pipx.pypa.io)는 명령줄 Python 애플리케이션을 자체 격리된 가상 환경에 설치하고,
+시스템 Python을 전혀 건드리지 않으면서 그 결과 명령을 전역으로 노출합니다. 이것이 바로
+ipmideck의 형태이므로, 이것이 우리가 권장하는 경로입니다.
+
+```bash
+sudo apt install pipx ipmitool
+pipx install ipmideck
+```
+
+pipx는 실행 파일을 `~/.local/bin`에 배치합니다. Debian과 Ubuntu는 그 디렉터리가 존재하면
+자동으로 `PATH`에 추가하지만, **새** 셸 세션에 대해서만 그렇게 하므로, 맨 처음 설치는 경고를
+출력하고 `ipmideck`는 그것을 실행한 셸에서는 아직 찾을 수 없습니다.
+
+```text
+⚠️  Note: '/home/you/.local/bin' is not on your PATH environment variable.
+```
+
+새 터미널을 열거나 (또는 SSH로 다시 연결하면) 명령이 작동합니다. 셸이 여전히 찾을 수 없으면,
+디렉터리를 명시적으로 추가한 다음 새 셸을 시작하세요.
+
+```bash
+pipx ensurepath
+```
+
+실제 하드웨어가 필요 없는 데모 모드로 설치를 확인하세요.
+
+```bash
+ipmideck --demo
+```
+
+### venv
+
+가상 환경은 같은 방식으로 PEP 668을 우회하며, 소스 체크아웃에서 작업하는 경우 올바른
+선택입니다.
+
+```bash
+python3 -m venv ~/ipmideck-venv
+source ~/ipmideck-venv/bin/activate
+pip install ipmideck
+```
+
+그 환경이 활성화되어 있을 때는 언제나 `ipmideck` 명령을 사용할 수 있습니다.
+
+<Note>
+  `pip install --break-system-packages ipmideck`도 작동하지만, 시스템 Python에 직접 쓰기
+  때문에 종속성 버전이 충돌하면 `apt`를 손상시킬 수 있습니다. pipx나 venv를 선호하세요.
+</Note>
+
 ## ipmideck가 데이터를 저장하는 위치
 
 ipmideck는 구성과 데이터베이스를 데이터 디렉터리 아래에 씁니다.
 
 - **Docker:** 컨테이너 내부의 `/data` (이미지가 `IPMIDECK_DATA_DIR=/data`를 설정합니다.
   볼륨으로 영속화하세요).
-- **Linux의 pip:** 기본적으로 `/data`. 이동하려면 `IPMIDECK_DATA_DIR`을 설정합니다.
+- **Linux의 pip:** 기본적으로 `/data`이며, 이는 보통 루트가 아닌 사용자가 쓸 수 없습니다.
 - **Windows의 pip:** `./data`. `ipmideck`를 실행하는 디렉터리 기준 상대 경로.
+
+<Warning>
+  Linux에서 데이터 디렉터리를 재정의하지 않고 일반 사용자로 ipmideck를 실행하면 시작 시
+  `PermissionError: [Errno 13] Permission denied: '/data'`로 실패합니다. 아래에 나온 대로
+  `IPMIDECK_DATA_DIR`을 소유한 디렉터리로 지정하세요.
+</Warning>
+
+데이터 디렉터리를 쓰기 가능한 곳으로 지정하세요.
+
+```bash
+export IPMIDECK_DATA_DIR=$HOME/ipmideck-data
+ipmideck start
+```
 
 어떤 플랫폼에서도 `IPMIDECK_DATA_DIR` 환경 변수로 위치를 재정의할 수 있습니다.
 이 디렉터리에는 `config.yaml`, SQLite 데이터베이스, 그리고 저장된 BMC 자격 증명을 보호하는 데
 사용되는 암호화 키 파일이 들어 있습니다. 자세한 내용은 [구성](/ko/configuration)과
 [ipmideck 실행](/ko/running)을 참조하세요.
 
+## 서비스로 실행 (Linux)
+
+터미널에서 `ipmideck start`는 [대화형 콘솔](/ko/console)을 열고 세션을 닫으면 중지됩니다.
+ipmideck를 백그라운드에서 계속 실행하고 부팅 시 시작하려면, 대신 systemd 아래에서
+실행하세요.
+
+전용 사용자를 만들고, pipx로 그 사용자용 ipmideck를 설치하고, 그 사용자가 소유하는 데이터
+디렉터리를 부여하세요.
+
+```bash
+sudo useradd -r -m -d /home/ipmideck -s /bin/bash ipmideck
+sudo -u ipmideck pipx install ipmideck
+sudo mkdir -p /opt/ipmideck/data && sudo chown -R ipmideck:ipmideck /opt/ipmideck
+```
+
+그런 다음 유닛을 작성하세요.
+
+```ini
+# /etc/systemd/system/ipmideck.service
+[Unit]
+Description=IPMIDeck — IPMI management dashboard
+After=network.target
+
+[Service]
+Type=simple
+User=ipmideck
+Group=ipmideck
+Environment=IPMIDECK_DATA_DIR=/opt/ipmideck/data
+ExecStart=/home/ipmideck/.local/bin/ipmideck start
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target
+```
+
+활성화하고 시작하세요.
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now ipmideck
+sudo systemctl status ipmideck
+```
+
+systemd 아래에는 연결된 터미널이 없으므로, ipmideck는 대화형 콘솔을 건너뛰고 Docker
+컨테이너와 정확히 같이 저널에 일반 로그를 스트리밍합니다 (`journalctl -u ipmideck -f`).
+`systemctl stop`은 `SIGTERM`을 보내며, 이는 팬 제어를 BMC로 반환하는 동일한 정상 종료를
+트리거합니다. [헤드리스 / 비 TTY 모드](/ko/running#헤드리스--비-tty-모드)를 참조하세요.
+
 ## 다음 단계
 
+- [최초 실행 설정](/ko/setup): 설정 마법사, 로그인 모드, 첫 번째 BMC.
 - [구성](/ko/configuration): 포트, 폴링 간격, 보존 기간을 조정합니다.
 - [지원 하드웨어](/ko/supported-hardware): BMC가 지원되는지 확인합니다.
 - [문제 해결](/ko/troubleshooting): 연결 및 IPMI 오류.

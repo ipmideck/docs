@@ -1,24 +1,37 @@
 ---
 title: "安装"
-description: "使用 Docker 或 pip 安装 ipmideck，并理解 --network host 要求。"
+description: "使用 Docker 或 pip 安装 ipmideck，处理 Debian/Ubuntu 的 externally-managed-environment 限制，并将其作为服务运行。"
 ---
 
-## Docker（推荐）
+## Docker (推荐)
+
+**Linux。** `--network host` 是必需的，这样容器才能通过 UDP 端口 623（IPMI/RMCP+ 端口）
+在你的本地网络上直接访问你的 BMC。没有主机网络，容器会处于 Docker 的 NAT 之后，
+无法与你的硬件完成 IPMI 会话。
 
 ```bash
-docker run --network host ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host \
+  -v ipmideck-data:/data \
+  devluigi06/ipmideck:latest
 ```
 
-`--network host` 是必需的，这样容器才能通过 UDP 端口 623（IPMI/RMCP+ 端口）
-在你的本地网络上直接访问你的 BMC。没有主机网络，容器会
-处于 Docker 的 NAT 之后，无法与你的硬件完成 IPMI 会话。
+**Windows / macOS。** Docker Desktop 不支持主机网络，因此改为映射端口：
+
+```bash
+docker run -d --name ipmideck -p 3000:3000 \
+  -v ipmideck-data:/data \
+  devluigi06/ipmideck:latest
+```
+
+两条命令都会将一个命名卷（`ipmideck-data`）挂载到 `/data`。该卷保存你的 `config.yaml`、
+SQLite 数据库，以及保护你存储的 BMC 凭据的加密密钥，因此它们能在重启、升级或
+`docker rm` 之后保留下来。没有 `-v`，每次重新创建容器时你都会得到一个全新的空安装。
 
 容器启动后，打开 `http://<your-ip>:3000` 并按照设置向导操作。
 
 <Note>
   已发布的镜像位于 Docker Hub
-  [hub.docker.com/r/ipmideck/ipmideck](https://hub.docker.com/r/ipmideck/ipmideck)。
-  镜像即将推出，上面的命令正是它发布后你将运行的确切命令。
+  [hub.docker.com/r/devluigi06/ipmideck](https://hub.docker.com/r/devluigi06/ipmideck)。
 </Note>
 
 ## pip
@@ -27,26 +40,160 @@ docker run --network host ipmideck/ipmideck:latest
 pip install ipmideck
 ```
 
-pip 包要求主机上已安装 `ipmitool`，ipmideck 在每次 IPMI 操作时都会调用
-`ipmitool`。请先从你发行版的包管理器安装它
-（例如 `apt install ipmitool` 或 `dnf install ipmitool`）。
+pip 包要求主机上已安装 `ipmitool`，ipmideck 在每次 IPMI 操作时都会调用 `ipmitool`。
+请先从你发行版的包管理器安装它（例如 `apt install ipmitool` 或 `dnf install ipmitool`）。
+
+<Warning>
+  在 Debian 12+ 和 Ubuntu 23.04+ 上，普通的 `pip install` 会拒绝运行并以
+  `error: externally-managed-environment` 失败。这是预期行为，请参阅下面的
+  [在 Debian 和 Ubuntu 上安装](#在-debian-和-ubuntu-上安装-pep-668)。
+</Warning>
+
+## 在 Debian 和 Ubuntu 上安装 (PEP 668)
+
+在一个原装的 Debian 12+ 或 Ubuntu 23.04+ 系统上，`pip install ipmideck` 会停止并显示：
+
+```text
+error: externally-managed-environment
+
+× This environment is externally managed
+╰─> To install Python packages system-wide, try apt install
+    python3-xyz, where xyz is the package you are trying to
+    install.
+    ...
+note: If you believe this is a mistake, please contact your Python installation or OS distribution provider. You can override this, at the risk of breaking your Python installation or OS, by passing --break-system-packages.
+hint: See PEP 668 for the detailed specification.
+```
+
+这不是 ipmideck 的 bug。发行版将系统 Python 保留给它自己的包管理器，`apt` 依赖它，
+因此阻止 pip 向其中写入。尽管如此，仍有两种受支持的方式来安装 ipmideck。
+
+### pipx (推荐)
+
+[pipx](https://pipx.pypa.io) 将一个命令行 Python 应用安装到它自己的隔离虚拟环境中，
+并将生成的命令全局暴露出来，同时从不触及系统 Python。这正是 ipmideck 的形态，
+因此这是我们推荐的路径：
+
+```bash
+sudo apt install pipx ipmitool
+pipx install ipmideck
+```
+
+pipx 将可执行文件放在 `~/.local/bin` 中。Debian 和 Ubuntu 会在该目录存在后自动将其
+加入你的 `PATH`，但仅对**新的** shell 会话生效，因此第一次安装时会打印一条警告，
+而 `ipmideck` 在你运行它的那个 shell 中还找不到：
+
+```text
+⚠️  Note: '/home/you/.local/bin' is not on your PATH environment variable.
+```
+
+打开一个新终端（或通过 SSH 重新连接），命令就能工作。如果你的 shell 仍然找不到它，
+请显式添加该目录，然后启动一个新 shell：
+
+```bash
+pipx ensurepath
+```
+
+用演示模式验证安装，它不需要任何真实硬件：
+
+```bash
+ipmideck --demo
+```
+
+### venv
+
+虚拟环境以同样的方式绕过 PEP 668，如果你从源码检出进行工作，它是正确的选择：
+
+```bash
+python3 -m venv ~/ipmideck-venv
+source ~/ipmideck-venv/bin/activate
+pip install ipmideck
+```
+
+只要该环境处于激活状态，`ipmideck` 命令就可用。
+
+<Note>
+  `pip install --break-system-packages ipmideck` 也可以工作，但它会直接写入系统 Python，
+  如果某个依赖的版本发生冲突，可能会破坏 `apt`。请优先使用 pipx 或 venv。
+</Note>
 
 ## ipmideck 在哪里存储数据
 
 ipmideck 将其配置和数据库写入一个数据目录：
 
-- **Docker：** 容器内的 `/data`（镜像设置 `IPMIDECK_DATA_DIR=/data`；
-  使用卷使其持久化）。
-- **Linux 上的 pip：** 默认 `/data`：设置 `IPMIDECK_DATA_DIR` 以重新定位。
+- **Docker：** 容器内的 `/data`（镜像设置 `IPMIDECK_DATA_DIR=/data`；使用卷使其持久化）。
+- **Linux 上的 pip：** 默认 `/data`，非 root 用户通常无法写入。
 - **Windows 上的 pip：** `./data`，相对于你运行 `ipmideck` 的目录。
 
-你可以在任意平台用环境变量 `IPMIDECK_DATA_DIR` 覆盖此位置。
-该目录包含 `config.yaml`、SQLite 数据库，以及用于保护你存储的 BMC
-凭据的加密密钥文件。详情请参阅 [配置](/zh-Hans/configuration) 和
-[运行 ipmideck](/zh-Hans/running)。
+<Warning>
+  在 Linux 上，以普通用户身份运行 ipmideck 而不覆盖数据目录，会在启动时以
+  `PermissionError: [Errno 13] Permission denied: '/data'` 失败。请将 `IPMIDECK_DATA_DIR`
+  指向一个你拥有的目录，如下所示。
+</Warning>
+
+将数据目录指向一个可写的位置：
+
+```bash
+export IPMIDECK_DATA_DIR=$HOME/ipmideck-data
+ipmideck start
+```
+
+你可以在任意平台用环境变量 `IPMIDECK_DATA_DIR` 覆盖此位置。该目录包含 `config.yaml`、
+SQLite 数据库，以及用于保护你存储的 BMC 凭据的加密密钥文件。详情请参阅
+[配置](/zh-Hans/configuration) 和 [运行 ipmideck](/zh-Hans/running)。
+
+## 作为服务运行 (Linux)
+
+在终端中运行 `ipmideck start` 会打开[交互式控制台](/zh-Hans/console)，并在你关闭会话时停止。
+要让 ipmideck 在后台持续运行并在开机时启动，请改为在 systemd 下运行它。
+
+创建一个专用用户，用 pipx 为它安装 ipmideck，并给它一个它拥有的数据目录：
+
+```bash
+sudo useradd -r -m -d /home/ipmideck -s /bin/bash ipmideck
+sudo -u ipmideck pipx install ipmideck
+sudo mkdir -p /opt/ipmideck/data && sudo chown -R ipmideck:ipmideck /opt/ipmideck
+```
+
+然后写入该 unit 文件：
+
+```ini
+# /etc/systemd/system/ipmideck.service
+[Unit]
+Description=IPMIDeck — IPMI management dashboard
+After=network.target
+
+[Service]
+Type=simple
+User=ipmideck
+Group=ipmideck
+Environment=IPMIDECK_DATA_DIR=/opt/ipmideck/data
+ExecStart=/home/ipmideck/.local/bin/ipmideck start
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target
+```
+
+启用并启动它：
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now ipmideck
+sudo systemctl status ipmideck
+```
+
+在 systemd 下没有附加的终端，因此 ipmideck 会跳过交互式控制台，并将纯文本日志
+流式输出到 journal（`journalctl -u ipmideck -f`），与 Docker 容器完全一样。
+`systemctl stop` 发送 `SIGTERM`，它会触发同样的优雅关闭，将风扇控制交还给你的 BMC。
+请参阅 [Headless / 非 TTY 模式](/zh-Hans/running#headless--非-tty-模式)。
 
 ## 后续步骤
 
+- [首次运行设置](/zh-Hans/setup)：设置向导、登录模式以及你的第一个 BMC。
 - [配置](/zh-Hans/configuration)：调整端口、轮询间隔和保留时间。
 - [支持的硬件](/zh-Hans/supported-hardware)：确认你的 BMC 已被覆盖。
 - [故障排除](/zh-Hans/troubleshooting)：连接和 IPMI 错误。

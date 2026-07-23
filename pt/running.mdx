@@ -51,11 +51,6 @@ ipmideck
 Por predefinição, o servidor faz bind a `0.0.0.0:3000`, por isso abra `http://<your-ip>:3000` num
 navegador assim que estiver a correr.
 
-<Note>
-  `ipmilink` é um alias retrocompatível para o mesmo comando, `ipmilink start`
-  comporta-se exatamente como `ipmideck start`. Use `ipmideck` para tudo o que for novo.
-</Note>
-
 Num terminal real (um TTY), `ipmideck start` abre uma consola de operador interativa. Quando
 o mesmo comando corre sem terminal, por exemplo canalizado para um ficheiro ou sob um
 supervisor de processos, salta a consola e serve com registos simples. Veja
@@ -67,7 +62,9 @@ O contentor Docker **não** corre o comando `ipmideck`. A sua imagem lança o se
 web (uvicorn) diretamente:
 
 ```bash
-docker run --network host ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host \
+  -v ipmideck-data:/data \
+  devluigi06/ipmideck:latest
 ```
 
 Como o contentor nunca invoca a CLI do `ipmideck`, nenhum dos subcomandos, flags ou
@@ -78,8 +75,7 @@ simples** para o stdout, exatamente como o modo headless no host. O contentor fa
 
 <Note>
   Configure o contentor com variáveis de ambiente com prefixo `IPMIDECK_` e um volume em
-  `/data` em vez de flags da CLI, veja [Configuração](/pt/configuration). A imagem publicada
-  chega em breve; o comando acima é exatamente o comando que executará assim que estiver disponível.
+  `/data` em vez de flags da CLI, veja [Configuração](/pt/configuration).
 </Note>
 
 ## O diretório de dados
@@ -89,6 +85,14 @@ O ipmideck escreve `config.yaml`, a base de dados SQLite e a chave de cifragem d
 
 - **Linux / Docker:** `/data`
 - **Windows:** `./data` (relativo ao diretório a partir do qual corre o `ipmideck`)
+
+<Warning>
+  No Linux, `/data` não é gravável por um utilizador normal, por isso uma instalação pip iniciada
+  como utilizador não-root falha no arranque com
+  `PermissionError: [Errno 13] Permission denied: '/data'`. Defina `IPMIDECK_DATA_DIR` para um
+  diretório que lhe pertença (veja abaixo), ou execute o ipmideck
+  [como serviço](/pt/installation#executar-como-serviço-linux).
+</Warning>
 
 Pode substituir a localização em qualquer plataforma com a variável de ambiente `IPMIDECK_DATA_DIR`:
 

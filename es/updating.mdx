@@ -7,24 +7,29 @@ Actualizar ipmideck reemplaza la aplicación, no tus datos. Tu `config.yaml`, la
 y la clave de cifrado residen en el [directorio de datos](/es/configuration#dónde-reside-la-configuración), que
 permanece intacto durante una actualización, así que tus servidores, historial y ajustes se conservan.
 
-<Note>
-  ipmideck está en versión previa. La imagen de Docker publicada y el paquete de PyPI llegan pronto;
-  los comandos de abajo son los que usarás una vez que estén disponibles.
-</Note>
-
 ## Docker
 
 Descarga la nueva imagen y recrea el contenedor con el mismo volumen de datos:
 
 ```bash
-docker pull ipmideck/ipmideck:latest
+docker pull devluigi06/ipmideck:latest
 docker stop ipmideck && docker rm ipmideck
-docker run -d --name ipmideck --network host -v ipmideck-data:/data ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host -v ipmideck-data:/data devluigi06/ipmideck:latest
 ```
 
 El volumen `-v ipmideck-data:/data` contiene tus datos, así que reutilizar el mismo nombre de volumen
-lo conserva todo. Fija una versión en lugar de `latest` (por ejemplo `ipmideck/ipmideck:2.0.0`) si
+lo conserva todo. Fija una versión en lugar de `latest` (por ejemplo `devluigi06/ipmideck:2.0.0`) si
 quieres controlar exactamente cuándo pasas de una versión a otra.
+
+## pipx
+
+Si instalaste con [pipx](/es/installation#pipx-recomendado), que es el camino recomendado en
+Debian y Ubuntu, actualiza con:
+
+```bash
+pipx upgrade ipmideck
+ipmideck start
+```
 
 ## pip
 
@@ -44,13 +49,18 @@ ipmideck start
 
 </CodeGroup>
 
+<Note>
+  El flag `-U` importa, un `pip install ipmideck` normal no hace nada cuando el paquete ya
+  está instalado y te deja en la versión antigua.
+</Note>
+
 El directorio de datos es independiente del paquete, así que la actualización no toca tu configuración
 ni tu base de datos.
 
 ## Comprobar tu versión
 
 La versión en ejecución se muestra en el panel, y la consola la imprime en la línea de créditos
-bajo el banner (por ejemplo `v2.0.0a1`). También puedes leerla desde el endpoint de salud:
+bajo el banner (por ejemplo `v2.0.0`). También puedes leerla desde el endpoint de salud:
 
 ```bash
 curl http://<your-ip>:3000/api/health

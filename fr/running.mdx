@@ -50,11 +50,6 @@ ipmideck
 Par défaut, le serveur se lie à `0.0.0.0:3000`, ouvrez donc `http://<your-ip>:3000` dans un
 navigateur une fois qu'il est en route.
 
-<Note>
-  `ipmilink` est un alias rétrocompatible de la même commande, `ipmilink start`
-  se comporte exactement comme `ipmideck start`. Utilisez `ipmideck` pour tout ce qui est nouveau.
-</Note>
-
 Sur un vrai terminal (un TTY), `ipmideck start` ouvre une console d'opérateur interactive. Lorsque
 la même commande s'exécute sans terminal, par exemple redirigée vers un fichier ou sous un
 superviseur de processus, elle saute la console et sert plutôt avec des journaux simples. Consultez
@@ -66,7 +61,9 @@ Le conteneur Docker n'exécute **pas** la commande `ipmideck`. Son image lance l
 (uvicorn) directement :
 
 ```bash
-docker run --network host ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host \
+  -v ipmideck-data:/data \
+  devluigi06/ipmideck:latest
 ```
 
 Comme le conteneur n'invoque jamais la CLI `ipmideck`, aucune des sous-commandes, aucun flag ni la
@@ -77,8 +74,7 @@ simples** vers stdout, exactement comme le mode headless sur hôte. Le conteneur
 
 <Note>
   Configurez le conteneur avec des variables d'environnement préfixées par `IPMIDECK_` et un volume sur
-  `/data` plutôt qu'avec des flags de CLI, consultez [Configuration](/fr/configuration). L'image publiée
-  arrive bientôt ; la commande ci-dessus est exactement celle que vous exécuterez une fois disponible.
+  `/data` plutôt qu'avec des flags de CLI, consultez [Configuration](/fr/configuration).
 </Note>
 
 ## Le répertoire de données
@@ -88,6 +84,14 @@ un seul répertoire de données. Son emplacement dépend de la plateforme :
 
 - **Linux / Docker :** `/data`
 - **Windows :** `./data` (relatif au répertoire depuis lequel vous exécutez `ipmideck`)
+
+<Warning>
+  Sous Linux, `/data` n'est pas inscriptible par un utilisateur normal, donc une installation pip
+  lancée en tant qu'utilisateur non-root échoue au démarrage avec
+  `PermissionError: [Errno 13] Permission denied: '/data'`. Définissez `IPMIDECK_DATA_DIR` vers un
+  répertoire que vous possédez (voir ci-dessous), ou exécutez ipmideck
+  [en tant que service](/fr/installation#exécuter-en-tant-que-service-linux).
+</Warning>
 
 Vous pouvez surcharger l'emplacement sur n'importe quelle plateforme avec la variable d'environnement `IPMIDECK_DATA_DIR` :
 

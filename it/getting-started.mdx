@@ -25,8 +25,14 @@ dipendenza esterna: parla direttamente con i tuoi BMC e archivia tutto in locale
 Il modo più veloce per provare ipmideck è Docker:
 
 ```bash
-docker run --network host ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host \
+  -v ipmideck-data:/data \
+  devluigi06/ipmideck:latest
 ```
+
+Il volume `-v ipmideck-data:/data` conserva la tua configurazione, il database e la chiave delle
+credenziali tra un riavvio del container e l'altro e attraverso gli aggiornamenti. Su Windows o
+macOS, sostituisci `--network host` con `-p 3000:3000`, vedi [Installazione](/it/installation).
 
 Poi apri `http://<your-ip>:3000` in un browser e segui la procedura guidata per aggiungere
 il tuo primo server.
@@ -40,9 +46,9 @@ pip install ipmideck
 Il pacchetto pip richiede che `ipmitool` sia installato sull'host.
 
 <Note>
-  ipmideck è in pre-release: l'immagine Docker e il pacchetto PyPI pubblicati arrivano
-  presto. I comandi qui sopra sono esattamente quelli che eseguirai una volta che saranno
-  disponibili.
+  Su Debian 12+ e Ubuntu 23.04+, `pip install` fallisce con
+  `error: externally-managed-environment` (PEP 668). Usa pipx invece, vedi
+  [Installare su Debian e Ubuntu](/it/installation#installare-su-debian-e-ubuntu-pep-668).
 </Note>
 
 ## Cosa ottieni

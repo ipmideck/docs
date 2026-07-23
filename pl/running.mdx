@@ -51,11 +51,6 @@ ipmideck
 Domyślnie serwer wiąże się z `0.0.0.0:3000`, więc otwórz `http://<your-ip>:3000` w
 przeglądarce, gdy już działa.
 
-<Note>
-  `ipmilink` to wstecznie zgodny alias tego samego polecenia, `ipmilink start`
-  zachowuje się dokładnie jak `ipmideck start`. Używaj `ipmideck` do wszystkiego, co nowe.
-</Note>
-
 W prawdziwym terminalu (TTY) `ipmideck start` otwiera interaktywną konsolę operatora. Gdy
 to samo polecenie działa bez terminala, na przykład przekierowane do pliku lub pod
 nadzorcą procesów, pomija konsolę i serwuje zamiast tego zwykłe dzienniki. Zobacz
@@ -67,7 +62,9 @@ Kontener Docker **nie** uruchamia polecenia `ipmideck`. Jego obraz uruchamia ser
 WWW (uvicorn) bezpośrednio:
 
 ```bash
-docker run --network host ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host \
+  -v ipmideck-data:/data \
+  devluigi06/ipmideck:latest
 ```
 
 Ponieważ kontener nigdy nie wywołuje CLI `ipmideck`, żadne z podpoleceń, flag ani
@@ -78,8 +75,7 @@ dzienniki** do stdout, dokładnie jak tryb headless na hoście. Kontener wiąże
 
 <Note>
   Skonfiguruj kontener za pomocą zmiennych środowiskowych z prefiksem `IPMIDECK_` oraz wolumenu na
-  `/data` zamiast flag CLI, zobacz [Konfiguracja](/pl/configuration). Opublikowany obraz
-  pojawi się wkrótce; polecenie powyżej to dokładnie to polecenie, które uruchomisz, gdy będzie dostępne.
+  `/data` zamiast flag CLI, zobacz [Konfiguracja](/pl/configuration).
 </Note>
 
 ## Katalog danych
@@ -89,6 +85,13 @@ jednego katalogu danych. Gdzie się on znajduje, zależy od platformy:
 
 - **Linux / Docker:** `/data`
 - **Windows:** `./data` (względem katalogu, z którego uruchamiasz `ipmideck`)
+
+<Warning>
+  Na Linuksie `/data` nie jest zapisywalny dla zwykłego użytkownika, więc instalacja pip uruchomiona jako
+  użytkownik nie-root kończy się przy starcie błędem `PermissionError: [Errno 13] Permission denied: '/data'`. Ustaw
+  `IPMIDECK_DATA_DIR` na katalog, którego jesteś właścicielem (patrz poniżej), lub uruchom ipmideck
+  [jako usługę](/pl/installation#uruchamianie-jako-usługa-linux).
+</Warning>
 
 Lokalizację możesz nadpisać na dowolnej platformie zmienną środowiskową `IPMIDECK_DATA_DIR`:
 

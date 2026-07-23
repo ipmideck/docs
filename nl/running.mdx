@@ -51,11 +51,6 @@ ipmideck
 Standaard bindt de server aan `0.0.0.0:3000`, open dus `http://<your-ip>:3000` in een
 browser zodra hij draait.
 
-<Note>
-  `ipmilink` is een achterwaarts compatibele alias voor hetzelfde commando, `ipmilink start`
-  gedraagt zich precies als `ipmideck start`. Gebruik `ipmideck` voor alles wat nieuw is.
-</Note>
-
 Op een echte terminal (een TTY) opent `ipmideck start` een interactieve operatorconsole. Wanneer
 hetzelfde commando zonder terminal draait, bijvoorbeeld doorgesluisd naar een bestand of onder een
 procesbeheerder, slaat het de console over en serveert het met platte logs. Zie
@@ -67,7 +62,9 @@ De Docker-container draait het commando `ipmideck` **niet**. De image start de
 webserver (uvicorn) rechtstreeks:
 
 ```bash
-docker run --network host ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host \
+  -v ipmideck-data:/data \
+  devluigi06/ipmideck:latest
 ```
 
 Omdat de container de `ipmideck`-CLI nooit aanroept, zijn geen van de subcommando's, vlaggen of
@@ -78,8 +75,7 @@ logs** naar stdout, precies zoals de headless host-modus. De container bindt aan
 
 <Note>
   Configureer de container met omgevingsvariabelen met `IPMIDECK_`-prefix en een volume op
-  `/data` in plaats van CLI-vlaggen, zie [Configuratie](/nl/configuration). De gepubliceerde image
-  komt binnenkort; het commando hierboven is precies het commando dat je uitvoert zodra het live is.
+  `/data` in plaats van CLI-vlaggen, zie [Configuratie](/nl/configuration).
 </Note>
 
 ## De datamap
@@ -89,6 +85,14 @@ ipmideck schrijft `config.yaml`, de SQLite-database en de versleutelingssleutel 
 
 - **Linux / Docker:** `/data`
 - **Windows:** `./data` (relatief aan de map waaruit je `ipmideck` uitvoert)
+
+<Warning>
+  Op Linux is `/data` niet schrijfbaar voor een normale gebruiker, dus een pip-installatie
+  die als niet-root-gebruiker wordt gestart, mislukt bij het opstarten met
+  `PermissionError: [Errno 13] Permission denied: '/data'`. Stel `IPMIDECK_DATA_DIR` in op
+  een map die je zelf bezit (zie hieronder), of draai ipmideck
+  [als service](/nl/installation#als-service-draaien-linux).
+</Warning>
 
 Je kunt de locatie op elk platform overschrijven met de omgevingsvariabele `IPMIDECK_DATA_DIR`:
 

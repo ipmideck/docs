@@ -50,11 +50,6 @@ ipmideck
 De forma predeterminada el servidor se enlaza a `0.0.0.0:3000`, así que abre `http://<your-ip>:3000` en un
 navegador una vez que esté activo.
 
-<Note>
-  `ipmilink` es un alias retrocompatible del mismo comando, `ipmilink start`
-  se comporta exactamente como `ipmideck start`. Usa `ipmideck` para todo lo nuevo.
-</Note>
-
 En una terminal real (un TTY), `ipmideck start` abre una consola de operador interactiva. Cuando
 el mismo comando se ejecuta sin terminal, por ejemplo redirigido a un archivo o bajo un
 supervisor de procesos, omite la consola y sirve con registros simples en su lugar. Consulta
@@ -66,7 +61,9 @@ El contenedor de Docker **no** ejecuta el comando `ipmideck`. Su imagen lanza el
 (uvicorn) directamente:
 
 ```bash
-docker run --network host ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host \
+  -v ipmideck-data:/data \
+  devluigi06/ipmideck:latest
 ```
 
 Como el contenedor nunca invoca la CLI de `ipmideck`, ninguno de los subcomandos, flags ni la
@@ -77,8 +74,7 @@ a stdout, exactamente como el modo headless en host. El contenedor se enlaza a
 
 <Note>
   Configura el contenedor con variables de entorno con prefijo `IPMIDECK_` y un volumen en
-  `/data` en lugar de flags de CLI, consulta [Configuración](/es/configuration). La imagen publicada
-  llega pronto; el comando anterior es exactamente el comando que ejecutarás una vez que esté disponible.
+  `/data` en lugar de flags de CLI, consulta [Configuración](/es/configuration).
 </Note>
 
 ## El directorio de datos
@@ -88,6 +84,13 @@ un único directorio de datos. Dónde reside depende de la plataforma:
 
 - **Linux / Docker:** `/data`
 - **Windows:** `./data` (relativo al directorio desde el que ejecutas `ipmideck`)
+
+<Warning>
+  En Linux, `/data` no es escribible por un usuario normal, así que una instalación pip iniciada
+  como usuario sin privilegios de root falla al arrancar con `PermissionError: [Errno 13] Permission denied: '/data'`.
+  Define `IPMIDECK_DATA_DIR` a un directorio de tu propiedad (ver abajo), o ejecuta ipmideck
+  [como servicio](/es/installation#ejecutar-como-servicio-linux).
+</Warning>
 
 Puedes sobrescribir la ubicación en cualquier plataforma con la variable de entorno `IPMIDECK_DATA_DIR`:
 

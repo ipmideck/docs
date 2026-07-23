@@ -7,24 +7,29 @@ Mettre à niveau ipmideck remplace l'application, pas vos données. Votre `confi
 et votre clé de chiffrement résident dans le [répertoire de données](/fr/configuration#où-réside-la-configuration), qui
 reste en place lors d'une mise à niveau, de sorte que vos serveurs, votre historique et vos réglages sont conservés.
 
-<Note>
-  ipmideck est en pré-version. L'image Docker publiée et le paquet PyPI arrivent bientôt ;
-  les commandes ci-dessous sont celles que vous utiliserez une fois qu'elles seront disponibles.
-</Note>
-
 ## Docker
 
 Récupérez la nouvelle image et recréez le conteneur avec le même volume de données :
 
 ```bash
-docker pull ipmideck/ipmideck:latest
+docker pull devluigi06/ipmideck:latest
 docker stop ipmideck && docker rm ipmideck
-docker run -d --name ipmideck --network host -v ipmideck-data:/data ipmideck/ipmideck:latest
+docker run -d --name ipmideck --network host -v ipmideck-data:/data devluigi06/ipmideck:latest
 ```
 
 Le volume `-v ipmideck-data:/data` contient vos données, donc réutiliser le même nom de volume
-conserve tout. Épinglez une version au lieu de `latest` (par exemple `ipmideck/ipmideck:2.0.0`) si vous
+conserve tout. Épinglez une version au lieu de `latest` (par exemple `devluigi06/ipmideck:2.0.0`) si vous
 voulez contrôler exactement quand vous passez d'une version à l'autre.
+
+## pipx
+
+Si vous avez installé avec [pipx](/fr/installation#pipx-recommandé), qui est la voie recommandée
+sur Debian et Ubuntu, mettez à niveau avec :
+
+```bash
+pipx upgrade ipmideck
+ipmideck start
+```
 
 ## pip
 
@@ -44,13 +49,18 @@ ipmideck start
 
 </CodeGroup>
 
+<Note>
+  Le flag `-U` est important, un simple `pip install ipmideck` ne fait rien lorsque le paquet est
+  déjà installé et vous laisse sur l'ancienne version.
+</Note>
+
 Le répertoire de données est indépendant du paquet, donc la mise à niveau ne touche pas à votre configuration
 ni à votre base de données.
 
 ## Vérifier votre version
 
 La version en cours d'exécution s'affiche dans le tableau de bord, et la console l'affiche dans la ligne de crédits
-sous la bannière (par exemple `v2.0.0a1`). Vous pouvez aussi la lire depuis le point de terminaison de santé :
+sous la bannière (par exemple `v2.0.0`). Vous pouvez aussi la lire depuis le point de terminaison de santé :
 
 ```bash
 curl http://<your-ip>:3000/api/health
