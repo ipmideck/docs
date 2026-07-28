@@ -6,10 +6,12 @@ description: "Lenovo XClarity Controller (XCC / XCC2)에서 IPMI over LAN을 활
 **적용 대상:** XClarity Controller (XCC)와 XCC2가 있는 Lenovo ThinkSystem 서버.
 
 <Note>
-  Lenovo XCC는 ipmideck의 **실험적** 공급업체입니다. 이 단계는 공식 Lenovo 문서와 실제
-  XCC (ThinkSystem SR630 V2)에서 나왔습니다. IPMI over LAN은 보안을 위해 XCC에서
-  **기본적으로 비활성화**되어 있으며, Lenovo는 사용하지 않을 때 다시 비활성화할 것을
-  권장합니다.
+  Lenovo XCC는 ipmideck의 **모니터링 전용** 공급업체입니다 — 센서, 전원, SEL, FRU는
+  작동하지만 ipmideck는 XCC 팬을 제어하지 않습니다 (신뢰할 수 있는 인밴드 자동 복원 경로가
+  없습니다). 이 단계는 (공식 Lenovo 문서와 실제 XCC, ThinkSystem SR630 V2에서 나왔으며)
+  IPMI over LAN을 활성화하여 ipmideck가 연결할 수 있도록 합니다. IPMI over LAN은 보안을
+  위해 XCC에서 **기본적으로 비활성화**되어 있으며, Lenovo는 사용하지 않을 때 다시 비활성화할
+  것을 권장합니다.
 </Note>
 
 ## 단계

@@ -6,8 +6,10 @@ description: "HPE iLO 4 / iLO 5 で IPMI/DCMI over LAN を有効にし、ipmidec
 **対象:** HPE iLO 4 と iLO 5 (ProLiant サーバー)。
 
 <Note>
-  HPE iLO は ipmideck の **実験的** ベンダーです。これらの手順は公式の HPE ドキュメントと実際の
-  iLO 4 から来ています。**iLO 4** では IPMI over LAN は通常 **デフォルトで有効** です。**iLO 5** では
+  HPE iLO は ipmideck の **監視のみ** ベンダーです — センサー、電源、SEL、FRU は動作しますが、
+  ipmideck は iLO のファンを制御しません (iLO は IPMI ファン制御インターフェイスを公開しません)。
+  これらの手順 (公式の HPE ドキュメントと実際の iLO 4 から) は IPMI over LAN を有効にし、ipmideck が
+  接続できるようにします。**iLO 4** では IPMI over LAN は通常 **デフォルトで有効** です。**iLO 5** では
   セキュリティのために **デフォルトで無効** で、有効にする必要があります (下記の手順)。
 </Note>
 

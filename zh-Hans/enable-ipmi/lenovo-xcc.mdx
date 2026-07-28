@@ -6,9 +6,11 @@ description: "在 Lenovo XClarity Controller（XCC / XCC2）上启用 IPMI-over-
 **适用于：** 带 XClarity Controller（XCC）和 XCC2 的 Lenovo ThinkSystem 服务器。
 
 <Note>
-  Lenovo XCC 对 ipmideck 而言是**实验性**厂商，这些步骤来自 Lenovo 官方
-  文档和一台真实的 XCC（ThinkSystem SR630 V2）。出于安全考虑，IPMI-over-LAN 在 XCC 上**默认
-  禁用**，并且 Lenovo 建议在不使用时再次禁用它。
+  Lenovo XCC 对 ipmideck 而言是**仅监控**厂商 — 传感器、电源、SEL 和 FRU 可用，
+  但 ipmideck 不控制 XCC 风扇（没有可靠的带内自动恢复路径）。这些步骤（来自 Lenovo
+  官方文档和一台真实的 XCC，ThinkSystem SR630 V2）启用 IPMI-over-LAN，以便 ipmideck
+  能连接。出于安全考虑，IPMI-over-LAN 在 XCC 上**默认禁用**，并且 Lenovo 建议在不使用
+  时再次禁用它。
 </Note>
 
 ## 步骤

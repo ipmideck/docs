@@ -5,22 +5,25 @@ description: "ipmideck는 표준 IPMI 2.0을 사용합니다. 지원은 각 공�
 
 ## 어디서나 IPMI 2.0
 
-ipmideck는 표준 IPMI 2.0을 사용하므로, 대부분의 서버 BMC가 응답합니다. 지원은 각 공급업체가
-얼마나 철저히 테스트되었는지에 따라 단계가 나뉩니다. 팬 커브 제어 (FanPilot)는 현재
-Dell iDRAC raw 명령에 의존합니다. 다른 공급업체의 팬 제어는 로드맵에 있습니다.
+ipmideck는 표준 IPMI 2.0을 사용하므로, 대부분의 서버 BMC가 센서 모니터링, 전원 제어,
+SEL, FRU를 위해 응답합니다. 팬 제어 (FanPilot)는 공급업체별로 다릅니다. Dell은 실제
+하드웨어에서 테스트되었고, Supermicro와 IBM은 실험적이며, HPE, Lenovo, 알 수 없는 BMC는
+모니터링 전용입니다 — 이들도 여전히 완전한 센서, 전원, SEL, FRU 지원을 받습니다.
 
 | 공급업체 | 상태 | IPMI 활성화 | 참고 |
 |--------|--------|-------------|-------|
 | Dell PowerEdge / iDRAC | <Icon icon="circle-check" color="#16a34a" /> 지원됨 / 테스트됨 | [Dell iDRAC 가이드](/ko/enable-ipmi/dell-idrac) | IPMI 2.0, 완전히 지원되고 테스트됨. |
 | Supermicro | <Icon icon="flask" color="#d97706" /> 실험적 | [Supermicro 가이드](/ko/enable-ipmi/supermicro) | IPMI 2.0, 작동하지만 아직 철저히 테스트되지 않음. |
-| HPE iLO | <Icon icon="flask" color="#d97706" /> 실험적 | [HPE iLO 가이드](/ko/enable-ipmi/hpe-ilo) | IPMI 2.0, 실험적, 아직 철저히 테스트되지 않음. |
-| Lenovo XCC | <Icon icon="flask" color="#d97706" /> 실험적 | [Lenovo XCC 가이드](/ko/enable-ipmi/lenovo-xcc) | IPMI 2.0, 실험적, 아직 철저히 테스트되지 않음. |
-| IBM IMM | <Icon icon="flask" color="#d97706" /> 실험적 | [IBM IMM 가이드](/ko/enable-ipmi/ibm-imm) | IPMI 2.0, 실험적, 아직 철저히 테스트되지 않음. |
+| HPE iLO | <Icon icon="eye" color="#6b7280" /> 모니터링 전용 | [HPE iLO 가이드](/ko/enable-ipmi/hpe-ilo) | IPMI 2.0 센서, 전원, SEL, FRU; iLO는 IPMI 팬 제어 인터페이스를 제공하지 않습니다. |
+| Lenovo XCC | <Icon icon="eye" color="#6b7280" /> 모니터링 전용 | [Lenovo XCC 가이드](/ko/enable-ipmi/lenovo-xcc) | IPMI 2.0 센서, 전원, SEL, FRU; 신뢰할 수 있는 인밴드 자동 복원 경로가 없습니다. |
+| IBM IMM | <Icon icon="flask" color="#d97706" /> 실험적 | [IBM IMM 가이드](/ko/enable-ipmi/ibm-imm) | IPMI 2.0, 작동하지만 아직 철저히 테스트되지 않음. |
+| 일반 / 알 수 없는 BMC | <Icon icon="eye" color="#6b7280" /> 모니터링 전용 | — | 검증할 수 없는 raw 공급업체 쓰기를 절대 실행하지 않습니다. |
 
 <Note>
-  IPMI 2.0을 구현하는 모든 BMC는 센서 모니터링, 전원 제어, SEL, FRU를 위해 연결되어야 합니다.
-  위의 단계는 FanPilot 팬 제어와 공급업체별 동작이 실제 하드웨어에서 얼마나 검증되었는지를
-  설명합니다.
+  IPMI 2.0을 구현하는 모든 BMC는 센서 모니터링, 전원 제어, SEL, FRU를 위해 연결됩니다.
+  단계는 팬 제어만을 설명합니다: **테스트됨**은 실제 하드웨어에서 검증되었고,
+  **실험적**은 작동하지만 아직 철저히 테스트되지 않았으며, **모니터링 전용**은
+  ipmideck가 해당 BMC에 대해 팬 제어를 시도하지 않음을 의미합니다.
 </Note>
 
 ## BMC에서 IPMI 활성화

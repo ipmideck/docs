@@ -6,10 +6,12 @@ description: "Abilita IPMI/DCMI-over-LAN su HPE iLO 4 / iLO 5 così ipmideck pu�
 **Si applica a:** HPE iLO 4 e iLO 5 (server ProLiant).
 
 <Note>
-  HPE iLO è un produttore **Sperimentale** per ipmideck, questi passaggi provengono dalla documentazione
-  ufficiale HPE e da un iLO 4 reale. Su **iLO 4** IPMI-over-LAN è tipicamente **abilitato per
-  impostazione predefinita**; su **iLO 5** è **disabilitato per impostazione predefinita** per sicurezza e deve essere attivato
-  (passaggi sotto).
+  HPE iLO è un produttore **Solo monitoraggio** per ipmideck — sensori, alimentazione, SEL e FRU
+  funzionano, ma ipmideck non controlla le ventole di iLO (iLO non espone alcuna interfaccia IPMI per il
+  controllo delle ventole). Questi passaggi (dalla documentazione ufficiale HPE e da un iLO 4 reale)
+  abilitano IPMI-over-LAN così ipmideck può connettersi. Su **iLO 4** IPMI-over-LAN è tipicamente
+  **abilitato per impostazione predefinita**; su **iLO 5** è **disabilitato per impostazione predefinita**
+  per sicurezza e deve essere attivato (passaggi sotto).
 </Note>
 
 ## iLO 5: abilita IPMI/DCMI over LAN

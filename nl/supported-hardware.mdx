@@ -5,22 +5,25 @@ description: "ipmideck spreekt standaard IPMI 2.0; ondersteuning is gelaagd op b
 
 ## IPMI 2.0 overal
 
-ipmideck spreekt standaard IPMI 2.0, dus de meeste server-BMC's reageren. Ondersteuning is gelaagd op basis van hoe
-grondig elke leverancier getest is. Regeling van fan-curves (FanPilot) leunt momenteel op
-raw-commando's van Dell iDRAC; fanregeling van andere leveranciers staat op de roadmap.
+ipmideck spreekt standaard IPMI 2.0, dus de meeste server-BMC's reageren voor sensormonitoring,
+voedingsbeheer, SEL en FRU. Fanregeling (FanPilot) is leverancierspecifiek: Dell is getest op echte
+hardware, Supermicro en IBM zijn experimenteel, en HPE, Lenovo en onbekende BMC's zijn alleen
+monitoring — ze krijgen nog steeds volledige ondersteuning voor sensoren, voeding, SEL en FRU.
 
 | Leverancier | Status | IPMI inschakelen | Opmerkingen |
 |--------|--------|-------------|-------|
 | Dell PowerEdge / iDRAC | <Icon icon="circle-check" color="#16a34a" /> Ondersteund / getest | [Dell iDRAC-gids](/nl/enable-ipmi/dell-idrac) | IPMI 2.0, volledig ondersteund en getest. |
 | Supermicro | <Icon icon="flask" color="#d97706" /> Experimenteel | [Supermicro-gids](/nl/enable-ipmi/supermicro) | IPMI 2.0, werkt, nog niet uitputtend getest. |
-| HPE iLO | <Icon icon="flask" color="#d97706" /> Experimenteel | [HPE iLO-gids](/nl/enable-ipmi/hpe-ilo) | IPMI 2.0, experimenteel, nog niet uitputtend getest. |
-| Lenovo XCC | <Icon icon="flask" color="#d97706" /> Experimenteel | [Lenovo XCC-gids](/nl/enable-ipmi/lenovo-xcc) | IPMI 2.0, experimenteel, nog niet uitputtend getest. |
-| IBM IMM | <Icon icon="flask" color="#d97706" /> Experimenteel | [IBM IMM-gids](/nl/enable-ipmi/ibm-imm) | IPMI 2.0, experimenteel, nog niet uitputtend getest. |
+| HPE iLO | <Icon icon="eye" color="#6b7280" /> Alleen monitoring | [HPE iLO-gids](/nl/enable-ipmi/hpe-ilo) | IPMI 2.0 sensoren, voeding, SEL, FRU; iLO biedt geen IPMI-interface voor fanregeling. |
+| Lenovo XCC | <Icon icon="eye" color="#6b7280" /> Alleen monitoring | [Lenovo XCC-gids](/nl/enable-ipmi/lenovo-xcc) | IPMI 2.0 sensoren, voeding, SEL, FRU; geen betrouwbaar in-band pad om terug te zetten naar automatisch. |
+| IBM IMM | <Icon icon="flask" color="#d97706" /> Experimenteel | [IBM IMM-gids](/nl/enable-ipmi/ibm-imm) | IPMI 2.0, werkt, nog niet uitputtend getest. |
+| Generieke / onbekende BMC | <Icon icon="eye" color="#6b7280" /> Alleen monitoring | — | Voert nooit raw leverancier-schrijfacties uit die het niet kan verifiëren. |
 
 <Note>
   Elke BMC die IPMI 2.0 implementeert, zou moeten verbinden voor sensormonitoring, voedingsbeheer,
-  SEL en FRU. De lagen hierboven beschrijven hoeveel FanPilot-fanregeling en leverancierspecifiek
-  gedrag op echte hardware is gevalideerd.
+  SEL en FRU. De lagen beschrijven alleen de fanregeling: **Getest** is gevalideerd op echte hardware,
+  **Experimenteel** werkt maar is nog niet uitputtend getest, en **Alleen monitoring** betekent dat
+  ipmideck geen fanregeling probeert voor die BMC.
 </Note>
 
 ## IPMI inschakelen op je BMC

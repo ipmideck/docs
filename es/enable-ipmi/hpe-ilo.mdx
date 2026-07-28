@@ -6,10 +6,12 @@ description: "Habilita IPMI/DCMI por LAN en HPE iLO 4 / iLO 5 para que ipmideck 
 **Se aplica a:** HPE iLO 4 e iLO 5 (servidores ProLiant).
 
 <Note>
-  HPE iLO es un fabricante **Experimental** para ipmideck, estos pasos provienen de documentación oficial de HPE
-  y un iLO 4 real. En **iLO 4** IPMI por LAN suele estar **habilitado de forma
-  predeterminada**; en **iLO 5** está **deshabilitado de forma predeterminada** por seguridad y debe activarse
-  (pasos abajo).
+  HPE iLO es un fabricante de nivel **Solo monitorización** para ipmideck: los sensores, la energía,
+  el SEL y el FRU funcionan, pero ipmideck no controla los ventiladores de iLO (iLO no expone una
+  interfaz IPMI de control de ventiladores). Estos pasos (de la documentación oficial de HPE y un
+  iLO 4 real) habilitan IPMI por LAN para que ipmideck pueda conectarse. En **iLO 4** IPMI por LAN
+  suele estar **habilitado de forma predeterminada**; en **iLO 5** está **deshabilitado de forma
+  predeterminada** por seguridad y debe activarse (pasos abajo).
 </Note>
 
 ## iLO 5: habilitar IPMI/DCMI por LAN

@@ -5,22 +5,25 @@ description: "ipmideck speaks standard IPMI 2.0; support is tiered by how thorou
 
 ## IPMI 2.0 everywhere
 
-ipmideck speaks standard IPMI 2.0, so most server BMCs respond. Support is tiered by how
-thoroughly each vendor has been tested. Fan-curve control (FanPilot) currently relies on
-Dell iDRAC raw commands; other vendors' fan control is on the roadmap.
+ipmideck speaks standard IPMI 2.0, so most server BMCs respond for sensor monitoring, power
+control, SEL, and FRU. Fan control (FanPilot) is vendor-specific: Dell is tested on real
+hardware, Supermicro and IBM are experimental, and HPE, Lenovo, and unknown BMCs are
+monitoring-only — they still get full sensor, power, SEL, and FRU support.
 
 | Vendor | Status | Enable IPMI | Notes |
 |--------|--------|-------------|-------|
 | Dell PowerEdge / iDRAC | <Icon icon="circle-check" color="#16a34a" /> Supported / tested | [Dell iDRAC guide](/en/enable-ipmi/dell-idrac) | IPMI 2.0, fully supported and tested. |
 | Supermicro | <Icon icon="flask" color="#d97706" /> Experimental | [Supermicro guide](/en/enable-ipmi/supermicro) | IPMI 2.0, works, not yet exhaustively tested. |
-| HPE iLO | <Icon icon="flask" color="#d97706" /> Experimental | [HPE iLO guide](/en/enable-ipmi/hpe-ilo) | IPMI 2.0, experimental, not yet exhaustively tested. |
-| Lenovo XCC | <Icon icon="flask" color="#d97706" /> Experimental | [Lenovo XCC guide](/en/enable-ipmi/lenovo-xcc) | IPMI 2.0, experimental, not yet exhaustively tested. |
-| IBM IMM | <Icon icon="flask" color="#d97706" /> Experimental | [IBM IMM guide](/en/enable-ipmi/ibm-imm) | IPMI 2.0, experimental, not yet exhaustively tested. |
+| HPE iLO | <Icon icon="eye" color="#6b7280" /> Monitoring-only | [HPE iLO guide](/en/enable-ipmi/hpe-ilo) | IPMI 2.0 sensors, power, SEL, FRU; iLO exposes no IPMI fan-control interface. |
+| Lenovo XCC | <Icon icon="eye" color="#6b7280" /> Monitoring-only | [Lenovo XCC guide](/en/enable-ipmi/lenovo-xcc) | IPMI 2.0 sensors, power, SEL, FRU; no reliable in-band restore-to-automatic path. |
+| IBM IMM | <Icon icon="flask" color="#d97706" /> Experimental | [IBM IMM guide](/en/enable-ipmi/ibm-imm) | IPMI 2.0, works, not yet exhaustively tested. |
+| Generic / unknown BMC | <Icon icon="eye" color="#6b7280" /> Monitoring-only | — | Never issues raw vendor writes it cannot verify. |
 
 <Note>
-  Any BMC that implements IPMI 2.0 should connect for sensor monitoring, power control,
-  SEL, and FRU. The tiers above describe how much FanPilot fan control and vendor-specific
-  behavior has been validated on real hardware.
+  Any BMC that implements IPMI 2.0 connects for sensor monitoring, power control, SEL, and
+  FRU. The tiers describe fan control only: **Tested** is validated on real hardware,
+  **Experimental** works but is not yet exhaustively tested, and **Monitoring-only** means
+  ipmideck does not attempt fan control for that BMC.
 </Note>
 
 ## Enabling IPMI on your BMC

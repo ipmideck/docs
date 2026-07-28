@@ -5,22 +5,26 @@ description: "ipmideck parla lo standard IPMI 2.0; il supporto è suddiviso in l
 
 ## IPMI 2.0 ovunque
 
-ipmideck parla lo standard IPMI 2.0, quindi la maggior parte dei BMC dei server risponde. Il supporto è suddiviso in livelli in base a quanto
-a fondo è stato testato ciascun produttore. Il controllo delle curve delle ventole (FanPilot) attualmente si appoggia ai
-comandi raw di Dell iDRAC; il controllo delle ventole di altri produttori è in roadmap.
+ipmideck parla lo standard IPMI 2.0, quindi la maggior parte dei BMC dei server risponde per il
+monitoraggio dei sensori, il controllo dell'alimentazione, il SEL e il FRU. Il controllo delle ventole (FanPilot) è
+specifico del produttore: Dell è testato su hardware reale, Supermicro e IBM sono sperimentali,
+e HPE, Lenovo e i BMC sconosciuti offrono solo monitoraggio — mantengono comunque il supporto completo
+per sensori, alimentazione, SEL e FRU.
 
 | Produttore | Stato | Abilita IPMI | Note |
 |--------|--------|-------------|-------|
 | Dell PowerEdge / iDRAC | <Icon icon="circle-check" color="#16a34a" /> Supportato / testato | [Guida Dell iDRAC](/it/enable-ipmi/dell-idrac) | IPMI 2.0, pienamente supportato e testato. |
 | Supermicro | <Icon icon="flask" color="#d97706" /> Sperimentale | [Guida Supermicro](/it/enable-ipmi/supermicro) | IPMI 2.0, funziona, non ancora testato in modo esaustivo. |
-| HPE iLO | <Icon icon="flask" color="#d97706" /> Sperimentale | [Guida HPE iLO](/it/enable-ipmi/hpe-ilo) | IPMI 2.0, sperimentale, non ancora testato in modo esaustivo. |
-| Lenovo XCC | <Icon icon="flask" color="#d97706" /> Sperimentale | [Guida Lenovo XCC](/it/enable-ipmi/lenovo-xcc) | IPMI 2.0, sperimentale, non ancora testato in modo esaustivo. |
-| IBM IMM | <Icon icon="flask" color="#d97706" /> Sperimentale | [Guida IBM IMM](/it/enable-ipmi/ibm-imm) | IPMI 2.0, sperimentale, non ancora testato in modo esaustivo. |
+| HPE iLO | <Icon icon="eye" color="#6b7280" /> Solo monitoraggio | [Guida HPE iLO](/it/enable-ipmi/hpe-ilo) | IPMI 2.0 sensori, alimentazione, SEL, FRU; iLO non espone alcuna interfaccia IPMI per il controllo delle ventole. |
+| Lenovo XCC | <Icon icon="eye" color="#6b7280" /> Solo monitoraggio | [Guida Lenovo XCC](/it/enable-ipmi/lenovo-xcc) | IPMI 2.0 sensori, alimentazione, SEL, FRU; nessun percorso in-band affidabile per il ripristino automatico. |
+| IBM IMM | <Icon icon="flask" color="#d97706" /> Sperimentale | [Guida IBM IMM](/it/enable-ipmi/ibm-imm) | IPMI 2.0, funziona, non ancora testato in modo esaustivo. |
+| BMC generico / sconosciuto | <Icon icon="eye" color="#6b7280" /> Solo monitoraggio | — | Non invia mai scritture raw del produttore che non è in grado di verificare. |
 
 <Note>
-  Qualsiasi BMC che implementa IPMI 2.0 dovrebbe connettersi per il monitoraggio dei sensori, il controllo dell'alimentazione,
-  il SEL e il FRU. I livelli qui sopra descrivono quanto il controllo delle ventole FanPilot e il comportamento
-  specifico del produttore sono stati validati su hardware reale.
+  Qualsiasi BMC che implementa IPMI 2.0 dovrebbe connettersi per il monitoraggio dei sensori, il controllo
+  dell'alimentazione, il SEL e il FRU. I livelli descrivono solo il controllo delle ventole: **Testato** è
+  validato su hardware reale, **Sperimentale** funziona ma non è ancora testato in modo esaustivo, e **Solo
+  monitoraggio** significa che ipmideck non tenta il controllo delle ventole per quel BMC.
 </Note>
 
 ## Abilitare IPMI sul tuo BMC

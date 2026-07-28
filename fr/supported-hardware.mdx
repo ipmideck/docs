@@ -5,22 +5,27 @@ description: "ipmideck parle l'IPMI 2.0 standard ; la prise en charge est échel
 
 ## IPMI 2.0 partout
 
-ipmideck parle l'IPMI 2.0 standard, donc la plupart des BMC de serveur répondent. La prise en charge est échelonnée selon le
-degré de test de chaque fabricant. Le contrôle des courbes de ventilateurs (FanPilot) repose actuellement sur des
-commandes raw Dell iDRAC ; le contrôle des ventilateurs des autres fabricants est sur la feuille de route.
+ipmideck parle l'IPMI 2.0 standard, donc la plupart des BMC de serveur répondent pour la surveillance
+des capteurs, le contrôle de l'alimentation, le SEL et le FRU. Le contrôle des ventilateurs (FanPilot)
+est spécifique à chaque fabricant : Dell est testé sur du matériel réel, Supermicro et IBM sont
+expérimentaux, et HPE, Lenovo et les BMC inconnus se limitent à la surveillance — ils bénéficient
+malgré tout d'une prise en charge complète des capteurs, de l'alimentation, du SEL et du FRU.
 
 | Fabricant | Statut | Activer IPMI | Notes |
 |--------|--------|-------------|-------|
 | Dell PowerEdge / iDRAC | <Icon icon="circle-check" color="#16a34a" /> Pris en charge / testé | [Guide Dell iDRAC](/fr/enable-ipmi/dell-idrac) | IPMI 2.0, entièrement pris en charge et testé. |
 | Supermicro | <Icon icon="flask" color="#d97706" /> Expérimental | [Guide Supermicro](/fr/enable-ipmi/supermicro) | IPMI 2.0, fonctionne, pas encore testé de façon exhaustive. |
-| HPE iLO | <Icon icon="flask" color="#d97706" /> Expérimental | [Guide HPE iLO](/fr/enable-ipmi/hpe-ilo) | IPMI 2.0, expérimental, pas encore testé de façon exhaustive. |
-| Lenovo XCC | <Icon icon="flask" color="#d97706" /> Expérimental | [Guide Lenovo XCC](/fr/enable-ipmi/lenovo-xcc) | IPMI 2.0, expérimental, pas encore testé de façon exhaustive. |
-| IBM IMM | <Icon icon="flask" color="#d97706" /> Expérimental | [Guide IBM IMM](/fr/enable-ipmi/ibm-imm) | IPMI 2.0, expérimental, pas encore testé de façon exhaustive. |
+| HPE iLO | <Icon icon="eye" color="#6b7280" /> Surveillance uniquement | [Guide HPE iLO](/fr/enable-ipmi/hpe-ilo) | IPMI 2.0 capteurs, alimentation, SEL, FRU ; iLO n'expose aucune interface IPMI de contrôle des ventilateurs. |
+| Lenovo XCC | <Icon icon="eye" color="#6b7280" /> Surveillance uniquement | [Guide Lenovo XCC](/fr/enable-ipmi/lenovo-xcc) | IPMI 2.0 capteurs, alimentation, SEL, FRU ; pas de méthode in-band fiable pour revenir au mode automatique. |
+| IBM IMM | <Icon icon="flask" color="#d97706" /> Expérimental | [Guide IBM IMM](/fr/enable-ipmi/ibm-imm) | IPMI 2.0, fonctionne, pas encore testé de façon exhaustive. |
+| BMC générique / inconnu | <Icon icon="eye" color="#6b7280" /> Surveillance uniquement | — | N'envoie jamais d'écritures constructeur brutes qu'il ne peut pas vérifier. |
 
 <Note>
-  Tout BMC qui implémente l'IPMI 2.0 devrait se connecter pour la surveillance des capteurs, le contrôle de l'alimentation,
-  le SEL et le FRU. Les niveaux ci-dessus décrivent à quel point le contrôle des ventilateurs FanPilot et le comportement
-  spécifique au fabricant ont été validés sur du matériel réel.
+  Tout BMC qui implémente l'IPMI 2.0 se connecte pour la surveillance des capteurs, le contrôle de
+  l'alimentation, le SEL et le FRU. Les niveaux décrivent uniquement le contrôle des ventilateurs :
+  **Testé** est validé sur du matériel réel, **Expérimental** fonctionne mais n'est pas encore testé
+  de façon exhaustive, et **Surveillance uniquement** signifie qu'ipmideck ne tente aucun contrôle
+  des ventilateurs pour ce BMC.
 </Note>
 
 ## Activer IPMI sur votre BMC

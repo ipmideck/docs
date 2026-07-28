@@ -6,10 +6,12 @@ description: "Habilita IPMI por LAN en el Lenovo XClarity Controller (XCC / XCC2
 **Se aplica a:** servidores Lenovo ThinkSystem con XClarity Controller (XCC) y XCC2.
 
 <Note>
-  Lenovo XCC es un fabricante **Experimental** para ipmideck, estos pasos provienen de documentación oficial de Lenovo
-  y un XCC real (ThinkSystem SR630 V2). IPMI por LAN está **deshabilitado de forma
-  predeterminada** en XCC por seguridad, y Lenovo recomienda deshabilitarlo de nuevo cuando no esté en
-  uso.
+  Lenovo XCC es un fabricante de nivel **Solo monitorización** para ipmideck: los sensores, la
+  energía, el SEL y el FRU funcionan, pero ipmideck no controla los ventiladores de XCC (no existe
+  una vía in-band fiable para restaurar el modo automático). Estos pasos (de la documentación
+  oficial de Lenovo y un XCC real, ThinkSystem SR630 V2) habilitan IPMI por LAN para que ipmideck
+  pueda conectarse. IPMI por LAN está **deshabilitado de forma predeterminada** en XCC por
+  seguridad, y Lenovo recomienda deshabilitarlo de nuevo cuando no esté en uso.
 </Note>
 
 ## Pasos

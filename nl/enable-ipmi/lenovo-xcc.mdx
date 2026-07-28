@@ -6,10 +6,12 @@ description: "Schakel IPMI-over-LAN in op de Lenovo XClarity Controller (XCC / X
 **Van toepassing op:** Lenovo ThinkSystem-servers met XClarity Controller (XCC) en XCC2.
 
 <Note>
-  Lenovo XCC is een **Experimentele** leverancier voor ipmideck, deze stappen komen uit officiële Lenovo-
-  documentatie en een echte XCC (ThinkSystem SR630 V2). IPMI-over-LAN is **standaard
-  uitgeschakeld** op XCC voor beveiliging, en Lenovo raadt aan het weer uit te schakelen wanneer het niet in
-  gebruik is.
+  Lenovo XCC is een **Alleen monitoring**-leverancier voor ipmideck — sensoren, voeding, SEL en FRU
+  werken, maar ipmideck regelt de fans van XCC niet (geen betrouwbaar in-band pad om terug te zetten
+  naar automatisch). Deze stappen (uit officiële Lenovo-documentatie en een echte XCC, ThinkSystem
+  SR630 V2) schakelen IPMI-over-LAN in zodat ipmideck verbinding kan maken. IPMI-over-LAN is
+  **standaard uitgeschakeld** op XCC voor beveiliging, en Lenovo raadt aan het weer uit te schakelen
+  wanneer het niet in gebruik is.
 </Note>
 
 ## Stappen

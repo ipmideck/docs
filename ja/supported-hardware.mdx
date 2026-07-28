@@ -5,22 +5,25 @@ description: "ipmideck は標準の IPMI 2.0 を話します。サポートは�
 
 ## どこでも IPMI 2.0
 
-ipmideck は標準の IPMI 2.0 を話すので、ほとんどのサーバー BMC が応答します。サポートは各ベンダーが
-どれだけ徹底的にテストされたかによって段階分けされています。ファンカーブ制御 (FanPilot) は現在、
-Dell iDRAC の raw コマンドに依存しています。他のベンダーのファン制御はロードマップ上にあります。
+ipmideck は標準の IPMI 2.0 を話すので、ほとんどのサーバー BMC がセンサー監視、電源制御、SEL、FRU に
+応答します。ファン制御 (FanPilot) はベンダー固有です。Dell は実際のハードウェアでテスト済み、
+Supermicro と IBM は実験的、HPE、Lenovo、および不明な BMC は監視のみです — これらも引き続き完全な
+センサー、電源、SEL、FRU のサポートを受けます。
 
 | ベンダー | ステータス | IPMI を有効化 | 注記 |
 |--------|--------|-------------|-------|
 | Dell PowerEdge / iDRAC | <Icon icon="circle-check" color="#16a34a" /> サポート済み / テスト済み | [Dell iDRAC ガイド](/ja/enable-ipmi/dell-idrac) | IPMI 2.0、完全にサポートされテスト済み。 |
 | Supermicro | <Icon icon="flask" color="#d97706" /> 実験的 | [Supermicro ガイド](/ja/enable-ipmi/supermicro) | IPMI 2.0、動作しますが、まだ網羅的にテストされていません。 |
-| HPE iLO | <Icon icon="flask" color="#d97706" /> 実験的 | [HPE iLO ガイド](/ja/enable-ipmi/hpe-ilo) | IPMI 2.0、実験的、まだ網羅的にテストされていません。 |
-| Lenovo XCC | <Icon icon="flask" color="#d97706" /> 実験的 | [Lenovo XCC ガイド](/ja/enable-ipmi/lenovo-xcc) | IPMI 2.0、実験的、まだ網羅的にテストされていません。 |
-| IBM IMM | <Icon icon="flask" color="#d97706" /> 実験的 | [IBM IMM ガイド](/ja/enable-ipmi/ibm-imm) | IPMI 2.0、実験的、まだ網羅的にテストされていません。 |
+| HPE iLO | <Icon icon="eye" color="#6b7280" /> 監視のみ | [HPE iLO ガイド](/ja/enable-ipmi/hpe-ilo) | IPMI 2.0 センサー、電源、SEL、FRU。iLO は IPMI ファン制御インターフェイスを公開しません。 |
+| Lenovo XCC | <Icon icon="eye" color="#6b7280" /> 監視のみ | [Lenovo XCC ガイド](/ja/enable-ipmi/lenovo-xcc) | IPMI 2.0 センサー、電源、SEL、FRU。自動モードへ復元する信頼できる in-band 経路がありません。 |
+| IBM IMM | <Icon icon="flask" color="#d97706" /> 実験的 | [IBM IMM ガイド](/ja/enable-ipmi/ibm-imm) | IPMI 2.0、動作しますが、まだ網羅的にテストされていません。 |
+| 汎用 / 不明な BMC | <Icon icon="eye" color="#6b7280" /> 監視のみ | — | 検証できない raw ベンダー書き込みを決して発行しません。 |
 
 <Note>
-  IPMI 2.0 を実装するすべての BMC は、センサー監視、電源制御、SEL、FRU のために接続できるはずです。
-  上記の段階は、FanPilot のファン制御とベンダー固有の動作が実際のハードウェアでどれだけ検証されたかを
-  説明しています。
+  IPMI 2.0 を実装するすべての BMC は、センサー監視、電源制御、SEL、FRU のために接続します。段階は
+  ファン制御のみを説明しています。**テスト済み** は実際のハードウェアで検証済み、**実験的** は
+  動作しますがまだ網羅的にテストされておらず、**監視のみ** は ipmideck がその BMC のファン制御を
+  試みないことを意味します。
 </Note>
 
 ## BMC で IPMI を有効化する

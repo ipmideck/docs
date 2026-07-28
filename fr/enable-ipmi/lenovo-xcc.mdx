@@ -6,10 +6,12 @@ description: "Activez IPMI sur LAN sur le Lenovo XClarity Controller (XCC / XCC2
 **S'applique à :** serveurs Lenovo ThinkSystem avec XClarity Controller (XCC) et XCC2.
 
 <Note>
-  Lenovo XCC est un fabricant **Expérimental** pour ipmideck, ces étapes proviennent de la documentation officielle de Lenovo
-  et d'un XCC réel (ThinkSystem SR630 V2). IPMI sur LAN est **désactivé par
-  défaut** sur XCC pour la sécurité, et Lenovo recommande de le désactiver à nouveau lorsqu'il n'est pas
-  utilisé.
+  Lenovo XCC est un fabricant de niveau **Surveillance uniquement** pour ipmideck : les capteurs,
+  l'alimentation, le SEL et le FRU fonctionnent, mais ipmideck ne contrôle pas les ventilateurs de
+  XCC (aucune méthode in-band fiable pour revenir au mode automatique). Ces étapes (issues de la
+  documentation officielle de Lenovo et d'un XCC réel, ThinkSystem SR630 V2) activent IPMI sur LAN
+  pour qu'ipmideck puisse se connecter. IPMI sur LAN est **désactivé par défaut** sur XCC pour la
+  sécurité, et Lenovo recommande de le désactiver à nouveau lorsqu'il n'est pas utilisé.
 </Note>
 
 ## Étapes

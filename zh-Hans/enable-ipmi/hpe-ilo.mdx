@@ -6,10 +6,11 @@ description: "在 HPE iLO 4 / iLO 5 上启用 IPMI/DCMI-over-LAN，以便 ipmide
 **适用于：** HPE iLO 4 和 iLO 5（ProLiant 服务器）。
 
 <Note>
-  HPE iLO 对 ipmideck 而言是**实验性**厂商，这些步骤来自 HPE 官方
-  文档和一台真实的 iLO 4。在 **iLO 4** 上，IPMI-over-LAN 通常**默认
-  启用**；在 **iLO 5** 上，出于安全考虑它**默认禁用**，必须开启
-  （步骤如下）。
+  HPE iLO 对 ipmideck 而言是**仅监控**厂商 — 传感器、电源、SEL 和 FRU 可用，
+  但 ipmideck 不控制 iLO 风扇（iLO 不提供 IPMI 风扇控制接口）。这些步骤（来自
+  HPE 官方文档和一台真实的 iLO 4）启用 IPMI-over-LAN，以便 ipmideck 能连接。在
+  **iLO 4** 上，IPMI-over-LAN 通常**默认启用**；在 **iLO 5** 上，出于安全考虑它
+  **默认禁用**，必须开启（步骤如下）。
 </Note>
 
 ## iLO 5：启用 IPMI/DCMI over LAN

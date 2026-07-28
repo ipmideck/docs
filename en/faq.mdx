@@ -13,8 +13,9 @@ description: "Common questions about running ipmideck in a homelab."
 
 <Accordion title="Which BMCs does it work with?">
   Any server with an IPMI 2.0 BMC should connect for sensor monitoring, power control, SEL,
-  and FRU. Dell PowerEdge / iDRAC is fully tested; Supermicro, HPE iLO,
-  Lenovo XCC, and IBM IMM are experimental. See [Supported Hardware](/en/supported-hardware).
+  and FRU. Fan control is vendor-specific: Dell PowerEdge / iDRAC is tested; Supermicro and
+  IBM IMM are experimental; HPE iLO and Lenovo XCC are monitoring-only (no fan control). See
+  [Supported Hardware](/en/supported-hardware).
 </Accordion>
 
 <Accordion title="Do I need ipmitool installed?">
