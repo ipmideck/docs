@@ -2,7 +2,7 @@
 # Pre-push i18n gate: blocks the push when a translation is missing or left stale.
 # CI runs the same script (.github/workflows/ci.yml). Activate per-clone with:
 #   git config core.hooksPath .githooks
-# Override a deliberate en-only change with [i18n-skip] in a commit message.
+# Override a deliberate en-only change with [i18n-skip] in a commit subject.
 zero=0000000000000000000000000000000000000000
 status=0
 while read -r local_ref local_sha remote_ref remote_sha; do

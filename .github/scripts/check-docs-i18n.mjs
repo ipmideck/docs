@@ -261,9 +261,9 @@ function checkStale(langs, since, head) {
     fail("git", `cannot resolve --head "${head}"`);
     return;
   }
-  const messages = git(["log", "--format=%B", `${base}..${tip}`]);
-  if (messages.includes(SKIP_TOKEN)) {
-    console.log(`stale check skipped (${SKIP_TOKEN} in a commit message in ${base.slice(0, 7)}..${tip.slice(0, 7)})`);
+  const subjects = git(["log", "--format=%s", `${base}..${tip}`]);
+  if (subjects.includes(SKIP_TOKEN)) {
+    console.log(`stale check skipped (${SKIP_TOKEN} in a commit subject in ${base.slice(0, 7)}..${tip.slice(0, 7)})`);
     return;
   }
   const changed = new Set(
@@ -278,7 +278,7 @@ function checkStale(langs, since, head) {
     const rel = file.slice(SOURCE.length + 1);
     for (const lang of langs) {
       if (lang === SOURCE || changed.has(`${lang}/${rel}`)) continue;
-      fail(lang, `${rel} not updated after ${SOURCE} change (add ${SKIP_TOKEN} to a commit message to override)`);
+      fail(lang, `${rel} not updated after ${SOURCE} change (add ${SKIP_TOKEN} to a commit subject to override)`);
     }
   }
   console.log(`stale check: ${enChanged} ${SOURCE} page(s) changed in ${base.slice(0, 7)}..${tip.slice(0, 7)}`);
