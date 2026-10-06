@@ -1,0 +1,21 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  i18n:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0   # the stale-translation check diffs against the base commit
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: node .github/scripts/check-docs-i18n.mjs --since "$BASE"
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
