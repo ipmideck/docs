@@ -53,7 +53,11 @@ docker run -d --name watchtower \
   <Step title="Połącz ipmideck">
     Dodaj adres Watchtower i token w istniejącej sekcji `updates:` pliku `config.yaml`, a następnie uruchom ipmideck ponownie:
 
-{'en': 'Add the address of Watchtower and its token under the `updates:` section that `config.yaml` already has, then restart ipmideck:', 'it': "Aggiungi l'indirizzo di Watchtower e il token nella sezione `updates:` già presente in `config.yaml`, poi riavvia ipmideck:", 'de': 'Ergänzen Sie die Adresse von Watchtower und das Token im bereits vorhandenen Abschnitt `updates:` von `config.yaml` und starten Sie ipmideck neu:', 'es': 'Añade la dirección de Watchtower y su token en la sección `updates:` que ya tiene `config.yaml` y reinicia ipmideck:', 'fr': "Ajoutez l'adresse de Watchtower et son jeton dans la section `updates:` déjà présente dans `config.yaml`, puis redémarrez ipmideck :", 'nl': 'Voeg het adres van Watchtower en het token toe aan de sectie `updates:` die al in `config.yaml` staat en herstart ipmideck:', 'pl': 'Dodaj adres Watchtower i token w istniejącej sekcji `updates:` pliku `config.yaml`, a następnie uruchom ipmideck ponownie:', 'pt': 'Adicione o endereço do Watchtower e o token na secção `updates:` que o `config.yaml` já tem e reinicie o ipmideck:', 'ru': 'Добавьте адрес Watchtower и токен в уже существующий раздел `updates:` файла `config.yaml` и перезапустите ipmideck:', 'ja': '`config.yaml` にすでにある `updates:` セクションに Watchtower のアドレスとトークンを追加し、ipmideck を再起動します:', 'ko': '`config.yaml`에 이미 있는 `updates:` 섹션에 Watchtower 주소와 토큰을 추가한 다음 ipmideck을 다시 시작합니다:', 'zh-Hans': '在 `config.yaml` 已有的 `updates:` 部分中添加 Watchtower 的地址和令牌，然后重启 ipmideck：'}
+```yaml config.yaml
+updates:
+  watchtower_url: http://127.0.0.1:8080
+  watchtower_token: replace-with-a-long-random-token
+```
 
     Te same ustawienia są dostępne jako `IPMIDECK_UPDATES_WATCHTOWER_URL` i `IPMIDECK_UPDATES_WATCHTOWER_TOKEN`. W Docker Compose, gdzie oba kontenery współdzielą sieć, użyj adresu `http://watchtower:8080`.
   </Step>
