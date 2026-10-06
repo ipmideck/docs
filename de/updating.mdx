@@ -7,6 +7,10 @@ Ein Upgrade von ipmideck ersetzt die Anwendung, nicht Ihre Daten. Ihre `config.y
 und Ihr Verschlüsselungsschlüssel liegen im [Datenverzeichnis](/de/configuration#wo-die-konfiguration-liegt), das
 über ein Upgrade hinweg erhalten bleibt, sodass Ihre Server, Ihr Verlauf und Ihre Einstellungen übernommen werden.
 
+<Tip>
+  Sie können eine neue Version auch im Browser installieren: siehe [Aktualisierung über die Weboberfläche](/de/update-from-web-ui).
+</Tip>
+
 ## Docker
 
 Ziehen Sie das neue Image und erstellen Sie den Container mit demselben Daten-Volume neu:
@@ -60,11 +64,7 @@ Datenbank nicht.
 ## Ihre Version prüfen
 
 Die laufende Version wird im Dashboard angezeigt, und die Konsole gibt sie in der Credits-Zeile
-unter dem Banner aus (zum Beispiel `v2.0.0`). Sie können sie auch über den Health-Endpunkt auslesen:
-
-```bash
-curl http://<your-ip>:3000/api/health
-```
+unter dem Banner aus (zum Beispiel `v2.0.0`). In der Weboberfläche steht sie neben dem Logo in der Seitenleiste; ein Klick darauf öffnet den Versionsverlauf.
 
 <Note>
   Erstellen Sie vor einem größeren Upgrade eine [Sicherung](/de/backup-restore). Die Wiederherstellung

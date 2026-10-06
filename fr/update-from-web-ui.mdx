@@ -1,0 +1,77 @@
+---
+title: "Mise à jour depuis l'interface web"
+description: "Installez une nouvelle version d'ipmideck depuis le navigateur, et configurez les installations Docker pour le faire avec Watchtower."
+---
+
+Lorsqu'une version plus récente est publiée, ipmideck affiche une notification une seule fois, et un bouton de mise à jour reste à côté de la version dans la barre latérale jusqu'à ce que vous l'installiez : une flèche vers le haut, ou un bouclier pour une version de sécurité. Les deux ouvrent les notes de la nouvelle version et, lorsqu'ipmideck peut l'installer lui-même, le bouton **Télécharger et installer**.
+
+## Ce que fait le bouton
+
+Avant toute modification, ipmideck sauvegarde la base de données, la clé de chiffrement et `config.yaml` dans `backups/` du [répertoire de données](/fr/configuration#où-réside-la-configuration).
+
+| Installé avec | Résultat |
+| --- | --- |
+| pip dans un environnement virtuel, pipx, uv | Installe la nouvelle version et redémarre ipmideck. La page se recharge d'elle-même lorsque la nouvelle version est en service. |
+| pip, pipx ou uv sous Windows | ipmideck s'arrête pour que la mise à jour soit installée, puis vous le relancez. La progression est consignée dans `update.log` du répertoire de données. |
+| Docker avec Watchtower | Watchtower télécharge la nouvelle image et remplace le conteneur. La page se recharge d'elle-même. |
+| Docker sans Watchtower | La boîte de dialogue affiche la commande à exécuter sur l'hôte Docker. |
+| Checkout git, Python système, installation modifiable | La boîte de dialogue explique pourquoi et affiche la commande à exécuter ; un Python géré par le système se met à jour de la même façon qu'il a été installé. |
+
+## Prérequis
+
+- La connexion doit être activée : le bouton remplace le programme en cours d'exécution.
+- Le bouton n'est pas disponible en mode démo.
+- Pour redémarrer seul, ipmideck doit avoir été lancé avec la commande `ipmideck`. S'il a été lancé autrement, il installe la mise à jour et vous demande de le redémarrer ; sous Windows, il affiche la commande à la place.
+
+## Docker avec Watchtower
+
+Un conteneur ne peut pas remplacer sa propre image, et donner à ipmideck l'accès au socket Docker lui donnerait le contrôle de l'hôte. Un conteneur [Watchtower](https://github.com/nicholas-fedor/watchtower) distinct effectue le remplacement lorsqu'ipmideck le demande.
+
+<Steps>
+  <Step title="Étiqueter le conteneur ipmideck">
+    Lancez ipmideck avec l'étiquette qui permet à Watchtower de le gérer :
+
+```bash
+docker run -d --name ipmideck --network host \
+  --label com.centurylinklabs.watchtower.enable=true \
+  -v ipmideck-data:/data devluigi06/ipmideck:latest
+```
+  </Step>
+  <Step title="Démarrer Watchtower">
+    Lancez Watchtower avec son API HTTP activée, accessible uniquement depuis l'hôte :
+
+```bash
+docker run -d --name watchtower \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -p 127.0.0.1:8080:8080 \
+  -e WATCHTOWER_HTTP_API_UPDATE=true \
+  -e WATCHTOWER_HTTP_API_TOKEN=replace-with-a-long-random-token \
+  -e WATCHTOWER_LABEL_ENABLE=true \
+  nickfedor/watchtower
+```
+  </Step>
+  <Step title="Connecter ipmideck">
+    Ajoutez l'adresse de Watchtower et son jeton dans la section `updates:` déjà présente dans `config.yaml`, puis redémarrez ipmideck :
+
+{'en': 'Add the address of Watchtower and its token under the `updates:` section that `config.yaml` already has, then restart ipmideck:', 'it': "Aggiungi l'indirizzo di Watchtower e il token nella sezione `updates:` già presente in `config.yaml`, poi riavvia ipmideck:", 'de': 'Ergänzen Sie die Adresse von Watchtower und das Token im bereits vorhandenen Abschnitt `updates:` von `config.yaml` und starten Sie ipmideck neu:', 'es': 'Añade la dirección de Watchtower y su token en la sección `updates:` que ya tiene `config.yaml` y reinicia ipmideck:', 'fr': "Ajoutez l'adresse de Watchtower et son jeton dans la section `updates:` déjà présente dans `config.yaml`, puis redémarrez ipmideck :", 'nl': 'Voeg het adres van Watchtower en het token toe aan de sectie `updates:` die al in `config.yaml` staat en herstart ipmideck:', 'pl': 'Dodaj adres Watchtower i token w istniejącej sekcji `updates:` pliku `config.yaml`, a następnie uruchom ipmideck ponownie:', 'pt': 'Adicione o endereço do Watchtower e o token na secção `updates:` que o `config.yaml` já tem e reinicie o ipmideck:', 'ru': 'Добавьте адрес Watchtower и токен в уже существующий раздел `updates:` файла `config.yaml` и перезапустите ipmideck:', 'ja': '`config.yaml` にすでにある `updates:` セクションに Watchtower のアドレスとトークンを追加し、ipmideck を再起動します:', 'ko': '`config.yaml`에 이미 있는 `updates:` 섹션에 Watchtower 주소와 토큰을 추가한 다음 ipmideck을 다시 시작합니다:', 'zh-Hans': '在 `config.yaml` 已有的 `updates:` 部分中添加 Watchtower 的地址和令牌，然后重启 ipmideck：'}
+
+    Les mêmes réglages existent sous la forme `IPMIDECK_UPDATES_WATCHTOWER_URL` et `IPMIDECK_UPDATES_WATCHTOWER_TOKEN`. Avec Docker Compose, où les deux conteneurs partagent un réseau, utilisez `http://watchtower:8080` comme adresse.
+  </Step>
+</Steps>
+
+<Warning>
+  Watchtower contrôle Docker par son socket. Utilisez un jeton long et aléatoire, et gardez son port lié à `127.0.0.1` comme dans l'exemple.
+</Warning>
+
+<Note>
+  Watchtower télécharge l'étiquette déjà utilisée par le conteneur. Avec `latest`, il passe à la version la plus récente ; un conteneur figé sur une étiquette de version (par exemple `2.0.0`) y reste.
+</Note>
+
+## Si l'installation échoue
+
+La boîte de dialogue affiche la raison et la sortie de l'installeur, ainsi que la commande pour installer la mise à jour manuellement. Rien n'est supprimé : la sauvegarde faite avant l'installation se trouve dans `backups/`, et [Sauvegarde et restauration](/fr/backup-restore) explique comment la restaurer.
+
+## Étapes suivantes
+
+- [Mettre à jour ipmideck](/fr/updating): mise à jour en ligne de commande.
+- [Sauvegarde et restauration](/fr/backup-restore): sauvegardez vos données avant une mise à jour.

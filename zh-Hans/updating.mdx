@@ -7,6 +7,10 @@ description: "使用 Docker 或 pip 将 ipmideck 升级到新版本。你的数�
 和加密密钥位于[数据目录](/zh-Hans/configuration#配置文件位于何处)中，它
 在升级过程中保持原位，因此你的服务器、历史记录和设置都会延续。
 
+<Tip>
+  你也可以在浏览器中安装新版本：参见[从 Web 界面更新](/zh-Hans/update-from-web-ui)。
+</Tip>
+
 ## Docker
 
 拉取新镜像并用相同的数据卷重新创建容器：
@@ -60,11 +64,7 @@ ipmideck start
 ## 检查你的版本
 
 运行中的版本会显示在仪表板上，控制台会在横幅下方的致谢行中
-打印它（例如 `v2.0.0`）。你也可以从 health 端点读取它：
-
-```bash
-curl http://<your-ip>:3000/api/health
-```
+打印它（例如 `v2.0.0`）。在 Web 界面中，它显示在侧边栏的标志旁边，点击即可打开发布历史。
 
 <Note>
   在重大升级前先做一次[备份](/zh-Hans/backup-restore)。这样一来，如果出现问题，

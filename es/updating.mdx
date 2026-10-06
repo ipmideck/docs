@@ -7,6 +7,10 @@ Actualizar ipmideck reemplaza la aplicación, no tus datos. Tu `config.yaml`, la
 y la clave de cifrado residen en el [directorio de datos](/es/configuration#dónde-reside-la-configuración), que
 permanece intacto durante una actualización, así que tus servidores, historial y ajustes se conservan.
 
+<Tip>
+  También puedes instalar una nueva versión desde el navegador: consulta [Actualizar desde la interfaz web](/es/update-from-web-ui).
+</Tip>
+
 ## Docker
 
 Descarga la nueva imagen y recrea el contenedor con el mismo volumen de datos:
@@ -60,11 +64,7 @@ ni tu base de datos.
 ## Comprobar tu versión
 
 La versión en ejecución se muestra en el panel, y la consola la imprime en la línea de créditos
-bajo el banner (por ejemplo `v2.0.0`). También puedes leerla desde el endpoint de salud:
-
-```bash
-curl http://<your-ip>:3000/api/health
-```
+bajo el banner (por ejemplo `v2.0.0`). En la interfaz web aparece junto al logotipo en la barra lateral; al seleccionarla se abre el historial de versiones.
 
 <Note>
   Haz una [copia de seguridad](/es/backup-restore) antes de una actualización mayor. Restaurar es entonces cuestión de

@@ -7,6 +7,10 @@ Mettre à niveau ipmideck remplace l'application, pas vos données. Votre `confi
 et votre clé de chiffrement résident dans le [répertoire de données](/fr/configuration#où-réside-la-configuration), qui
 reste en place lors d'une mise à niveau, de sorte que vos serveurs, votre historique et vos réglages sont conservés.
 
+<Tip>
+  Vous pouvez aussi installer une nouvelle version depuis le navigateur : voir [Mise à jour depuis l'interface web](/fr/update-from-web-ui).
+</Tip>
+
 ## Docker
 
 Récupérez la nouvelle image et recréez le conteneur avec le même volume de données :
@@ -60,11 +64,7 @@ ni à votre base de données.
 ## Vérifier votre version
 
 La version en cours d'exécution s'affiche dans le tableau de bord, et la console l'affiche dans la ligne de crédits
-sous la bannière (par exemple `v2.0.0`). Vous pouvez aussi la lire depuis le point de terminaison de santé :
-
-```bash
-curl http://<your-ip>:3000/api/health
-```
+sous la bannière (par exemple `v2.0.0`). Dans l'interface web, elle figure à côté du logo dans la barre latérale ; la sélectionner ouvre l'historique des versions.
 
 <Note>
   Faites une [sauvegarde](/fr/backup-restore) avant une mise à niveau majeure. La restauration consiste alors simplement à

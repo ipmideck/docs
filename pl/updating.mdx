@@ -7,6 +7,10 @@ Aktualizacja ipmideck zastępuje aplikację, a nie twoje dane. Twoje `config.yam
 i klucz szyfrujący znajdują się w [katalogu danych](/pl/configuration#gdzie-znajduje-się-konfiguracja), który
 pozostaje na miejscu po aktualizacji, więc twoje serwery, historia i ustawienia są zachowane.
 
+<Tip>
+  Nowe wydanie możesz też zainstalować z przeglądarki: zobacz [Aktualizacja z interfejsu webowego](/pl/update-from-web-ui).
+</Tip>
+
 ## Docker
 
 Pobierz nowy obraz i odtwórz kontener z tym samym wolumenem danych:
@@ -60,11 +64,7 @@ ani bazy danych.
 ## Sprawdź swoją wersję
 
 Działająca wersja jest pokazana na pulpicie, a konsola wypisuje ją w wierszu z podziękowaniami
-pod banerem (na przykład `v2.0.0`). Możesz ją również odczytać z punktu końcowego health:
-
-```bash
-curl http://<your-ip>:3000/api/health
-```
+pod banerem (na przykład `v2.0.0`). W interfejsie webowym znajduje się obok logo na pasku bocznym; kliknięcie jej otwiera historię wydań.
 
 <Note>
   Wykonaj [kopię zapasową](/pl/backup-restore) przed dużą aktualizacją. Przywracanie to wtedy kwestia

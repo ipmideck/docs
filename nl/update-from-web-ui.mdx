@@ -1,0 +1,77 @@
+---
+title: "Bijwerken via de webinterface"
+description: "Installeer een nieuwe ipmideck-release vanuit de browser, en stel Docker-installaties in om dat met Watchtower te doen."
+---
+
+Wanneer er een nieuwere versie is gepubliceerd, toont ipmideck eenmalig een melding, en blijft er naast de versie in de zijbalk een updateknop staan totdat je hem installeert: een pijl omhoog, of een schild bij een beveiligingsrelease. Beide openen de release notes van de nieuwe versie en, als ipmideck hem zelf kan installeren, de knop **Downloaden en installeren**.
+
+## Wat de knop doet
+
+Voordat er iets verandert, maakt ipmideck een back-up van de database, de encryptiesleutel en `config.yaml` in `backups/` in de [datamap](/nl/configuration#waar-de-configuratie-staat).
+
+| Geïnstalleerd met | Resultaat |
+| --- | --- |
+| pip in een virtuele omgeving, pipx, uv | Installeert de nieuwe versie en herstart ipmideck. De pagina herlaadt vanzelf zodra de nieuwe versie draait. |
+| pip, pipx of uv op Windows | ipmideck stopt zodat de update kan worden geïnstalleerd; daarna start je het opnieuw. De voortgang wordt vastgelegd in `update.log` in de datamap. |
+| Docker met Watchtower | Watchtower haalt de nieuwe image op en vervangt de container. De pagina herlaadt vanzelf. |
+| Docker zonder Watchtower | Het venster toont de opdracht die je op de Docker-host uitvoert. |
+| git-checkout, systeem-Python, bewerkbare installatie | Het venster legt uit waarom en toont de opdracht die je uitvoert; een door het systeem beheerde Python werk je bij zoals je hem hebt geïnstalleerd. |
+
+## Vereisten
+
+- De login moet aan staan: de knop vervangt het draaiende programma.
+- De knop is niet beschikbaar in demomodus.
+- Om zelf te herstarten moet ipmideck gestart zijn met het commando `ipmideck`. Is het anders gestart, dan installeert het de update en vraagt het je om het te herstarten; op Windows toont het in plaats daarvan de opdracht.
+
+## Docker met Watchtower
+
+Een container kan zijn eigen image niet vervangen, en ipmideck toegang geven tot de Docker-socket zou het de controle over de host geven. Een aparte [Watchtower](https://github.com/nicholas-fedor/watchtower)-container voert de vervanging uit wanneer ipmideck daarom vraagt.
+
+<Steps>
+  <Step title="Label de ipmideck-container">
+    Start ipmideck met het label waarmee Watchtower het mag beheren:
+
+```bash
+docker run -d --name ipmideck --network host \
+  --label com.centurylinklabs.watchtower.enable=true \
+  -v ipmideck-data:/data devluigi06/ipmideck:latest
+```
+  </Step>
+  <Step title="Start Watchtower">
+    Start Watchtower met de HTTP-API aan, alleen bereikbaar vanaf de host:
+
+```bash
+docker run -d --name watchtower \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -p 127.0.0.1:8080:8080 \
+  -e WATCHTOWER_HTTP_API_UPDATE=true \
+  -e WATCHTOWER_HTTP_API_TOKEN=replace-with-a-long-random-token \
+  -e WATCHTOWER_LABEL_ENABLE=true \
+  nickfedor/watchtower
+```
+  </Step>
+  <Step title="Koppel ipmideck">
+    Voeg het adres van Watchtower en het token toe aan de sectie `updates:` die al in `config.yaml` staat en herstart ipmideck:
+
+{'en': 'Add the address of Watchtower and its token under the `updates:` section that `config.yaml` already has, then restart ipmideck:', 'it': "Aggiungi l'indirizzo di Watchtower e il token nella sezione `updates:` già presente in `config.yaml`, poi riavvia ipmideck:", 'de': 'Ergänzen Sie die Adresse von Watchtower und das Token im bereits vorhandenen Abschnitt `updates:` von `config.yaml` und starten Sie ipmideck neu:', 'es': 'Añade la dirección de Watchtower y su token en la sección `updates:` que ya tiene `config.yaml` y reinicia ipmideck:', 'fr': "Ajoutez l'adresse de Watchtower et son jeton dans la section `updates:` déjà présente dans `config.yaml`, puis redémarrez ipmideck :", 'nl': 'Voeg het adres van Watchtower en het token toe aan de sectie `updates:` die al in `config.yaml` staat en herstart ipmideck:', 'pl': 'Dodaj adres Watchtower i token w istniejącej sekcji `updates:` pliku `config.yaml`, a następnie uruchom ipmideck ponownie:', 'pt': 'Adicione o endereço do Watchtower e o token na secção `updates:` que o `config.yaml` já tem e reinicie o ipmideck:', 'ru': 'Добавьте адрес Watchtower и токен в уже существующий раздел `updates:` файла `config.yaml` и перезапустите ipmideck:', 'ja': '`config.yaml` にすでにある `updates:` セクションに Watchtower のアドレスとトークンを追加し、ipmideck を再起動します:', 'ko': '`config.yaml`에 이미 있는 `updates:` 섹션에 Watchtower 주소와 토큰을 추가한 다음 ipmideck을 다시 시작합니다:', 'zh-Hans': '在 `config.yaml` 已有的 `updates:` 部分中添加 Watchtower 的地址和令牌，然后重启 ipmideck：'}
+
+    Dezelfde instellingen bestaan als `IPMIDECK_UPDATES_WATCHTOWER_URL` en `IPMIDECK_UPDATES_WATCHTOWER_TOKEN`. Met Docker Compose, waar beide containers een netwerk delen, gebruik je `http://watchtower:8080` als adres.
+  </Step>
+</Steps>
+
+<Warning>
+  Watchtower bestuurt Docker via de socket. Gebruik een lang, willekeurig token en houd de poort gebonden aan `127.0.0.1` zoals in het voorbeeld.
+</Warning>
+
+<Note>
+  Watchtower haalt de tag op die de container al gebruikt. Met `latest` gaat hij naar de nieuwste release; een container die vastzit op een versietag (bijvoorbeeld `2.0.0`) blijft daarop.
+</Note>
+
+## Als de installatie mislukt
+
+Het venster toont de reden en de uitvoer van het installatieprogramma, samen met de opdracht om de update handmatig te installeren. Er wordt niets verwijderd: de back-up van vóór de installatie staat in `backups/`, en [Back-up en herstel](/nl/backup-restore) legt uit hoe je hem terugzet.
+
+## Volgende stappen
+
+- [ipmideck bijwerken](/nl/updating): bijwerken via de opdrachtregel.
+- [Back-up en herstel](/nl/backup-restore): maak een back-up van je gegevens voordat je bijwerkt.

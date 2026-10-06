@@ -7,6 +7,10 @@ Een upgrade van ipmideck vervangt de applicatie, niet je data. Je `config.yaml`,
 en versleutelingssleutel staan in de [datamap](/nl/configuration#waar-de-configuratie-staat), die
 bij een upgrade blijft staan, dus je servers, historie en instellingen blijven behouden.
 
+<Tip>
+  Je kunt een nieuwe release ook vanuit de browser installeren: zie [Bijwerken via de webinterface](/nl/update-from-web-ui).
+</Tip>
+
 ## Docker
 
 Haal de nieuwe image op en maak de container opnieuw aan met hetzelfde datavolume:
@@ -60,11 +64,7 @@ of database niet aan.
 ## Controleer je versie
 
 De draaiende versie staat in het dashboard, en de console print hem in de creditsregel
-onder de banner (bijvoorbeeld `v2.0.0`). Je kunt hem ook uitlezen via het health-endpoint:
-
-```bash
-curl http://<your-ip>:3000/api/health
-```
+onder de banner (bijvoorbeeld `v2.0.0`). In de webinterface staat hij naast het logo in de zijbalk; als je erop klikt, opent de releasegeschiedenis.
 
 <Note>
   Maak een [back-up](/nl/backup-restore) vóór een grote upgrade. Herstellen is dan een kwestie van

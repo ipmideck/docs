@@ -21,7 +21,7 @@
           },
           {
             "group": "Running",
-            "pages": ["en/running", "en/updating"]
+            "pages": ["en/running", "en/updating", "en/update-from-web-ui"]
           },
           {
             "group": "Configuration",
@@ -66,7 +66,7 @@
           },
           {
             "group": "Esecuzione",
-            "pages": ["it/running", "it/updating"]
+            "pages": ["it/running", "it/updating", "it/update-from-web-ui"]
           },
           {
             "group": "Configurazione",
@@ -111,7 +111,7 @@
           },
           {
             "group": "Ausführen",
-            "pages": ["de/running", "de/updating"]
+            "pages": ["de/running", "de/updating", "de/update-from-web-ui"]
           },
           {
             "group": "Konfiguration",
@@ -156,7 +156,7 @@
           },
           {
             "group": "Ejecución",
-            "pages": ["es/running", "es/updating"]
+            "pages": ["es/running", "es/updating", "es/update-from-web-ui"]
           },
           {
             "group": "Configuración",
@@ -201,7 +201,7 @@
           },
           {
             "group": "Exécution",
-            "pages": ["fr/running", "fr/updating"]
+            "pages": ["fr/running", "fr/updating", "fr/update-from-web-ui"]
           },
           {
             "group": "Configuration",
@@ -246,7 +246,7 @@
           },
           {
             "group": "実行",
-            "pages": ["ja/running", "ja/updating"]
+            "pages": ["ja/running", "ja/updating", "ja/update-from-web-ui"]
           },
           {
             "group": "設定",
@@ -291,7 +291,7 @@
           },
           {
             "group": "실행",
-            "pages": ["ko/running", "ko/updating"]
+            "pages": ["ko/running", "ko/updating", "ko/update-from-web-ui"]
           },
           {
             "group": "구성",
@@ -336,7 +336,7 @@
           },
           {
             "group": "Draaien",
-            "pages": ["nl/running", "nl/updating"]
+            "pages": ["nl/running", "nl/updating", "nl/update-from-web-ui"]
           },
           {
             "group": "Configuratie",
@@ -381,7 +381,7 @@
           },
           {
             "group": "Uruchamianie",
-            "pages": ["pl/running", "pl/updating"]
+            "pages": ["pl/running", "pl/updating", "pl/update-from-web-ui"]
           },
           {
             "group": "Konfiguracja",
@@ -426,7 +426,7 @@
           },
           {
             "group": "Execução",
-            "pages": ["pt/running", "pt/updating"]
+            "pages": ["pt/running", "pt/updating", "pt/update-from-web-ui"]
           },
           {
             "group": "Configuração",
@@ -471,7 +471,7 @@
           },
           {
             "group": "Запуск",
-            "pages": ["ru/running", "ru/updating"]
+            "pages": ["ru/running", "ru/updating", "ru/update-from-web-ui"]
           },
           {
             "group": "Конфигурация",
@@ -516,7 +516,7 @@
           },
           {
             "group": "运行",
-            "pages": ["zh-Hans/running", "zh-Hans/updating"]
+            "pages": ["zh-Hans/running", "zh-Hans/updating", "zh-Hans/update-from-web-ui"]
           },
           {
             "group": "配置",
