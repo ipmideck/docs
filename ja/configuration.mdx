@@ -12,22 +12,21 @@ ipmideck は設定を `data/config.yaml` から読み込みます。これは初
 ```yaml
 # data/config.yaml (auto-generated on first run)
 server:
-  host: "0.0.0.0"
+  host: 0.0.0.0
   port: 3000
   https: false
 auth:
-  enabled: true
-  session_expiry: "24h"
-  max_login_attempts: 5
+  session_expiry: 24h
 ipmi:
   poll_interval: 30
   power_poll_interval: 30
   command_timeout: 30
 data:
   retention_days: 365
-  cleanup_interval: "24h"
 logging:
-  level: "info"
+  level: info
+updates:
+  enabled: true
 modules:
   sensors:
     enabled: true
@@ -45,6 +44,19 @@ modules:
 環境変数による上書きは別の `IPMIDECK_` プレフィックスを使用し、YAML ファイル自体の中には
 決して現れません。
 
+ログインを有効にするかどうかはここでは設定しません。セキュリティ設定で切り替え、その状態は
+データベースに保存されるため、`config.yaml` への書き込み権限があってもログインを無効にはできません。
+
+いくつかのオプションのキーはデフォルトでは書き込まれません。必要なときに追加してください。
+
+| キー | 説明 |
+|-----|-------------|
+| `server.cert_file`, `server.key_file` | `https: true` で使う独自の証明書。指定しない場合、ipmideck は自己署名証明書を作成します。 |
+| `server.forwarded_allow_ips` | リバースプロキシの背後で使う場合: `X-Forwarded-*` ヘッダーの設定を許可するプロキシのアドレス。 |
+| `server.trusted_origins` | ブラウザーの `Host` を渡さないリバースプロキシの背後で使う場合: ダッシュボードの外部アドレス。 |
+| `ipmi.auto_install_ipmitool` | ipmitool がない場合に Web UI からのインストールを許可します (デフォルト `false`)。[Web UI から ipmitool をインストール](#web-ui-から-ipmitool-をインストール) を参照してください。 |
+| `updates.watchtower_url`, `updates.watchtower_token` | Docker のみ: 更新をインストールする Watchtower。[Web UI からの更新](/ja/update-from-web-ui#docker-と-watchtower) を参照してください。 |
+
 ## 環境変数による上書き
 
 すべての設定は、実行時に `IPMIDECK_` プレフィックス付きの環境変数で上書きできます。これは
@@ -54,13 +66,19 @@ modules:
 |----------------------|-------------|
 | `IPMIDECK_SERVER_HOST` | ダッシュボードがバインドするホスト/インターフェイス (デフォルト `0.0.0.0`)。 |
 | `IPMIDECK_SERVER_PORT` | ダッシュボードがバインドする HTTP ポート (デフォルト `3000`)。 |
-| `IPMIDECK_AUTH_ENABLED` | 組み込みログインを有効または無効にします (デフォルト `true`)。 |
+| `IPMIDECK_SERVER_HTTPS` | HTTPS で配信します (デフォルト `false`)。 |
+| `IPMIDECK_SERVER_CERT_FILE`, `IPMIDECK_SERVER_KEY_FILE` | HTTPS 用の証明書と鍵。 |
+| `IPMIDECK_SERVER_FORWARDED_ALLOW_IPS` | `X-Forwarded-*` ヘッダーの設定を許可するプロキシのアドレス。 |
+| `IPMIDECK_SERVER_TRUSTED_ORIGINS` | ダッシュボードの外部アドレス (カンマ区切り)。 |
 | `IPMIDECK_AUTH_SESSION_EXPIRY` | ログインセッションが有効なままでいる時間 (デフォルト `24h`)。 |
 | `IPMIDECK_IPMI_POLL_INTERVAL` | BMC センサーポーリングの間隔 (秒) (デフォルト `30`)。 |
 | `IPMIDECK_IPMI_POWER_POLL_INTERVAL` | 電源状態ポーリングの間隔 (秒) (デフォルト `30`)。 |
+| `IPMIDECK_IPMI_AUTO_INSTALL_IPMITOOL` | ipmitool がない場合に Web UI からのインストールを許可します (デフォルト `false`)。 |
 | `IPMIDECK_DATA_RETENTION_DAYS` | クリーンアップ前に保持するセンサー履歴の日数 (デフォルト `365`)。 |
 | `IPMIDECK_DATA_DB_PATH` | SQLite データベースファイルへの絶対パス。 |
 | `IPMIDECK_LOGGING_LEVEL` | ログの詳細度: `debug`、`info`、`warning`、`error` (デフォルト `info`)。 |
+| `IPMIDECK_UPDATES_ENABLED` | `false` にすると更新チェックを完全に無効にします (デフォルト `true`)。 |
+| `IPMIDECK_UPDATES_WATCHTOWER_URL`, `IPMIDECK_UPDATES_WATCHTOWER_TOKEN` | Docker のみ: 更新をインストールする Watchtower のアドレスとトークン。 |
 | `IPMIDECK_DEMO` | 実際の BMC ではなくシミュレートされたハードウェアに対して実行します (デフォルト `false`)。 |
 
 さらに 2 つの変数が、`config.yaml` の値ではなくファイルの *場所* を制御します。
@@ -82,6 +100,42 @@ ipmideck は `IPMIDECK_DATA_DIR` が設定されていればそこからデー�
   `/data` をボリュームで永続化してください。
 - **Linux 上の pip:** デフォルトで `/data/config.yaml`。`IPMIDECK_DATA_DIR` を設定して移動します。
 - **Windows 上の pip:** `./data/config.yaml`。`ipmideck` を実行するディレクトリーからの相対パス。
+
+## 更新チェック
+
+ipmideck は新しいバージョンが公開されたときに知らせることができます。初回セットアップで
+チェックしてよいかを一度だけ尋ね、その答えは **設定 → 情報 → 更新** でいつでも変更できます。
+
+- **送信する内容。** インストール方法に対応するインデックス (Python パッケージインデックス、
+  コンテナーレジストリ、または公開リリース) への `GET` を 1 回送ります。含まれるのは製品名と
+  実行中のバージョンだけです。識別子、ホスト名、サーバーに関する情報は一切含まれません。
+  パッケージインデックスまたはコンテナーレジストリが新しいバージョンを報告した場合は、それが
+  セキュリティリリースかどうかを公開リリースに問い合わせる 2 回目の `GET` を送ります。すべての
+  リクエストは送信前にログに記録されます。
+- **タイミング。** 起動時と、チェックが有効な間は 24 時間ごとに 1 回。さらに、設定で
+  **今すぐ確認** を押したときや、[コンソール](/ja/console#g-更新) で `g` を押したときにも実行されます。
+- **決して行わないこと。** チェックは何もダウンロードもインストールもしません。インストールは
+  あなた自身が開始する別の手順です。[Web UI からの更新](/ja/update-from-web-ui) を参照してください。
+
+完全に無効にするには、`config.yaml` で `updates.enabled: false` を設定するか、
+`IPMIDECK_UPDATES_ENABLED=false` を設定します。これを設定すると、セットアップでの回答に
+関係なく、ipmideck はバージョンを調べるための接続を一切開かず、**今すぐ確認** と `g` は拒否されます。
+
+## Web UI から ipmitool をインストール
+
+ipmideck はすべての BMC に `ipmitool` プログラムを通じて接続します。これがない場合でも ipmideck は
+起動し、Web UI にはお使いのシステムにインストールするコマンドを示すバナーが表示されます。
+
+次の条件がすべて満たされている場合、バナーはシステムのパッケージマネージャーを使ってその
+コマンドを代わりに実行することもできます。
+
+- `ipmi.auto_install_ipmitool` が `true` である (デフォルトは `false`)。
+- ipmideck が root として、またはパスワードを求めない `sudo` を持つユーザーとして実行されている。
+- ログインが有効である。
+
+ipmideck がブラウザーでパスワードを求めることはありません。Docker ではイメージに ipmitool が
+すでに含まれています。Windows にはインストールするパッケージがありません。Dell iDRAC Tools など
+`ipmitool.exe` を同梱するツールをインストールするか、`ipmitool.exe` を `PATH` に置いてください。
 
 ## 次のステップ
 

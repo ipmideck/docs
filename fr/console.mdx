@@ -57,7 +57,7 @@ Chaque action est une pression de touche. La barre d'aide les liste toutes :
 | `c`   | Ouvrir la sous-vue des **sessions** connectées                         |
 | `s`   | Ouvrir la sous-vue des **serveurs** configurés                         |
 | `u`   | Afficher l'**url** du tableau de bord dans le journal                  |
-| `g`   | Vérification de **mise à jour** (affiche la version locale)            |
+| `g`   | Vérification de **mise à jour** (cherche tout de suite la dernière version publiée) |
 | `b`   | Ouvrir l'éditeur de **changement de liaison**                          |
 | `r`   | **Redémarrer** le serveur                                              |
 | `q`   | **Quitter**, ou revenir à la vue journal depuis une sous-vue           |
@@ -125,8 +125,11 @@ d'écoute, pas une adresse navigable.
 
 ### g : mise à jour
 
-`g` affiche la version locale et une note indiquant que la vérification de mise à jour en ligne est livrée avec la
-version pip. Il ne fait **aucun appel réseau**, ipmideck reste hors ligne.
+`g` cherche tout de suite la dernière version publiée et affiche la réponse dans le journal : soit
+vous exécutez la dernière version, soit la version plus récente, un lien vers ses notes de version et la
+commande qui l'installe. C'est une demande que vous faites vous-même, donc elle fonctionne même lorsque la
+vérification automatique est désactivée. Elle est refusée lorsque `updates.enabled` vaut `false` ; voir
+[Vérifications de mise à jour](/fr/configuration#vérifications-de-mise-à-jour).
 
 ### r : redémarrage
 

@@ -22,18 +22,21 @@ descifrar nada.
 
 Las contraseñas de inicio de sesión se hashean con bcrypt (salt por contraseña, verificación en tiempo constante). Los tokens
 de sesión se firman con HMAC-SHA256, se revalidan en cada petición y se invalidan cuando cambia un
-nombre de usuario. Las cookies son HttpOnly y SameSite=Lax.
+nombre de usuario. Las cookies son HttpOnly y SameSite=Strict.
 
 ### Bloqueo contra fuerza bruta
 
 Bloqueo por nombre de usuario con retroceso exponencial tras cinco intentos fallidos (hasta una hora),
 más errores genéricos a prueba de fugas de tiempo para que un atacante no aprenda nada de cómo falla un inicio de sesión.
 
-### ipmitool sin shell, totalmente sin conexión
+### ipmitool sin shell, sin telemetría
 
 ipmitool se invoca a través de una lista de argumentos (`create_subprocess_exec`), nunca una shell,
-así que no hay superficie de inyección de comandos. Todo el sistema se ejecuta totalmente sin conexión: sin
-telemetría, sin nube, sin llamadas externas.
+así que no hay superficie de inyección de comandos. No hay telemetría ni nube. La única
+petición enviada fuera de tu red es la comprobación de actualizaciones: un único `GET` que lleva el nombre del
+producto y la versión que ejecutas, y nada más. Se escribe en el registro antes de enviarse, y
+`updates.enabled: false` la desactiva por completo (consulta
+[Comprobación de actualizaciones](/es/configuration#comprobación-de-actualizaciones)).
 
 ## Protección de hardware
 

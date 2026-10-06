@@ -6,9 +6,11 @@ description: "Common questions about running ipmideck in a homelab."
 <AccordionGroup>
 
 <Accordion title="Is ipmideck cloud-based?">
-  No. ipmideck is fully self-hosted and runs entirely on your own network. It makes no
-  external calls, no telemetry, no cloud, no account. It talks directly to your BMCs and
-  stores everything locally.
+  No. ipmideck is fully self-hosted and runs entirely on your own network: no telemetry, no
+  cloud, no account. It talks directly to your BMCs and stores everything locally. The only
+  request it sends outside your network is the update check, which carries no identifier
+  and is switched off with `updates.enabled: false` (see
+  [Update checks](/en/configuration#update-checks)).
 </Accordion>
 
 <Accordion title="Which BMCs does it work with?">

@@ -3,6 +3,22 @@ title: "Troubleshooting"
 description: "Connection, authentication, and IPMI errors when ipmideck talks to your BMC."
 ---
 
+## ipmitool is not installed
+
+If every server fails at once and the web UI shows a banner saying ipmitool was not found,
+the `ipmitool` program is missing on the host. A pip install cannot bring it along, so
+install it with your package manager, for example `sudo apt install ipmitool` on Debian and
+Ubuntu or `sudo dnf install ipmitool` on Fedora and RHEL. The banner shows the command for
+your system. Then press **Check again** in the banner, or restart ipmideck.
+
+- On Alpine, ipmitool is in the `community` repository, which must be enabled.
+- On Windows, install a tool that ships `ipmitool.exe`, such as Dell iDRAC Tools, or put
+  `ipmitool.exe` on `PATH`. ipmideck also looks in the Dell tools' own folders.
+- The Docker image already includes ipmitool.
+
+The banner can run the install for you when you allow it in the configuration; see
+[Installing ipmitool from the web UI](/en/configuration#installing-ipmitool-from-the-web-ui).
+
 ## ipmideck cannot reach the BMC
 
 ipmideck communicates with BMCs over UDP port 623 (IPMI/RMCP+). If a server shows as

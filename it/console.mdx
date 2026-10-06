@@ -57,7 +57,7 @@ Ogni azione è una pressione di tasto. La barra di aiuto li elenca tutti:
 | `c`   | Apre la sotto-vista delle **sessioni** connesse                        |
 | `s`   | Apre la sotto-vista dei **server** configurati                         |
 | `u`   | Emerge l'**url** della dashboard nel log                               |
-| `g`   | Controllo **aggiornamenti** (stampa la versione locale)                |
+| `g`   | Controllo **aggiornamenti** (cerca subito l'ultima versione pubblicata) |
 | `b`   | Apre l'editor di **cambio bind**                                       |
 | `r`   | **Riavvia** il server                                                  |
 | `q`   | **Esci**, o torna alla vista log da una sotto-vista                    |
@@ -125,8 +125,11 @@ di ascolto, non uno navigabile.
 
 ### g: aggiornamento
 
-`g` stampa la versione locale e una nota che il controllo aggiornamenti online arriva con la release
-pip. **Non fa alcuna chiamata di rete**, ipmideck resta offline.
+`g` cerca subito l'ultima versione pubblicata e stampa la risposta nel log: o che stai usando
+l'ultima release, oppure la versione più recente, un link alle sue note di rilascio e il comando
+che la installa. È una richiesta che fai tu, quindi funziona anche con il controllo automatico
+disattivato. Viene rifiutata quando `updates.enabled` è `false`; vedi
+[Controllo degli aggiornamenti](/it/configuration#controllo-degli-aggiornamenti).
 
 ### r: riavvio
 

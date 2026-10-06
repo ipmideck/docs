@@ -22,18 +22,20 @@ BMC 凭据在静态时用 AES-256-CBC 和每个机密一个随机 IV 加密。
 
 登录密码用 bcrypt 哈希（每个密码加盐，恒定时间校验）。会话
 令牌用 HMAC-SHA256 签名，在每次请求时重新校验，并在用户名更改时
-失效。Cookie 为 HttpOnly 且 SameSite=Lax。
+失效。Cookie 为 HttpOnly 且 SameSite=Strict。
 
 ### 暴力破解锁定
 
 按用户名锁定，在五次失败尝试后采用指数退避（最长一小时），
 外加防时序泄露的通用错误，因此攻击者从登录失败的方式中什么也学不到。
 
-### 无 shell 的 ipmitool，完全离线
+### 无 shell 的 ipmitool，无遥测
 
 ipmitool 通过参数列表（`create_subprocess_exec`）调用，绝不通过 shell，
-因此不存在命令注入面。整个系统完全离线运行：没有
-遥测、没有云、没有外部调用。
+因此不存在命令注入面。没有遥测，也没有云。唯一发往你网络之外的
+请求是更新检查：一个只携带产品名称和你运行的版本、别无其他的 `GET`。
+它在发送之前会写入日志，`updates.enabled: false` 可将其完全关闭（见
+[更新检查](/zh-Hans/configuration#更新检查)）。
 
 ## 硬件保护
 

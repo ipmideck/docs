@@ -6,9 +6,11 @@ description: "Częste pytania o uruchamianie ipmideck w homelabie."
 <AccordionGroup>
 
 <Accordion title="Czy ipmideck działa w chmurze?">
-  Nie. ipmideck jest w pełni samodzielnie hostowany i działa w całości w twojej własnej sieci. Nie wykonuje
-  zewnętrznych wywołań, bez telemetrii, bez chmury, bez konta. Rozmawia bezpośrednio z twoimi BMC i
-  przechowuje wszystko lokalnie.
+  Nie. ipmideck jest w pełni samodzielnie hostowany i działa w całości w twojej własnej sieci: bez
+  telemetrii, bez chmury, bez konta. Rozmawia bezpośrednio z twoimi BMC i przechowuje wszystko
+  lokalnie. Jedyne żądanie wysyłane poza twoją sieć to sprawdzanie aktualizacji, które nie zawiera
+  żadnego identyfikatora i wyłącza się je przez `updates.enabled: false` (zobacz
+  [Sprawdzanie aktualizacji](/pl/configuration#sprawdzanie-aktualizacji)).
 </Accordion>
 
 <Accordion title="Z którymi BMC współpracuje?">

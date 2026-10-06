@@ -11,7 +11,9 @@ sensormonitoring, intelligente regeling van fan-curves (FanPilot), beheer van vo
 en hardware-gebeurtenislogs, allemaal vanuit je browser, zonder CLI.
 
 ipmideck draait volledig op je eigen netwerk. Er is geen cloud, geen telemetrie en geen
-externe afhankelijkheid: het praat rechtstreeks met je BMC's en bewaart alles lokaal.
+externe afhankelijkheid: het praat rechtstreeks met je BMC's en bewaart alles lokaal. De enige
+aanvraag die het buiten je netwerk verstuurt, is de
+[updatecontrole](/nl/configuration#updatecontroles), die je kunt uitschakelen.
 
 <Note>
   ipmideck moet je BMC's over het netwerk kunnen bereiken op UDP-poort 623 (de IPMI/RMCP+

@@ -57,7 +57,7 @@ Every action is one keypress. The help bar lists them all:
 | `c`   | Open the connected-**sessions** sub-view                               |
 | `s`   | Open the configured-**servers** sub-view                              |
 | `u`   | Surface the dashboard **url** in the log                               |
-| `g`   | **Update** check (prints the local version)                            |
+| `g`   | **Update** check (looks up the newest published version now)           |
 | `b`   | Open the **change-bind** editor                                        |
 | `r`   | **Restart** the server                                                 |
 | `q`   | **Quit**, or return to the log view from a sub-view                    |
@@ -125,8 +125,11 @@ address, not a navigable one.
 
 ### g: update
 
-`g` prints the local version and a note that the online update check ships with the pip
-release. It makes **no network call**, ipmideck stays offline.
+`g` looks up the newest published version now and prints the answer in the log: either that
+you run the latest release, or the newer version, a link to its release notes, and the
+command that installs it. It is a request you make yourself, so it works even with the
+automatic check turned off. It is refused when `updates.enabled` is `false`; see
+[Update checks](/en/configuration#update-checks).
 
 ### r: restart
 

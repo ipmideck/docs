@@ -22,18 +22,21 @@ entschlüsseln kann.
 
 Anmeldepasswörter werden mit bcrypt gehasht (Salt pro Passwort, konstante Verifikationszeit). Sitzungs-
 Token werden mit HMAC-SHA256 signiert, bei jeder Anfrage neu validiert und ungültig gemacht, wenn sich ein
-Benutzername ändert. Cookies sind HttpOnly und SameSite=Lax.
+Benutzername ändert. Cookies sind HttpOnly und SameSite=Strict.
 
 ### Brute-Force-Sperre
 
 Sperre pro Benutzername mit exponentiellem Backoff nach fünf fehlgeschlagenen Versuchen (bis zu einer Stunde),
 plus zeitleck-sichere generische Fehler, sodass ein Angreifer nichts daraus lernt, wie eine Anmeldung fehlschlägt.
 
-### Shell-loses ipmitool, vollständig offline
+### Shell-loses ipmitool, keine Telemetrie
 
 ipmitool wird über eine Argumentliste aufgerufen (`create_subprocess_exec`), nie über eine Shell,
-sodass es keine Command-Injection-Angriffsfläche gibt. Das gesamte System läuft vollständig offline: keine
-Telemetrie, keine Cloud, keine externen Aufrufe.
+sodass es keine Command-Injection-Angriffsfläche gibt. Es gibt keine Telemetrie und keine Cloud. Die einzige
+Anfrage, die nach außerhalb Ihres Netzwerks gesendet wird, ist die Update-Prüfung: ein `GET`-Aufruf, der den
+Produktnamen und die Version enthält, die Sie ausführen, sonst nichts. Er wird ins Log geschrieben, bevor er
+gesendet wird, und `updates.enabled: false` schaltet ihn vollständig ab (siehe
+[Update-Prüfung](/de/configuration#update-prüfung)).
 
 ## Hardware-Schutz
 

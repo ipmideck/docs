@@ -11,7 +11,9 @@ Sensorüberwachung in Echtzeit, intelligente Lüfterkurvensteuerung (FanPilot), 
 Stromverwaltung und Hardware-Ereignisprotokolle, alles direkt aus Ihrem Browser, ohne CLI.
 
 ipmideck läuft vollständig in Ihrem eigenen Netzwerk. Es gibt keine Cloud, keine Telemetrie und
-keine externe Abhängigkeit: Es spricht direkt mit Ihren BMCs und speichert alles lokal.
+keine externe Abhängigkeit: Es spricht direkt mit Ihren BMCs und speichert alles lokal. Die einzige
+Anfrage, die es nach außerhalb Ihres Netzwerks sendet, ist die
+[Update-Prüfung](/de/configuration#update-prüfung), die Sie abschalten können.
 
 <Note>
   ipmideck muss Ihre BMCs über das Netzwerk auf UDP-Port 623 (dem IPMI/RMCP+-Port) erreichen.

@@ -57,7 +57,7 @@ Elke actie is één toetsaanslag. De hulpbalk somt ze allemaal op:
 | `c`   | Open de subweergave met verbonden **sessies**                          |
 | `s`   | Open de subweergave met geconfigureerde **servers**                    |
 | `u`   | Toon de dashboard-**url** in de log                                    |
-| `g`   | **Update**-controle (print de lokale versie)                          |
+| `g`   | **Update**-controle (zoekt nu de nieuwste gepubliceerde versie op)     |
 | `b`   | Open de **change-bind**-editor                                         |
 | `r`   | **Herstart** de server                                                 |
 | `q`   | **Afsluiten**, of terug naar de logweergave vanuit een subweergave    |
@@ -125,8 +125,11 @@ adres, geen navigeerbaar adres.
 
 ### g: update
 
-`g` print de lokale versie en een opmerking dat de online updatecontrole met de pip-
-release meekomt. Het doet **geen netwerkoproep**, ipmideck blijft offline.
+`g` zoekt nu de nieuwste gepubliceerde versie op en print het antwoord in de log: ofwel dat
+je de nieuwste release draait, ofwel de nieuwere versie, een link naar de release notes en de
+opdracht die hem installeert. Het is een aanvraag die je zelf doet, dus het werkt ook als de
+automatische controle uit staat. Het wordt geweigerd als `updates.enabled` op `false` staat; zie
+[Updatecontroles](/nl/configuration#updatecontroles).
 
 ### r: herstart
 

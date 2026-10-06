@@ -22,18 +22,21 @@ niczego odszyfrować.
 
 Hasła logowania są haszowane za pomocą bcrypt (sól na hasło, weryfikacja w stałym czasie). Tokeny
 sesji są podpisywane za pomocą HMAC-SHA256, rewalidowane przy każdym żądaniu i unieważniane, gdy
-nazwa użytkownika się zmienia. Pliki cookie są HttpOnly i SameSite=Lax.
+nazwa użytkownika się zmienia. Pliki cookie są HttpOnly i SameSite=Strict.
 
 ### Blokada przed atakami brute-force
 
 Blokada na nazwę użytkownika z wykładniczym backoffem po pięciu nieudanych próbach (do godziny),
 plus bezpieczne wobec wycieków czasowych ogólne błędy, więc atakujący niczego się nie dowiaduje z tego, jak login zawodzi.
 
-### ipmitool bez powłoki, w pełni offline
+### ipmitool bez powłoki, bez telemetrii
 
 ipmitool jest wywoływany przez listę argumentów (`create_subprocess_exec`), nigdy przez powłokę,
-więc nie ma powierzchni do wstrzykiwania poleceń. Cały system działa w pełni offline: bez
-telemetrii, bez chmury, bez zewnętrznych wywołań.
+więc nie ma powierzchni do wstrzykiwania poleceń. Nie ma telemetrii ani chmury. Jedyne żądanie
+wysyłane poza twoją sieć to sprawdzanie aktualizacji: jedno żądanie `GET` zawierające nazwę
+produktu i używaną wersję, nic więcej. Jest zapisywane w dzienniku przed wysłaniem, a
+`updates.enabled: false` wyłącza je całkowicie (zobacz
+[Sprawdzanie aktualizacji](/pl/configuration#sprawdzanie-aktualizacji)).
 
 ## Ochrona sprzętu
 

@@ -12,22 +12,21 @@ environment variable (handy for Docker, see below).
 ```yaml
 # data/config.yaml (auto-generated on first run)
 server:
-  host: "0.0.0.0"
+  host: 0.0.0.0
   port: 3000
   https: false
 auth:
-  enabled: true
-  session_expiry: "24h"
-  max_login_attempts: 5
+  session_expiry: 24h
 ipmi:
   poll_interval: 30
   power_poll_interval: 30
   command_timeout: 30
 data:
   retention_days: 365
-  cleanup_interval: "24h"
 logging:
-  level: "info"
+  level: info
+updates:
+  enabled: true
 modules:
   sensors:
     enabled: true
@@ -45,6 +44,19 @@ The keys above are the real, unprefixed nested keys ipmideck writes to `config.y
 Environment-variable overrides use a separate `IPMIDECK_` prefix and never appear inside
 the YAML file itself.
 
+Whether the login is on is not set here: you switch it from the Security settings, and the
+answer is kept in the database, so write access to `config.yaml` cannot turn the login off.
+
+A few optional keys are not written by default. Add them when you need them:
+
+| Key | Description |
+|-----|-------------|
+| `server.cert_file`, `server.key_file` | Your own certificate for `https: true`. Without them ipmideck creates a self-signed one. |
+| `server.forwarded_allow_ips` | Behind a reverse proxy: the proxy addresses allowed to set `X-Forwarded-*` headers. |
+| `server.trusted_origins` | Behind a reverse proxy that does not pass the browser's `Host`: the external addresses of the dashboard. |
+| `ipmi.auto_install_ipmitool` | Let the web UI install ipmitool when it is missing (default `false`). See [Installing ipmitool from the web UI](#installing-ipmitool-from-the-web-ui). |
+| `updates.watchtower_url`, `updates.watchtower_token` | Docker only: the Watchtower that installs updates. See [Updating from the web UI](/en/update-from-web-ui#docker-with-watchtower). |
+
 ## Environment overrides
 
 Every setting can be overridden at runtime with an `IPMIDECK_`-prefixed environment
@@ -55,13 +67,19 @@ to edit a file inside the container.
 |----------------------|-------------|
 | `IPMIDECK_SERVER_HOST` | Host/interface the dashboard binds to (default `0.0.0.0`). |
 | `IPMIDECK_SERVER_PORT` | HTTP port the dashboard binds to (default `3000`). |
-| `IPMIDECK_AUTH_ENABLED` | Enable or disable the built-in login (default `true`). |
+| `IPMIDECK_SERVER_HTTPS` | Serve over HTTPS (default `false`). |
+| `IPMIDECK_SERVER_CERT_FILE`, `IPMIDECK_SERVER_KEY_FILE` | Certificate and key for HTTPS. |
+| `IPMIDECK_SERVER_FORWARDED_ALLOW_IPS` | Proxy addresses allowed to set `X-Forwarded-*` headers. |
+| `IPMIDECK_SERVER_TRUSTED_ORIGINS` | External addresses of the dashboard, separated by commas. |
 | `IPMIDECK_AUTH_SESSION_EXPIRY` | How long a login session stays valid (default `24h`). |
 | `IPMIDECK_IPMI_POLL_INTERVAL` | Seconds between BMC sensor polls (default `30`). |
 | `IPMIDECK_IPMI_POWER_POLL_INTERVAL` | Seconds between power-status polls (default `30`). |
+| `IPMIDECK_IPMI_AUTO_INSTALL_IPMITOOL` | Let the web UI install ipmitool when it is missing (default `false`). |
 | `IPMIDECK_DATA_RETENTION_DAYS` | Days of sensor history to keep before cleanup (default `365`). |
 | `IPMIDECK_DATA_DB_PATH` | Absolute path to the SQLite database file. |
 | `IPMIDECK_LOGGING_LEVEL` | Log verbosity: `debug`, `info`, `warning`, or `error` (default `info`). |
+| `IPMIDECK_UPDATES_ENABLED` | Set to `false` to switch the update check off completely (default `true`). |
+| `IPMIDECK_UPDATES_WATCHTOWER_URL`, `IPMIDECK_UPDATES_WATCHTOWER_TOKEN` | Docker only: address and token of the Watchtower that installs updates. |
 | `IPMIDECK_DEMO` | Run against simulated hardware instead of real BMCs (default `false`). |
 
 Two more variables control file *locations* rather than a `config.yaml` value:
@@ -82,6 +100,42 @@ back to a platform default. `config.yaml` always lives at `<data-dir>/config.yam
   `/data` with a volume.
 - **pip on Linux:** `/data/config.yaml` by default: set `IPMIDECK_DATA_DIR` to relocate it.
 - **pip on Windows:** `./data/config.yaml`, relative to the directory you run `ipmideck` from.
+
+## Update checks
+
+ipmideck can tell you when a newer version has been published. First-run setup asks once
+whether it may check, and you can change the answer at any time under
+**Settings → About → Updates**.
+
+- **What it sends.** One `GET` to the index that matches how you installed: the Python
+  package index, the container registry, or the published releases. It carries the product
+  name and the version you run, and nothing else: no identifier, no hostname, nothing about
+  your servers. When the package index or the container registry reports a newer version, a
+  second `GET` asks the published releases whether it is a security release. Every request is written to the log before it is sent.
+- **When.** At start-up and once every 24 hours while the check is on, and whenever you
+  press **Check now** in Settings or `g` in the [console](/en/console#g-update).
+- **What it never does.** The check does not download or install anything. Installing is a
+  separate step you start yourself: see [Updating from the web UI](/en/update-from-web-ui).
+
+To switch it off completely, set `updates.enabled: false` in `config.yaml`, or
+`IPMIDECK_UPDATES_ENABLED=false`. With that set, ipmideck never opens a connection to look
+up a version, whatever was answered during setup, and **Check now** and `g` are refused.
+
+## Installing ipmitool from the web UI
+
+ipmideck reaches every BMC through the `ipmitool` program. When it is missing, ipmideck still
+starts, and the web UI shows a banner with the command that installs it on your system.
+
+The banner can also run that command for you, through the system package manager, when all
+of these are true:
+
+- `ipmi.auto_install_ipmitool` is `true` (it is `false` by default);
+- ipmideck runs as root, or as a user with `sudo` that does not ask for a password;
+- the login is on.
+
+ipmideck never asks for a password in the browser. In Docker the image already includes
+ipmitool. On Windows there is no package to install: install a tool that ships
+`ipmitool.exe`, such as Dell iDRAC Tools, or put `ipmitool.exe` on `PATH`.
 
 ## Next steps
 

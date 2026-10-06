@@ -22,18 +22,21 @@ decifrar nada.
 
 As palavras-passe de início de sessão são submetidas a hash com bcrypt (salt por palavra-passe, verificação em tempo constante). Os tokens
 de sessão são assinados com HMAC-SHA256, revalidados em cada pedido e invalidados quando um
-nome de utilizador muda. Os cookies são HttpOnly e SameSite=Lax.
+nome de utilizador muda. Os cookies são HttpOnly e SameSite=Strict.
 
 ### Bloqueio contra força bruta
 
 Bloqueio por nome de utilizador com recuo exponencial após cinco tentativas falhadas (até uma hora),
 mais erros genéricos seguros contra fugas de tempo, para que um atacante não aprenda nada com a forma como um início de sessão falha.
 
-### ipmitool sem shell, totalmente offline
+### ipmitool sem shell, sem telemetria
 
 O ipmitool é invocado através de uma lista de argumentos (`create_subprocess_exec`), nunca uma shell,
-por isso não há superfície de injeção de comandos. Todo o sistema corre totalmente offline: sem
-telemetria, sem nuvem, sem chamadas externas.
+por isso não há superfície de injeção de comandos. Não há telemetria nem nuvem. O único
+pedido enviado para fora da sua rede é a verificação de atualizações: um único `GET` que leva o nome do
+produto e a versão que corre, e mais nada. É escrito no registo antes de ser enviado, e
+`updates.enabled: false` desliga-o por completo (veja
+[Verificação de atualizações](/pt/configuration#verificação-de-atualizações)).
 
 ## Proteção de hardware
 

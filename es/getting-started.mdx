@@ -11,7 +11,9 @@ de sensores en tiempo real, control inteligente de curvas de ventilador (FanPilo
 de energía y registros de eventos de hardware, todo desde tu navegador, sin necesidad de CLI.
 
 ipmideck se ejecuta por completo en tu propia red. No hay nube, ni telemetría, ni ninguna
-dependencia externa: habla directamente con tus BMC y lo almacena todo localmente.
+dependencia externa: habla directamente con tus BMC y lo almacena todo localmente. La única
+petición que envía fuera de tu red es la
+[comprobación de actualizaciones](/es/configuration#comprobación-de-actualizaciones), que puedes desactivar.
 
 <Note>
   ipmideck necesita alcanzar tus BMC por la red en el puerto UDP 623 (el puerto IPMI/RMCP+).

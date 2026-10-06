@@ -11,7 +11,9 @@ czujników w czasie rzeczywistym, inteligentne sterowanie krzywą wentylatorów 
 oraz dzienniki zdarzeń sprzętowych, wszystko z poziomu przeglądarki, bez potrzeby CLI.
 
 ipmideck działa w całości w twojej własnej sieci. Nie ma chmury, telemetrii ani żadnej
-zewnętrznej zależności: rozmawia bezpośrednio z twoimi BMC i wszystko przechowuje lokalnie.
+zewnętrznej zależności: rozmawia bezpośrednio z twoimi BMC i wszystko przechowuje lokalnie. Jedyne
+żądanie wysyłane poza twoją sieć to [sprawdzanie aktualizacji](/pl/configuration#sprawdzanie-aktualizacji),
+które możesz wyłączyć.
 
 <Note>
   ipmideck musi docierać do twoich BMC przez sieć na porcie UDP 623 (port IPMI/RMCP+).

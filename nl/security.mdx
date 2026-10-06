@@ -22,18 +22,21 @@ niets ontsleutelen.
 
 Inlogwachtwoorden worden gehasht met bcrypt (salt per wachtwoord, constante-tijd-verificatie). Sessie-
 tokens worden ondertekend met HMAC-SHA256, bij elke aanvraag opnieuw gevalideerd, en ongeldig gemaakt wanneer een
-gebruikersnaam verandert. Cookies zijn HttpOnly en SameSite=Lax.
+gebruikersnaam verandert. Cookies zijn HttpOnly en SameSite=Strict.
 
 ### Brute-force-lockout
 
 Lockout per gebruikersnaam met exponentiële backoff na vijf mislukte pogingen (tot een uur),
 plus tegen timing-leaks bestendige generieke fouten zodat een aanvaller niets leert van hoe een login mislukt.
 
-### Shell-loze ipmitool, volledig offline
+### Shell-loze ipmitool, geen telemetrie
 
 ipmitool wordt aangeroepen via een argumentenlijst (`create_subprocess_exec`), nooit via een shell,
-dus er is geen command-injection-oppervlak. Het hele systeem draait volledig offline: geen
-telemetrie, geen cloud, geen externe oproepen.
+dus er is geen command-injection-oppervlak. Er is geen telemetrie en geen cloud. De enige
+aanvraag die buiten je netwerk wordt verstuurd, is de updatecontrole: één `GET` met de productnaam
+en de versie die je draait, en verder niets. Hij wordt gelogd voordat hij wordt verstuurd, en
+`updates.enabled: false` schakelt hem volledig uit (zie
+[Updatecontroles](/nl/configuration#updatecontroles)).
 
 ## Hardwarebescherming
 

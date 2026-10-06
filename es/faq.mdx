@@ -6,9 +6,11 @@ description: "Preguntas habituales sobre ejecutar ipmideck en un homelab."
 <AccordionGroup>
 
 <Accordion title="¿ipmideck está basado en la nube?">
-  No. ipmideck es totalmente autoalojado y se ejecuta por completo en tu propia red. No hace
-  llamadas externas, ni telemetría, ni nube, ni cuenta. Habla directamente con tus BMC y
-  lo almacena todo localmente.
+  No. ipmideck es totalmente autoalojado y se ejecuta por completo en tu propia red: sin telemetría, sin
+  nube, sin cuenta. Habla directamente con tus BMC y lo almacena todo localmente. La única
+  petición que envía fuera de tu red es la comprobación de actualizaciones, que no lleva ningún identificador
+  y se desactiva con `updates.enabled: false` (consulta
+  [Comprobación de actualizaciones](/es/configuration#comprobación-de-actualizaciones)).
 </Accordion>
 
 <Accordion title="¿Con qué BMC funciona?">

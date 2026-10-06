@@ -57,7 +57,7 @@ Cada ação é uma tecla. A barra de ajuda lista-as todas:
 | `c`   | Abrir a subvista de **sessões** ligadas                                |
 | `s`   | Abrir a subvista de **servidores** configurados                        |
 | `u`   | Mostrar o **url** do painel no registo                                 |
-| `g`   | Verificação de **atualização** (imprime a versão local)               |
+| `g`   | Verificação de **atualização** (consulta agora a versão publicada mais recente) |
 | `b`   | Abrir o editor de **change-bind**                                      |
 | `r`   | **Reiniciar** o servidor                                               |
 | `q`   | **Sair**, ou voltar à vista de registo a partir de uma subvista        |
@@ -125,8 +125,11 @@ escuta, não um navegável.
 
 ### g: atualização
 
-`g` imprime a versão local e uma nota de que a verificação de atualização online vem com o lançamento
-pip. **Não faz chamada de rede**, o ipmideck mantém-se offline.
+`g` consulta agora a versão publicada mais recente e imprime a resposta no registo: ou que
+já corre a versão mais recente, ou a nova versão, uma ligação para as suas notas de versão e o
+comando que a instala. É um pedido que faz por si próprio, por isso funciona mesmo com a
+verificação automática desligada. É recusado quando `updates.enabled` é `false`; veja
+[Verificação de atualizações](/pt/configuration#verificação-de-atualizações).
 
 ### r: reiniciar
 

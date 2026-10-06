@@ -6,9 +6,11 @@ description: "关于在 homelab 中运行 ipmideck 的常见问题。"
 <AccordionGroup>
 
 <Accordion title="ipmideck 是基于云的吗？">
-  不是。ipmideck 完全自托管，完全运行在你自己的网络上。它不进行
-  外部调用，没有遥测、没有云、没有账户。它直接与你的 BMC 通信，并
-  将一切存储在本地。
+  不是。ipmideck 完全自托管，完全运行在你自己的网络上：没有遥测、
+  没有云、没有账户。它直接与你的 BMC 通信，并将一切存储在本地。它唯一
+  发往你网络之外的请求是更新检查，该请求不携带任何标识符，并可用
+  `updates.enabled: false` 关闭（见
+  [更新检查](/zh-Hans/configuration#更新检查)）。
 </Accordion>
 
 <Accordion title="它能与哪些 BMC 配合使用？">

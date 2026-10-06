@@ -22,18 +22,21 @@ decifrare nulla.
 
 Le password di login sono sottoposte a hash con bcrypt (salt per password, verifica a tempo costante). I token
 di sessione sono firmati con HMAC-SHA256, rivalidati a ogni richiesta e invalidati quando un
-nome utente cambia. I cookie sono HttpOnly e SameSite=Lax.
+nome utente cambia. I cookie sono HttpOnly e SameSite=Strict.
 
 ### Blocco anti-brute-force
 
 Blocco per nome utente con backoff esponenziale dopo cinque tentativi falliti (fino a un'ora),
 più errori generici a prova di timing-leak così un attaccante non impara nulla da come fallisce un login.
 
-### ipmitool senza shell, completamente offline
+### ipmitool senza shell, niente telemetria
 
 ipmitool viene invocato tramite una lista di argomenti (`create_subprocess_exec`), mai una shell,
-quindi non c'è superficie di command-injection. L'intero sistema gira completamente offline: niente
-telemetria, niente cloud, nessuna chiamata esterna.
+quindi non c'è superficie di command-injection. Niente telemetria e niente cloud. L'unica
+richiesta inviata fuori dalla tua rete è il controllo degli aggiornamenti: una richiesta `GET` che contiene il nome
+del prodotto e la versione in esecuzione, nient'altro. Viene scritta nel log prima di essere inviata, e
+`updates.enabled: false` la disattiva completamente (vedi
+[Controllo degli aggiornamenti](/it/configuration#controllo-degli-aggiornamenti)).
 
 ## Protezione dell'hardware
 

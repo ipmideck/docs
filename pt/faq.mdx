@@ -6,9 +6,11 @@ description: "Perguntas frequentes sobre correr o ipmideck num homelab."
 <AccordionGroup>
 
 <Accordion title="O ipmideck é baseado na nuvem?">
-  Não. O ipmideck é totalmente auto-hospedado e corre inteiramente na sua própria rede. Não faz
-  chamadas externas, sem telemetria, sem nuvem, sem conta. Fala diretamente com os seus BMCs e
-  guarda tudo localmente.
+  Não. O ipmideck é totalmente auto-hospedado e corre inteiramente na sua própria rede: sem telemetria, sem
+  nuvem, sem conta. Fala diretamente com os seus BMCs e guarda tudo localmente. O único
+  pedido que envia para fora da sua rede é a verificação de atualizações, que não leva nenhum identificador
+  e se desliga com `updates.enabled: false` (veja
+  [Verificação de atualizações](/pt/configuration#verificação-de-atualizações)).
 </Accordion>
 
 <Accordion title="Com que BMCs funciona?">

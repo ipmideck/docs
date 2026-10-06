@@ -57,7 +57,7 @@ Jede Aktion ist ein Tastendruck. Die Hilfeleiste listet sie alle auf:
 | `c`   | Die Unteransicht der verbundenen **Sitzungen** öffnen                  |
 | `s`   | Die Unteransicht der konfigurierten **Server** öffnen                  |
 | `u`   | Die Dashboard-**URL** im Log einblenden                                |
-| `g`   | **Update**-Prüfung (gibt die lokale Version aus)                       |
+| `g`   | **Update**-Prüfung (fragt sofort die neueste veröffentlichte Version ab) |
 | `b`   | Den **Bind-ändern**-Editor öffnen                                      |
 | `r`   | Den Server **neu starten**                                             |
 | `q`   | **Beenden** oder aus einer Unteransicht zur Log-Ansicht zurückkehren   |
@@ -125,8 +125,11 @@ Adresse, keine navigierbare.
 
 ### g: Update
 
-`g` gibt die lokale Version aus und einen Hinweis, dass die Online-Update-Prüfung mit der pip-Version
-ausgeliefert wird. Es macht **keinen Netzwerkaufruf**, ipmideck bleibt offline.
+`g` fragt sofort die neueste veröffentlichte Version ab und gibt die Antwort im Log aus: entweder, dass
+Sie die aktuelle Version ausführen, oder die neuere Version, einen Link zu ihren Versionshinweisen und den
+Befehl, der sie installiert. Es ist eine Anfrage, die Sie selbst auslösen, daher funktioniert sie auch bei
+abgeschalteter automatischer Prüfung. Sie wird abgelehnt, wenn `updates.enabled` auf `false` steht; siehe
+[Update-Prüfung](/de/configuration#update-prüfung).
 
 ### r: Neustart
 

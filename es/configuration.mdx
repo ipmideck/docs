@@ -12,22 +12,21 @@ variable de entorno (práctico para Docker, mira abajo).
 ```yaml
 # data/config.yaml (auto-generated on first run)
 server:
-  host: "0.0.0.0"
+  host: 0.0.0.0
   port: 3000
   https: false
 auth:
-  enabled: true
-  session_expiry: "24h"
-  max_login_attempts: 5
+  session_expiry: 24h
 ipmi:
   poll_interval: 30
   power_poll_interval: 30
   command_timeout: 30
 data:
   retention_days: 365
-  cleanup_interval: "24h"
 logging:
-  level: "info"
+  level: info
+updates:
+  enabled: true
 modules:
   sensors:
     enabled: true
@@ -45,6 +44,19 @@ Las claves de arriba son las claves anidadas reales, sin prefijo, que ipmideck e
 Las sobrescrituras por variable de entorno usan un prefijo `IPMIDECK_` aparte y nunca aparecen dentro
 del propio archivo YAML.
 
+Si el inicio de sesión está activo no se decide aquí: lo cambias desde los ajustes de Seguridad, y
+la respuesta se guarda en la base de datos, así que tener acceso de escritura a `config.yaml` no permite desactivar el inicio de sesión.
+
+Algunas claves opcionales no se escriben de forma predeterminada. Añádelas cuando las necesites:
+
+| Clave | Descripción |
+|-----|-------------|
+| `server.cert_file`, `server.key_file` | Tu propio certificado para `https: true`. Sin ellas, ipmideck crea uno autofirmado. |
+| `server.forwarded_allow_ips` | Detrás de un proxy inverso: las direcciones del proxy que pueden definir las cabeceras `X-Forwarded-*`. |
+| `server.trusted_origins` | Detrás de un proxy inverso que no transmite el `Host` del navegador: las direcciones externas del panel. |
+| `ipmi.auto_install_ipmitool` | Permite que la interfaz web instale ipmitool cuando falta (predeterminado `false`). Consulta [Instalar ipmitool desde la interfaz web](#instalar-ipmitool-desde-la-interfaz-web). |
+| `updates.watchtower_url`, `updates.watchtower_token` | Solo Docker: el Watchtower que instala las actualizaciones. Consulta [Actualizar desde la interfaz web](/es/update-from-web-ui#docker-con-watchtower). |
+
 ## Sobrescrituras de entorno
 
 Cada ajuste puede sobrescribirse en tiempo de ejecución con una variable de entorno con prefijo
@@ -55,13 +67,19 @@ editar un archivo dentro del contenedor.
 |----------------------|-------------|
 | `IPMIDECK_SERVER_HOST` | Host/interfaz al que se enlaza el panel (predeterminado `0.0.0.0`). |
 | `IPMIDECK_SERVER_PORT` | Puerto HTTP al que se enlaza el panel (predeterminado `3000`). |
-| `IPMIDECK_AUTH_ENABLED` | Habilita o deshabilita el inicio de sesión integrado (predeterminado `true`). |
+| `IPMIDECK_SERVER_HTTPS` | Servir por HTTPS (predeterminado `false`). |
+| `IPMIDECK_SERVER_CERT_FILE`, `IPMIDECK_SERVER_KEY_FILE` | Certificado y clave para HTTPS. |
+| `IPMIDECK_SERVER_FORWARDED_ALLOW_IPS` | Direcciones del proxy que pueden definir las cabeceras `X-Forwarded-*`. |
+| `IPMIDECK_SERVER_TRUSTED_ORIGINS` | Direcciones externas del panel, separadas por comas. |
 | `IPMIDECK_AUTH_SESSION_EXPIRY` | Cuánto tiempo sigue válida una sesión de inicio de sesión (predeterminado `24h`). |
 | `IPMIDECK_IPMI_POLL_INTERVAL` | Segundos entre sondeos de sensores del BMC (predeterminado `30`). |
 | `IPMIDECK_IPMI_POWER_POLL_INTERVAL` | Segundos entre sondeos de estado de energía (predeterminado `30`). |
+| `IPMIDECK_IPMI_AUTO_INSTALL_IPMITOOL` | Permite que la interfaz web instale ipmitool cuando falta (predeterminado `false`). |
 | `IPMIDECK_DATA_RETENTION_DAYS` | Días de historial de sensores a conservar antes de la limpieza (predeterminado `365`). |
 | `IPMIDECK_DATA_DB_PATH` | Ruta absoluta al archivo de base de datos SQLite. |
 | `IPMIDECK_LOGGING_LEVEL` | Verbosidad de registro: `debug`, `info`, `warning` o `error` (predeterminado `info`). |
+| `IPMIDECK_UPDATES_ENABLED` | Defínela en `false` para desactivar por completo la comprobación de actualizaciones (predeterminado `true`). |
+| `IPMIDECK_UPDATES_WATCHTOWER_URL`, `IPMIDECK_UPDATES_WATCHTOWER_TOKEN` | Solo Docker: dirección y token del Watchtower que instala las actualizaciones. |
 | `IPMIDECK_DEMO` | Ejecutar contra hardware simulado en lugar de BMC reales (predeterminado `false`). |
 
 Otras dos variables controlan *ubicaciones* de archivos en lugar de un valor de `config.yaml`:
@@ -82,6 +100,42 @@ a un valor predeterminado de plataforma. `config.yaml` siempre reside en `<data-
   `/data` con un volumen.
 - **pip en Linux:** `/data/config.yaml` de forma predeterminada: define `IPMIDECK_DATA_DIR` para reubicarlo.
 - **pip en Windows:** `./data/config.yaml`, relativo al directorio desde el que ejecutas `ipmideck`.
+
+## Comprobación de actualizaciones
+
+ipmideck puede avisarte cuando se publica una versión más reciente. La configuración inicial pregunta una vez
+si puede comprobarlo, y puedes cambiar la respuesta cuando quieras en
+**Ajustes → Acerca de → Actualizaciones**.
+
+- **Qué envía.** Un único `GET` al índice que corresponde a cómo lo instalaste: el índice de
+  paquetes de Python, el registro de contenedores o las versiones publicadas. Lleva el nombre del producto
+  y la versión que ejecutas, y nada más: ningún identificador, ningún nombre de host, nada sobre
+  tus servidores. Cuando el índice de paquetes o el registro de contenedores indica una versión más reciente, un
+  segundo `GET` pregunta a las versiones publicadas si se trata de una versión de seguridad. Cada petición se escribe en el registro antes de enviarse.
+- **Cuándo.** Al arrancar y una vez cada 24 horas mientras la comprobación está activa, y cada vez que
+  pulsas **Comprobar ahora** en Ajustes o `g` en la [consola](/es/console#g-actualización).
+- **Lo que nunca hace.** La comprobación no descarga ni instala nada. La instalación es un
+  paso aparte que inicias tú: consulta [Actualizar desde la interfaz web](/es/update-from-web-ui).
+
+Para desactivarla por completo, define `updates.enabled: false` en `config.yaml`, o
+`IPMIDECK_UPDATES_ENABLED=false`. Con eso definido, ipmideck nunca abre una conexión para consultar
+una versión, sea cual sea la respuesta dada durante la configuración, y **Comprobar ahora** y `g` se rechazan.
+
+## Instalar ipmitool desde la interfaz web
+
+ipmideck llega a cada BMC a través del programa `ipmitool`. Cuando falta, ipmideck sigue
+arrancando y la interfaz web muestra un banner con el comando que lo instala en tu sistema.
+
+El banner también puede ejecutar ese comando por ti, mediante el gestor de paquetes del sistema, cuando
+se cumplen todas estas condiciones:
+
+- `ipmi.auto_install_ipmitool` es `true` (es `false` de forma predeterminada);
+- ipmideck se ejecuta como root, o como un usuario con `sudo` que no pide contraseña;
+- el inicio de sesión está activo.
+
+ipmideck nunca pide una contraseña en el navegador. En Docker la imagen ya incluye
+ipmitool. En Windows no hay ningún paquete que instalar: instala una herramienta que incluya
+`ipmitool.exe`, como Dell iDRAC Tools, o pon `ipmitool.exe` en el `PATH`.
 
 ## Próximos pasos
 

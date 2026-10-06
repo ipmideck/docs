@@ -11,7 +11,9 @@ des capteurs en temps réel, un contrôle intelligent des courbes de ventilateur
 de l'alimentation à distance et des journaux d'événements matériels, le tout depuis votre navigateur, sans CLI.
 
 ipmideck s'exécute entièrement sur votre propre réseau. Il n'y a pas de cloud, pas de télémétrie et
-aucune dépendance externe : il dialogue directement avec vos BMC et stocke tout en local.
+aucune dépendance externe : il dialogue directement avec vos BMC et stocke tout en local. La seule
+requête qu'il envoie hors de votre réseau est la
+[vérification de mise à jour](/fr/configuration#vérifications-de-mise-à-jour), que vous pouvez désactiver.
 
 <Note>
   ipmideck doit atteindre vos BMC sur le réseau via le port UDP 623 (le port IPMI/RMCP+).

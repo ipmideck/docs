@@ -3,6 +3,22 @@ title: "故障排除"
 description: "当 ipmideck 与你的 BMC 通信时出现的连接、身份验证和 IPMI 错误。"
 ---
 
+## 未安装 ipmitool
+
+如果所有服务器同时失败，并且 Web 界面显示横幅提示找不到 ipmitool，
+说明主机上缺少 `ipmitool` 程序。pip 安装无法一并带上它，因此请用你的软件包管理器
+安装，例如在 Debian 和 Ubuntu 上运行 `sudo apt install ipmitool`，
+在 Fedora 和 RHEL 上运行 `sudo dnf install ipmitool`。横幅会显示适用于你系统的命令。
+然后在横幅中按 **重新检查**，或重启 ipmideck。
+
+- 在 Alpine 上，ipmitool 位于 `community` 仓库中，必须启用该仓库。
+- 在 Windows 上，请安装一个附带 `ipmitool.exe` 的工具（例如 Dell iDRAC Tools），或将
+  `ipmitool.exe` 放入 `PATH`。ipmideck 也会在 Dell 工具自己的文件夹中查找。
+- Docker 镜像已包含 ipmitool。
+
+在配置中允许后，横幅可以为你运行安装；见
+[从 Web 界面安装 ipmitool](/zh-Hans/configuration#从-web-界面安装-ipmitool)。
+
 ## ipmideck 无法访问 BMC
 
 ipmideck 通过 UDP 端口 623（IPMI/RMCP+）与 BMC 通信。如果某台服务器显示为

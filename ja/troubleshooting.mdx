@@ -3,6 +3,23 @@ title: "トラブルシューティング"
 description: "ipmideck が BMC と通信する際の接続、認証、IPMI のエラー。"
 ---
 
+## ipmitool がインストールされていない
+
+すべてのサーバーが同時に失敗し、Web UI に ipmitool が見つからないというバナーが表示される場合、
+ホストに `ipmitool` プログラムがありません。pip インストールでは一緒に導入できないため、
+パッケージマネージャーでインストールしてください。たとえば Debian と Ubuntu では
+`sudo apt install ipmitool`、Fedora と RHEL では `sudo dnf install ipmitool` です。バナーには
+お使いのシステム用のコマンドが表示されます。その後、バナーの **再確認** を押すか、ipmideck を
+再起動してください。
+
+- Alpine では ipmitool は `community` リポジトリにあり、これを有効にする必要があります。
+- Windows では、Dell iDRAC Tools など `ipmitool.exe` を同梱するツールをインストールするか、
+  `ipmitool.exe` を `PATH` に置いてください。ipmideck は Dell ツール自体のフォルダーも探します。
+- Docker イメージには ipmitool がすでに含まれています。
+
+設定で許可すれば、バナーがインストールを代わりに実行できます。
+[Web UI から ipmitool をインストール](/ja/configuration#web-ui-から-ipmitool-をインストール) を参照してください。
+
 ## ipmideck が BMC に到達できない
 
 ipmideck は UDP ポート 623 (IPMI/RMCP+) を通じて BMC と通信します。サーバーがオフラインと

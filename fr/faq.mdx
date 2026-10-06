@@ -6,9 +6,11 @@ description: "Questions courantes sur l'exécution d'ipmideck dans un homelab."
 <AccordionGroup>
 
 <Accordion title="ipmideck est-il basé sur le cloud ?">
-  Non. ipmideck est entièrement auto-hébergé et s'exécute entièrement sur votre propre réseau. Il ne fait aucun
-  appel externe, pas de télémétrie, pas de cloud, pas de compte. Il dialogue directement avec vos BMC et
-  stocke tout en local.
+  Non. ipmideck est entièrement auto-hébergé et s'exécute entièrement sur votre propre réseau : pas de
+  télémétrie, pas de cloud, pas de compte. Il dialogue directement avec vos BMC et stocke tout en local. La seule
+  requête qu'il envoie hors de votre réseau est la vérification de mise à jour, qui ne contient aucun identifiant
+  et se désactive avec `updates.enabled: false` (voir
+  [Vérifications de mise à jour](/fr/configuration#vérifications-de-mise-à-jour)).
 </Accordion>
 
 <Accordion title="Avec quels BMC fonctionne-t-il ?">

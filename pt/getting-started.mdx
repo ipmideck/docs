@@ -11,7 +11,9 @@ de sensores em tempo real, controlo inteligente de curva de ventoinha (FanPilot)
 e registos de eventos de hardware, tudo a partir do seu navegador, sem CLI.
 
 O ipmideck corre inteiramente na sua própria rede. Não há nuvem, nem telemetria, nem
-dependência externa: fala diretamente com os seus BMCs e guarda tudo localmente.
+dependência externa: fala diretamente com os seus BMCs e guarda tudo localmente. O único
+pedido que envia para fora da sua rede é a
+[verificação de atualizações](/pt/configuration#verificação-de-atualizações), que pode desligar.
 
 <Note>
   O ipmideck precisa de alcançar os seus BMCs pela rede na porta UDP 623 (a porta IPMI/RMCP+).

@@ -57,7 +57,7 @@ Cada acción es una pulsación de tecla. La barra de ayuda las lista todas:
 | `c`   | Abrir la subvista de **sesiones** conectadas                           |
 | `s`   | Abrir la subvista de **servidores** configurados                       |
 | `u`   | Mostrar la **url** del panel en el registro                            |
-| `g`   | Comprobación de **actualización** (imprime la versión local)           |
+| `g`   | Comprobación de **actualización** (consulta ahora la última versión publicada) |
 | `b`   | Abrir el editor de **cambio de enlace**                                |
 | `r`   | **Reiniciar** el servidor                                              |
 | `q`   | **Salir**, o volver a la vista de registro desde una subvista          |
@@ -125,8 +125,11 @@ escucha, no una navegable.
 
 ### g: actualización
 
-`g` imprime la versión local y una nota de que la comprobación de actualización en línea se incluye con la
-versión de pip. **No hace ninguna llamada de red**, ipmideck permanece sin conexión.
+`g` consulta ahora la última versión publicada e imprime la respuesta en el registro: o bien que
+ejecutas la versión más reciente, o bien la versión más nueva, un enlace a sus notas de versión y el
+comando que la instala. Es una petición que haces tú mismo, así que funciona incluso con la
+comprobación automática desactivada. Se rechaza cuando `updates.enabled` es `false`; consulta
+[Comprobación de actualizaciones](/es/configuration#comprobación-de-actualizaciones).
 
 ### r: reinicio
 

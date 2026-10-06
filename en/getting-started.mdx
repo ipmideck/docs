@@ -11,7 +11,9 @@ sensor monitoring, intelligent fan-curve control (FanPilot), remote power manage
 and hardware event logs, all from your browser, no CLI required.
 
 ipmideck runs entirely on your own network. There is no cloud, no telemetry, and no
-external dependency: it talks directly to your BMCs and stores everything locally.
+external dependency: it talks directly to your BMCs and stores everything locally. The only
+request it sends outside your network is the
+[update check](/en/configuration#update-checks), which you can switch off.
 
 <Note>
   ipmideck needs to reach your BMCs over the network on UDP port 623 (the IPMI/RMCP+

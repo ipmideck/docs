@@ -12,22 +12,21 @@ ipmideck 从 `data/config.yaml` 读取其设置，该文件在首次运行时以
 ```yaml
 # data/config.yaml (auto-generated on first run)
 server:
-  host: "0.0.0.0"
+  host: 0.0.0.0
   port: 3000
   https: false
 auth:
-  enabled: true
-  session_expiry: "24h"
-  max_login_attempts: 5
+  session_expiry: 24h
 ipmi:
   poll_interval: 30
   power_poll_interval: 30
   command_timeout: 30
 data:
   retention_days: 365
-  cleanup_interval: "24h"
 logging:
-  level: "info"
+  level: info
+updates:
+  enabled: true
 modules:
   sensors:
     enabled: true
@@ -45,6 +44,19 @@ modules:
 环境变量覆盖使用单独的 `IPMIDECK_` 前缀，绝不会出现在
 YAML 文件本身内部。
 
+是否启用登录不在这里设置：你在安全设置中切换它，该选择保存在数据库中，
+因此对 `config.yaml` 的写入权限无法关闭登录。
+
+有几个可选键默认不会写入。需要时再添加：
+
+| 键 | 描述 |
+|-----|-------------|
+| `server.cert_file`, `server.key_file` | 用于 `https: true` 的自有证书。没有它们时，ipmideck 会创建一个自签名证书。 |
+| `server.forwarded_allow_ips` | 位于反向代理之后时：允许设置 `X-Forwarded-*` 标头的代理地址。 |
+| `server.trusted_origins` | 位于不传递浏览器 `Host` 的反向代理之后时：仪表板的外部地址。 |
+| `ipmi.auto_install_ipmitool` | 缺少 ipmitool 时允许 Web 界面安装它（默认 `false`）。见[从 Web 界面安装 ipmitool](#从-web-界面安装-ipmitool)。 |
+| `updates.watchtower_url`, `updates.watchtower_token` | 仅限 Docker：负责安装更新的 Watchtower。见[从 Web 界面更新](/zh-Hans/update-from-web-ui#docker-与-watchtower)。 |
+
 ## 环境覆盖
 
 每个设置都可以在运行时用带 `IPMIDECK_` 前缀的环境变量覆盖。
@@ -55,13 +67,19 @@ YAML 文件本身内部。
 |----------------------|-------------|
 | `IPMIDECK_SERVER_HOST` | 仪表板绑定的主机/接口（默认 `0.0.0.0`）。 |
 | `IPMIDECK_SERVER_PORT` | 仪表板绑定的 HTTP 端口（默认 `3000`）。 |
-| `IPMIDECK_AUTH_ENABLED` | 启用或禁用内置登录（默认 `true`）。 |
+| `IPMIDECK_SERVER_HTTPS` | 通过 HTTPS 提供服务（默认 `false`）。 |
+| `IPMIDECK_SERVER_CERT_FILE`, `IPMIDECK_SERVER_KEY_FILE` | HTTPS 使用的证书和密钥。 |
+| `IPMIDECK_SERVER_FORWARDED_ALLOW_IPS` | 允许设置 `X-Forwarded-*` 标头的代理地址。 |
+| `IPMIDECK_SERVER_TRUSTED_ORIGINS` | 仪表板的外部地址，以逗号分隔。 |
 | `IPMIDECK_AUTH_SESSION_EXPIRY` | 登录会话保持有效的时长（默认 `24h`）。 |
 | `IPMIDECK_IPMI_POLL_INTERVAL` | BMC 传感器轮询之间的秒数（默认 `30`）。 |
 | `IPMIDECK_IPMI_POWER_POLL_INTERVAL` | 电源状态轮询之间的秒数（默认 `30`）。 |
+| `IPMIDECK_IPMI_AUTO_INSTALL_IPMITOOL` | 缺少 ipmitool 时允许 Web 界面安装它（默认 `false`）。 |
 | `IPMIDECK_DATA_RETENTION_DAYS` | 清理前保留的传感器历史天数（默认 `365`）。 |
 | `IPMIDECK_DATA_DB_PATH` | SQLite 数据库文件的绝对路径。 |
 | `IPMIDECK_LOGGING_LEVEL` | 日志详细程度：`debug`、`info`、`warning` 或 `error`（默认 `info`）。 |
+| `IPMIDECK_UPDATES_ENABLED` | 设为 `false` 可完全关闭更新检查（默认 `true`）。 |
+| `IPMIDECK_UPDATES_WATCHTOWER_URL`, `IPMIDECK_UPDATES_WATCHTOWER_TOKEN` | 仅限 Docker：负责安装更新的 Watchtower 的地址和令牌。 |
 | `IPMIDECK_DEMO` | 针对模拟硬件而非真实 BMC 运行（默认 `false`）。 |
 
 另外两个变量控制文件的*位置*，而不是 `config.yaml` 的值：
@@ -82,6 +100,40 @@ ipmideck 如果设置了 `IPMIDECK_DATA_DIR` 就从中解析其数据目录，�
   `/data` 持久化。
 - **Linux 上的 pip：** 默认 `/data/config.yaml`：设置 `IPMIDECK_DATA_DIR` 以重新定位。
 - **Windows 上的 pip：** `./data/config.yaml`，相对于你运行 `ipmideck` 的目录。
+
+## 更新检查
+
+ipmideck 可以在发布了更新的版本时告诉你。首次运行设置会询问一次是否允许检查，
+之后你可以随时在 **设置 → 关于 → 更新** 中更改这个选择。
+
+- **发送什么。** 向与你的安装方式对应的索引发送一个 `GET`：Python 软件包索引、
+  容器镜像仓库或已发布的版本列表。它只携带产品名称和你运行的版本，别无其他：
+  没有标识符，没有主机名，也不包含任何关于你服务器的信息。当软件包索引或容器镜像仓库
+  报告有更新的版本时，会再发送第二个 `GET`，向已发布的版本列表询问它是否为安全版本。
+  每个请求在发送之前都会写入日志。
+- **何时发送。** 启动时发送一次，检查开启期间每 24 小时发送一次；此外，每当你在设置中按
+  **立即检查**，或在[控制台](/zh-Hans/console#g更新)中按 `g` 时也会发送。
+- **它绝不会做什么。** 检查不会下载或安装任何东西。安装是由你自己启动的单独步骤：
+  见[从 Web 界面更新](/zh-Hans/update-from-web-ui)。
+
+要完全关闭它，请在 `config.yaml` 中设置 `updates.enabled: false`，或设置
+`IPMIDECK_UPDATES_ENABLED=false`。这样设置后，无论首次运行设置时如何回答，ipmideck
+都绝不会为查询版本而建立连接，**立即检查** 和 `g` 也会被拒绝。
+
+## 从 Web 界面安装 ipmitool
+
+ipmideck 通过 `ipmitool` 程序访问每个 BMC。缺少该程序时，ipmideck 仍会启动，
+Web 界面会显示一个横幅，其中包含在你的系统上安装它的命令。
+
+当以下条件全部满足时，横幅也可以通过系统软件包管理器为你运行该命令：
+
+- `ipmi.auto_install_ipmitool` 为 `true`（默认为 `false`）；
+- ipmideck 以 root 身份运行，或以拥有无需密码的 `sudo` 的用户身份运行；
+- 登录已启用。
+
+ipmideck 绝不会在浏览器中询问密码。在 Docker 中，镜像已包含
+ipmitool。在 Windows 上没有可安装的软件包：请安装一个附带
+`ipmitool.exe` 的工具（例如 Dell iDRAC Tools），或将 `ipmitool.exe` 放入 `PATH`。
 
 ## 后续步骤
 

@@ -57,7 +57,7 @@ Każda akcja to jedno naciśnięcie klawisza. Pasek pomocy wymienia je wszystkie
 | `c`   | Otwórz podwidok podłączonych **sesji**                                 |
 | `s`   | Otwórz podwidok skonfigurowanych **serwerów**                          |
 | `u`   | Wyświetl **url** pulpitu w dzienniku                                   |
-| `g`   | Sprawdzenie **aktualizacji** (wypisuje lokalną wersję)                |
+| `g`   | Sprawdzenie **aktualizacji** (od razu sprawdza najnowszą opublikowaną wersję) |
 | `b`   | Otwórz edytor **change-bind**                                          |
 | `r`   | **Zrestartuj** serwer                                                  |
 | `q`   | **Zakończ** lub wróć do widoku dziennika z podwidoku                   |
@@ -125,8 +125,11 @@ nasłuchu, a nie taki, do którego można nawigować.
 
 ### g: aktualizacja
 
-`g` wypisuje lokalną wersję i notatkę, że internetowe sprawdzanie aktualizacji jest dostarczane z wydaniem
-pip. Nie wykonuje **żadnego wywołania sieciowego**, ipmideck pozostaje offline.
+`g` od razu sprawdza najnowszą opublikowaną wersję i wypisuje odpowiedź w dzienniku: albo że
+używasz najnowszego wydania, albo nowszą wersję, link do jej informacji o wydaniu i polecenie,
+które ją instaluje. To żądanie, które wysyłasz sam, więc działa nawet przy wyłączonym
+automatycznym sprawdzaniu. Jest odrzucane, gdy `updates.enabled` ma wartość `false`; zobacz
+[Sprawdzanie aktualizacji](/pl/configuration#sprawdzanie-aktualizacji).
 
 ### r: restart
 

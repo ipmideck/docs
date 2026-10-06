@@ -22,18 +22,21 @@ déchiffrer.
 
 Les mots de passe de connexion sont hachés avec bcrypt (sel par mot de passe, vérification en temps constant). Les jetons
 de session sont signés avec HMAC-SHA256, revalidés à chaque requête et invalidés lorsqu'un
-nom d'utilisateur change. Les cookies sont HttpOnly et SameSite=Lax.
+nom d'utilisateur change. Les cookies sont HttpOnly et SameSite=Strict.
 
 ### Verrouillage anti-force brute
 
 Verrouillage par nom d'utilisateur avec recul exponentiel après cinq tentatives échouées (jusqu'à une heure),
 plus des erreurs génériques à l'épreuve des fuites temporelles pour qu'un attaquant n'apprenne rien de la façon dont une connexion échoue.
 
-### ipmitool sans shell, entièrement hors ligne
+### ipmitool sans shell, sans télémétrie
 
 ipmitool est invoqué via une liste d'arguments (`create_subprocess_exec`), jamais un shell,
-donc il n'y a pas de surface d'injection de commandes. Tout le système s'exécute entièrement hors ligne : pas de
-télémétrie, pas de cloud, pas d'appels externes.
+donc il n'y a pas de surface d'injection de commandes. Il n'y a ni télémétrie ni cloud. La seule
+requête envoyée hors de votre réseau est la vérification de mise à jour : une requête `GET` qui contient le nom du produit
+et la version que vous exécutez, rien d'autre. Elle est consignée dans le journal avant d'être envoyée, et
+`updates.enabled: false` la désactive complètement (voir
+[Vérifications de mise à jour](/fr/configuration#vérifications-de-mise-à-jour)).
 
 ## Protection du matériel
 
